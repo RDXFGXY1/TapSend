@@ -1,0 +1,33 @@
+# Rust and Go build outputs
+/tui/target/
+/bin/
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/local.properties
+/android/.android-user/
+*.exe
+*.test
+*.out
+
+# Local editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# TapSend private data, if a custom data directory is placed in the repo
+/tapsend-data/
+/data/
+**/server.key
+**/server.crt
+**/tapsend-ca.crt
+**/devices.json
+**/history.json
+**/inbox/
+*.legacy-backup
+
+# Keep the application lockfile for reproducible Rust builds
+!/tui/Cargo.lock

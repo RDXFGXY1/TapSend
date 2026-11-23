@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TapSend</title><link rel="stylesheet" href="/style.css"></head>
+<body><main>
+<header><a class="brand" href="/">Tap<span>Send</span><small> / receiver</small></a><span class="badge">LOCAL</span></header>
+<div class="route"><span>RECEIVE</span><code>computer → this phone</code></div>
+<section class="connection"><div class="eyebrow">CONNECTION / SESSION</div><h1>Your files.<br>One short hop.</h1><p id="status" role="status" aria-live="polite">Preparing connection…</p><div class="tags"><span>Local network</span><span>Paired device</span></div></section>
+<section id="files" hidden><div class="section-title"><h2>Incoming files</h2><span>SELECT TO SAVE ↓</span></div><div class="transfer-controls"><button id="cancel-transfer" type="button" hidden>Stop current download</button><span id="transfer-state">Ready</span></div><div id="list"></div></section>
+<section id="messages" hidden><div class="section-title"><h2>Messages</h2><span>COMPUTER ↔ PHONE</span></div><div id="thread" class="thread" aria-live="polite"></div><form id="message-form" class="message-form"><input id="message-text" maxlength="2000" placeholder="Write a message…" aria-label="Message"><button type="submit">Send ↑</button></form></section>
+<section id="outgoing" hidden><div class="section-title"><h2>Send to computer</h2><span>INBOX ↑</span></div><label>Choose files <input id="upload-files" type="file" multiple></label><p id="upload-status" role="status"></p><button id="cancel-upload" type="button" hidden>Stop upload</button><label>Send a note<textarea id="note" rows="4" placeholder="Paste text or a link"></textarea></label><button id="send-note">Send note ↑</button><p>Files are saved in the computer’s TapSend inbox.</p></section>
+<details class="trust"><summary>Browser showing a certificate warning?</summary><p>Install the TapSend CA certificate from your computer in your phone’s trusted certificates. It must be the new certificate generated after the compatibility update. Restart your browser afterward. Signing in here does not mean the browser trusts the certificate.</p></details>
+<footer><span>TapSend / direct delivery</span><span>No cloud upload</span></footer>
+</main><script src="/app.js"></script></body>
+</html>
+

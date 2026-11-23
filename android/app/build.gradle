@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.tapsend.android'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.tapsend.android'
+        minSdk 33
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    signingConfigs {
+        localDebug {
+            storeFile rootProject.file('.android-user/debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            if (rootProject.file('.android-user/debug.keystore').exists()) {
+                signingConfig signingConfigs.localDebug
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.google.android.gms:play-services-code-scanner:16.1.0'
+    implementation 'com.google.zxing:core:3.5.4'
+}
