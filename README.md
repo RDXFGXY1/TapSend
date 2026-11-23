@@ -47,6 +47,14 @@ Named options can appear in either order. Repeat `-p` or `--path` for several fi
 
 The Android app shows **Incoming offer for this phone** and an **Accept & Save** button for targeted sends. The phone must be paired already and able to reach the computer. TapSend does not start a background queue when the command is closed.
 
+### Receive from a phone without sharing a computer file
+
+```bash
+tabsend receive
+```
+
+This starts the server with an empty shared-file list and prints pairing details. On a previously paired phone, open TapSend and use **Send → Choose files**; a new phone can pair using the displayed link or code first. Files arrive in the computer inbox shown by `tabsend settings`. Keep the command running until the upload finishes, then press Ctrl+C. In the TUI, press `s` while no file is focused, or open the command menu (`;`) and choose `receive` from any folder. You can add files to a receive-only session later with `a`.
+
 ### Settings
 
 Press `g` in the terminal interface to edit the computer inbox folder and listen address, or use `./bin/tabsend settings` and `./bin/tabsend settings set --inbox /absolute/path --listen :8443`. The settings are saved for future shares. Restart a running share after changing them. The phone's `Downloads/TapSend` folder is controlled by the Android app.

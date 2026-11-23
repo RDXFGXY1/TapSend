@@ -12,6 +12,7 @@ tabsend send -d "My Phone" -p photo.jpg
 tabsend send -p photo.jpg -d "My Phone"      Named options can appear in either order
 tabsend send "My Phone" photo.jpg            Positional shorthand
 tabsend send                                 Choose a device and file interactively
+tabsend receive                              Start phone uploads with no PC file selected
 tabsend status                               Show the active transfer and its result
 ```
 

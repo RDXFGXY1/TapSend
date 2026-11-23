@@ -34,6 +34,12 @@ const COMMANDS: &[CommandSpec] = &[
         live_only: false,
     },
     CommandSpec {
+        name: "receive",
+        detail: "Start phone uploads without sharing a file",
+        argument: false,
+        live_only: false,
+    },
+    CommandSpec {
         name: "add",
         detail: "Add focused files or enter a path",
         argument: false,
@@ -178,7 +184,8 @@ const HELP_LINES: &[&str] = &[
     " G           Open settings",
     "",
     "SHARING & PAIRING",
-    " S           Share focused or marked files",
+    " S           Share focused files or receive when none is focused",
+    " ; receive   Start receive-only mode from any folder",
     " A           Add files while sharing",
     " P           QR → manual details → dashboard",
     " R           Create a new pairing code",
@@ -435,7 +442,7 @@ pub fn draw(
     lines.push(if live {
         " [SPACE] mark   [A] add now   [P] pair / details / deck   [R] new code   [T] pause".into()
     } else {
-        " [SPACE] mark   [S] share focused or marked   [ENTER] open   [BACKSPACE] up".into()
+        " [SPACE] mark   [S] share or receive   [ENTER] open   [BACKSPACE] up".into()
     });
     lines.push(" [↑↓/JK] browse   [G] settings   [;] commands   [?] help   [Q] quit".into());
 
@@ -636,7 +643,7 @@ fn draw_reference_layout(
     lines.push(if live {
         " [F] files  [D] devices  [SPACE] mark  [A] add  [P] QR / details / dashboard  [R] new code  [T] pause".into()
     } else {
-        " [F] files  [D] devices  [SPACE] mark  [S] share  [ENTER] open folder  [BACKSPACE] up".into()
+        " [F] files  [D] devices  [SPACE] mark  [S] share/receive  [ENTER] open  [BACKSPACE] up".into()
     });
     lines.push(" [↑↓/JK] browse  [G] settings  [;] commands  [?] help  [Q] quit".into());
     paint_frame(&lines, width, height, overlay)
@@ -1202,7 +1209,7 @@ fn file_rows(explorer: &Explorer, width: usize, height: usize) -> Vec<String> {
         human_size(explorer.selected_size())
     ));
     rows.push(if explorer.selected_count() == 0 {
-        "Focus file, then press S".into()
+        "Press S to receive, or focus a file to share".into()
     } else {
         "Press S to share · A to add while live".into()
     });
@@ -1218,7 +1225,7 @@ fn ready_rows(explorer: &Explorer, _width: usize, height: usize) -> Vec<String> 
         "Focus file or mark several [SPACE]".into(),
         String::new(),
         format!("{BOLD}02 / START{NORMAL}"),
-        "Press S. Files go live immediately.".into(),
+        "Press S. With no file, receive only.".into(),
         String::new(),
         format!("{BOLD}03 / CONNECT{NORMAL}"),
         "Saved phones return automatically.".into(),
@@ -1235,7 +1242,7 @@ fn ready_rows(explorer: &Explorer, _width: usize, height: usize) -> Vec<String> 
                     path.file_name()
                         .map(|name| format!("◇ {}", crop(&name.to_string_lossy(), 80)))
                 })
-                .unwrap_or_else(|| "No file focused".into()),
+                .unwrap_or_else(|| "No PC file selected: phone uploads work".into()),
         );
     } else {
         for path in selected.iter().take(height.saturating_sub(rows.len())) {

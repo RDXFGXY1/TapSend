@@ -41,7 +41,7 @@ impl App {
         Ok(Self {
             explorer: Explorer::new(env::current_dir()?)?,
             server: None,
-            message: "Focus a file and press S, or mark several with Space".into(),
+            message: "Press S with no file to receive, or focus a file to share".into(),
             pairing_view: 0,
             auto_dashboard: false,
             device_view: false,
@@ -179,18 +179,28 @@ impl App {
                 files.push(path);
             }
         }
-        if files.is_empty() {
-            self.message = "Focus a file or select files with Space".into();
-            return;
-        }
-        match ServerProcess::start(&files) {
+        self.start_with_files(&files);
+    }
+
+    fn start_receiving(&mut self) {
+        self.start_with_files(&[]);
+    }
+
+    fn start_with_files(&mut self, files: &[PathBuf]) {
+        match ServerProcess::start(files) {
             Ok(server) => {
                 self.server = Some(server);
-                self.explorer.clear_selection();
+                if !files.is_empty() {
+                    self.explorer.clear_selection();
+                }
                 self.pairing_view = 1;
                 self.auto_dashboard = true;
-                self.message =
-                    "Sharing is live. A saved phone can reconnect without pairing again".into();
+                self.message = if files.is_empty() {
+                    "Receiving is live. Open TapSend on your phone and send files to this computer"
+                        .into()
+                } else {
+                    "Sharing is live. A saved phone can reconnect without pairing again".into()
+                };
             }
             Err(error) => self.message = error.to_string(),
         }
@@ -379,6 +389,8 @@ impl App {
         match action {
             "share" if self.server.is_none() => self.start_server(),
             "share" => self.message = "Sharing is already live; use add".into(),
+            "receive" if self.server.is_none() => self.start_receiving(),
+            "receive" => self.message = "TapSend is already running and can receive files".into(),
             "add" if self.server.is_some() && argument.is_empty() => self.add_files(),
             "add" if self.server.is_some() => {
                 let path = PathBuf::from(argument);

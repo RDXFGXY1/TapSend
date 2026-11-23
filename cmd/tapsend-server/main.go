@@ -35,11 +35,6 @@ func main() {
 	flag.Parse()
 	cfg.SharedFiles = files
 
-	if len(files) == 0 {
-		fmt.Fprintln(os.Stderr, "at least one --file is required")
-		os.Exit(2)
-	}
-
 	app, err := server.New(cfg)
 	if err != nil {
 		log.Fatal(err)

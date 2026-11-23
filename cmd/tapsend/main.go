@@ -51,6 +51,8 @@ func run(args []string, input io.Reader, output, errorsOut io.Writer) int {
 		return 0
 	case "send":
 		return send(args[1:], input, output, errorsOut)
+	case "receive":
+		return receive(args[1:], output, errorsOut)
 	case "status":
 		if len(args) != 1 {
 			return fail(errorsOut, "status takes no arguments")
@@ -83,6 +85,7 @@ const usage = `TapSend — share files with paired phones
   tabsend send -d "My Phone" -p "photo.jpg"    Send to one paired phone
   tabsend send -p "photo.jpg" -d "My Phone"    Flags can be reordered
   tabsend send "My Phone" "photo.jpg"          Positional shorthand
+  tabsend receive                              Accept phone uploads without sharing PC files
   tabsend status                               Show the latest send status
   tabsend settings                             Show saved settings
   tabsend settings set --inbox DIR --listen :8443
@@ -283,6 +286,31 @@ func send(args []string, input io.Reader, output, errorsOut io.Writer) int {
 		<-errors
 		return 1
 	}
+}
+
+func receive(args []string, output, errorsOut io.Writer) int {
+	if len(args) == 1 && (args[0] == "-h" || args[0] == "--help") {
+		fmt.Fprintln(output, "Usage: tabsend receive\nStart TapSend without sharing computer files, then send files from a paired phone.")
+		return 0
+	}
+	if len(args) != 0 {
+		return fail(errorsOut, "receive takes no arguments")
+	}
+	cfg, err := config.Load()
+	if err != nil {
+		return fail(errorsOut, err.Error())
+	}
+	app, err := server.New(cfg)
+	if err != nil {
+		return fail(errorsOut, err.Error())
+	}
+	fmt.Fprintf(output, "Ready to receive into %s\nPairing link: %s\nManual code: %s\nSecurity key: %s\nCA certificate: %s\nPress Ctrl+C to stop.\n", cfg.InboxDirectory, app.PairingURL(), app.ManualCode(), app.ManualKey(), app.CAPath())
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	if err := app.RunContext(ctx); err != nil {
+		return fail(errorsOut, err.Error())
+	}
+	return 0
 }
 
 func settings(args []string, output, errorsOut io.Writer) int {
