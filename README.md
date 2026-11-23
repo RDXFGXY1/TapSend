@@ -68,9 +68,9 @@ The same values are available through `tabsend settings`, `tabsend settings defa
 
 ### Linux installation and portable archive
 
-Run `make install-linux` to install the binaries in `~/.local/bin` and create a **TapSend** launcher in your desktop application menu. If that folder is on your `PATH`, you can then type `tabsend` or `tapsend` from any terminal. Run `make portable-linux` to create a `.tar.gz` archive under `dist/`; extract it and run `bin/tabsend` without installing.
+Run `make install-linux` to install the binaries in `~/.local/bin` and create a **TapSend** launcher in your desktop application menu. If that folder is on your `PATH`, you can then type `tabsend` or `tapsend` from any terminal. Install the Rust `x86_64-unknown-linux-musl` target, then run `make portable-linux` to create a static `.tar.gz` archive under `dist/`; extract it and run `bin/tabsend` without installing.
 
-For Windows, the **Build release packages** GitHub Actions workflow builds `TapSend-v1.0.0-windows-x64-setup.exe` and `TapSend-v1.0.0-windows-x64.zip`. The installer places TapSend in the current user's app folder, adds its folder to the user's `PATH`, and creates a Start menu shortcut. The portable archive runs from an extracted folder. The Windows console backend and packaging are in the repository; use the release workflow results to verify the Windows build.
+The Windows release includes `TapSend-v1.0.0-windows-x64.zip`; extract it and run the included commands together. The **Build release packages** workflow also prepares an installer when GitHub Actions is available. The Windows console backend and cross-compiled archive still need a hands-on Windows run.
 
 In the terminal, focus a file and press `s` to share it. Use Space to select multiple files first. Scan the displayed QR code with the Android app, or open the pairing link in a phone browser. You can also enter the displayed address, code, and security key manually in the app. Press `r` to issue a fresh pairing code.
 

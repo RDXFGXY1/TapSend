@@ -8,8 +8,6 @@ TapSend is in development. Try it with non-critical files before relying on it f
 
 **Linux (x86_64 portable archive):** Extract the archive and run `bin/tapsend` from a terminal. To install the included binaries and an application-menu launcher for your user account, run `bash scripts/install-linux.sh` from the extracted folder. The four executables in `bin/` must stay together.
 
-**Windows (x64 installer):** Run `TapSend-Setup-windows-x64.exe`, then open TapSend from the Start menu. The installer adds TapSend to your user `PATH`; open a new terminal before using its commands.
-
 **Windows (x64 portable ZIP):** Extract the entire ZIP and run `tapsend.exe` from a terminal. Keep all four `.exe` files together.
 
 The four desktop executables must stay together; the server generates pairing QR codes without an extra program. The computer and phone must be on the same reachable local network, and the computer must allow inbound connections on port `8443`.

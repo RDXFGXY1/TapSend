@@ -24,13 +24,17 @@ android:
 	mkdir -p bin
 	cp android/app/build/outputs/apk/debug/app-debug.apk bin/tapsend-android-debug.apk
 
-portable-linux: build
+portable-linux:
 	mkdir -p dist/$(LINUX_RELEASE)/bin dist/$(LINUX_RELEASE)/scripts dist/$(LINUX_RELEASE)/licenses
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -o dist/$(LINUX_RELEASE)/bin/tapsend ./cmd/tapsend
+	cp dist/$(LINUX_RELEASE)/bin/tapsend dist/$(LINUX_RELEASE)/bin/tabsend
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -o dist/$(LINUX_RELEASE)/bin/tapsend-server ./cmd/tapsend-server
+	cargo build --manifest-path tui/Cargo.toml --release --target x86_64-unknown-linux-musl
+	cp tui/target/x86_64-unknown-linux-musl/release/tapsend dist/$(LINUX_RELEASE)/bin/tapsend-tui
 	cp packaging/README.release.md dist/$(LINUX_RELEASE)/README.md
 	cp release.md dist/$(LINUX_RELEASE)/release.md
 	cp scripts/install-linux.sh dist/$(LINUX_RELEASE)/scripts/install-linux.sh
-	cp packaging/licenses/go-qrcode.LICENSE dist/$(LINUX_RELEASE)/licenses/go-qrcode.LICENSE
-	cp bin/tapsend bin/tabsend bin/tapsend-tui bin/tapsend-server dist/$(LINUX_RELEASE)/bin/
+	install -m 644 packaging/licenses/go-qrcode.LICENSE dist/$(LINUX_RELEASE)/licenses/go-qrcode.LICENSE
 	tar -czf dist/$(LINUX_RELEASE).tar.gz -C dist/$(LINUX_RELEASE) README.md release.md licenses/go-qrcode.LICENSE scripts/install-linux.sh bin/tapsend bin/tabsend bin/tapsend-tui bin/tapsend-server
 
 install-linux: build

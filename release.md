@@ -17,9 +17,10 @@ TapSend moves files and short messages between devices on the same local network
 | Device | File | What is inside |
 | --- | --- | --- |
 | Linux x86_64 | `TapSend-v1.0.0-linux-x86_64.tar.gz` | Portable desktop commands, terminal interface, server, and installer script |
-| Windows x64 | `TapSend-v1.0.0-windows-x64-setup.exe` | Per-user installer and Start menu shortcut |
 | Windows x64 | `TapSend-v1.0.0-windows-x64.zip` | Portable desktop commands, terminal interface, and server |
 | Android 13+ | `TapSend-v1.0.0-android.apk` | Signed Android app |
+
+Download `SHA256SUMS.txt` alongside the package to verify its SHA-256 checksum.
 
 ## Get started
 
@@ -35,5 +36,6 @@ TapSend moves files and short messages between devices on the same local network
 - Portal arrival details and pairing QR are available only to a browser running on the computer.
 - The Android release APK uses a release signing key. An older debug APK has a different signature and must be uninstalled before installing this release.
 - The app supports Linux x86_64, Windows x64, and Android 13 or newer in this release. There is no macOS or iOS app in this package.
+- The Linux archive uses static binaries. The Windows archive was cross compiled on Linux and still needs a hands-on Windows run. The Android APK was compiled and signed but still needs a device smoke test.
 
 For controls, settings, and source build instructions, see [README.md](README.md).
