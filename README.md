@@ -2,6 +2,8 @@
 
 TapSend shares files and messages across devices on the same local network. Run the terminal app on a Linux or Windows computer to share selected files with a phone through a browser or the Android app. The Android app can also share files directly with another phone, without a computer or cloud service.
 
+See [release.md](release.md) for v1.0.0 downloads, features, and setup.
+
 > TapSend is in development. Try it with non-critical files before relying on it for important transfers.
 
 ## Features
@@ -12,13 +14,14 @@ TapSend shares files and messages across devices on the same local network. Run 
 - Download files, upload to the computer's inbox, and exchange messages from the browser or Android app.
 - Share files directly between phones on the same Wi-Fi network or hotspot. Recipients can use a browser or the Android app.
 - Approve additional recipients, limit a share to one device, pause computer downloads, or revoke a paired device.
+- Open **Portal Mode** on the computer for a live pairing QR and animated file arrivals; flick selected files upward from the Android app or phone browser.
 
 ## Requirements
 
 | Component | Requirement |
 | --- | --- |
 | Computer | Linux or Windows; Go 1.24+ and Rust with edition 2024 support to build from source (`make` for Linux builds) |
-| Terminal QR code | `qrencode` |
+| Terminal and portal QR code | Built in |
 | File previews | `ffmpeg` and `ffprobe` (optional) |
 | Android app | Android 13+; to build it, Android SDK platform 35, build tools 35.0.0, and Java 17 |
 
@@ -55,6 +58,8 @@ tabsend receive
 
 This starts the server with an empty shared-file list and prints pairing details. On a previously paired phone, open TapSend and use **Send → Choose files**; a new phone can pair using the displayed link or code first. Files arrive in the computer inbox shown by `tabsend settings`. Keep the command running until the upload finishes, then press Ctrl+C. In the TUI, press `s` while no file is focused, or open the command menu (`;`) and choose `receive` from any folder. You can add files to a receive-only session later with `a`.
 
+For Portal Mode, open `https://localhost:8443/portal.html` on the computer while `tabsend receive` or a TUI share is running. Use your configured listen port if it is not `8443`. Scan the QR in the portal with the Android app, or open its pairing link in the phone browser. On Android, use **Send → Choose portal files**, then flick the file tile upward. In the phone browser, use **Portal Mode → Choose portal files**. The portal animates when each file has been saved to the computer inbox. Its arrival feed is available only from the computer itself. Pairing codes expire after five minutes; use **New pairing QR** when needed.
+
 ### Settings
 
 Press `g` in the terminal interface to open Settings. Use ↑/↓ or Tab to select a row, Enter to edit or toggle it, `d` to load defaults, and `s` to save. Press Esc to close; if you changed a value, press Esc again to discard it. The settings include the computer inbox, starting browser folder, hidden files, listen address, pairing link host, and the number of phones that may join directly before approval. A blank starting folder uses the current working directory; a blank pairing host uses automatic detection.
@@ -65,11 +70,11 @@ The same values are available through `tabsend settings`, `tabsend settings defa
 
 Run `make install-linux` to install the binaries in `~/.local/bin` and create a **TapSend** launcher in your desktop application menu. If that folder is on your `PATH`, you can then type `tabsend` or `tapsend` from any terminal. Run `make portable-linux` to create a `.tar.gz` archive under `dist/`; extract it and run `bin/tabsend` without installing.
 
-For Windows, the manual **Windows package** GitHub Actions workflow builds `TapSend-Setup-windows-x64.exe` and `TapSend-portable-windows-x64.zip`. The installer places TapSend in the current user's app folder, adds its folder to the user's `PATH`, and creates a Start menu shortcut. The portable archive runs from an extracted folder. The Windows console backend and packaging are in the repository, but the workflow must pass on a Windows runner before those artifacts are considered verified.
+For Windows, the **Build release packages** GitHub Actions workflow builds `TapSend-v1.0.0-windows-x64-setup.exe` and `TapSend-v1.0.0-windows-x64.zip`. The installer places TapSend in the current user's app folder, adds its folder to the user's `PATH`, and creates a Start menu shortcut. The portable archive runs from an extracted folder. The Windows console backend and packaging are in the repository; use the release workflow results to verify the Windows build.
 
 In the terminal, focus a file and press `s` to share it. Use Space to select multiple files first. Scan the displayed QR code with the Android app, or open the pairing link in a phone browser. You can also enter the displayed address, code, and security key manually in the app. Press `r` to issue a fresh pairing code.
 
-If the QR does not appear, install `qrencode` and use the displayed pairing link or manual details in the meantime. A previously paired phone can reconnect while a share is running.
+If the QR does not appear, use the displayed pairing link or manual details. A previously paired phone can reconnect while a share is running.
 
 ### Browser certificate setup
 

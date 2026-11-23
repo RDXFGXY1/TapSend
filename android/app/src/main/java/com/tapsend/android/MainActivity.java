@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class MainActivity extends Activity {
     private static final int PICK_FILE = 7;
     private static final int PICK_PEER_FILE = 8;
+    private static final int PICK_PORTAL_FILE = 9;
     private static final int TAB_SEND = 0;
     private static final int TAB_RECEIVE = 1;
     private static final int TAB_CONNECTION = 2;
@@ -64,6 +65,9 @@ public final class MainActivity extends Activity {
     private LinearLayout fileList;
     private LinearLayout thread;
     private LinearLayout uploadHistory;
+    private TextView portalTile;
+    private final List<Uri> portalPending = new ArrayList<>();
+    private boolean portalSending;
     private LinearLayout peerFileList;
     private EditText peerLinkInput;
     private TextView peerShareLink;
@@ -183,6 +187,38 @@ public final class MainActivity extends Activity {
 
     private LinearLayout buildSendPage() {
         LinearLayout page = page();
+        LinearLayout portal = panel(page, "PORTAL MODE / THROW IT THROUGH", 210);
+        portal.addView(text("✦  YOUR FILES CAN FLY", 18, true));
+        portal.addView(text("Open the portal on your computer. Choose files, then flick the tile upward.", 12, false));
+        portal.addView(button("[ CHOOSE PORTAL FILES ]", true, view -> choosePortalFiles()));
+        portalTile = text("FLICK UP TO SEND  ↑", 15, true);
+        portalTile.setTextColor(Color.rgb(126, 231, 220));
+        portalTile.setGravity(android.view.Gravity.CENTER);
+        portalTile.setPadding(dp(14), dp(20), dp(14), dp(20));
+        GradientDrawable portalBackground = border(dp(16));
+        portalBackground.setColor(Color.rgb(29, 24, 52));
+        portalBackground.setStroke(dp(2), Color.rgb(126, 231, 220));
+        portalTile.setBackground(portalBackground);
+        portalTile.setContentDescription("Flick upward or tap to send selected portal files");
+        portalTile.setVisibility(View.GONE);
+        LinearLayout.LayoutParams tileParams = new LinearLayout.LayoutParams(-1, dp(112));
+        tileParams.topMargin = dp(14);
+        portal.addView(portalTile, tileParams);
+        portalTile.setOnTouchListener(new View.OnTouchListener() {
+            float startY;
+            @Override public boolean onTouch(View view, android.view.MotionEvent event) {
+                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) { startY = event.getY(); return true; }
+                if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                    if (startY - event.getY() > dp(45)) sendPortalFiles();
+                    else view.performClick();
+                    return true;
+                }
+                return true;
+            }
+        });
+        portalTile.setOnClickListener(view -> sendPortalFiles());
+        portal.addView(button("[ SEND THROUGH PORTAL ↑ ]", false, view -> sendPortalFiles()));
+        divider(page);
         buildNearbySendPanel(page);
         divider(page);
         LinearLayout main = panel(page, "01 / SEND TO COMPUTER", 230);
@@ -507,6 +543,28 @@ public final class MainActivity extends Activity {
         startActivityForResult(intent, PICK_FILE);
     }
 
+    private void choosePortalFiles() {
+        if (!client.hasIdentity()) { postStatus("Pair this phone first."); selectTab(TAB_CONNECTION); return; }
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        startActivityForResult(intent, PICK_PORTAL_FILE);
+    }
+
+    private void sendPortalFiles() {
+        if (portalSending) return;
+        if (portalPending.isEmpty()) { postStatus("Choose portal files first."); return; }
+        portalSending = true;
+        List<Uri> selected = new ArrayList<>(portalPending);
+        portalTile.animate().translationY(-dp(160)).alpha(0f).setDuration(450).withEndAction(() -> {
+            portalTile.setVisibility(View.GONE);
+            portalTile.setTranslationY(0);
+            portalTile.setAlpha(1f);
+        }).start();
+        uploadSelected(selected, true);
+    }
+
     private void startPeerShare() {
         if (peerServer != null) { postStatus("Phone share is already running."); return; }
         nearbyWork("STARTING PHONE SHARE", () -> {
@@ -660,12 +718,22 @@ public final class MainActivity extends Activity {
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if ((requestCode != PICK_FILE && requestCode != PICK_PEER_FILE) || resultCode != RESULT_OK || data == null) return;
+        if ((requestCode != PICK_FILE && requestCode != PICK_PEER_FILE && requestCode != PICK_PORTAL_FILE) || resultCode != RESULT_OK || data == null) return;
         List<Uri> selected = new ArrayList<>();
         ClipData clip = data.getClipData();
         if (clip != null) {
             for (int i = 0; i < clip.getItemCount(); i++) selected.add(clip.getItemAt(i).getUri());
         } else if (data.getData() != null) selected.add(data.getData());
+        if (requestCode == PICK_PORTAL_FILE) {
+            portalPending.clear();
+            portalPending.addAll(selected);
+            if (!selected.isEmpty()) {
+                portalTile.setText(selected.size() == 1 ? "READY TO FLY  ↑\n" + selected.get(0).getLastPathSegment() : selected.size() + " FILES READY TO FLY  ↑");
+                portalTile.setVisibility(View.VISIBLE);
+                postStatus("Flick the portal tile upward to send.");
+            }
+            return;
+        }
         if (requestCode == PICK_PEER_FILE) {
             nearbyWork("ADDING PHONE FILES", () -> {
                 PeerShareServer current = peerServer;
@@ -695,8 +763,17 @@ public final class MainActivity extends Activity {
             });
             return;
         }
+        uploadSelected(selected);
+    }
+
+    private void uploadSelected(List<Uri> selected) {
+        uploadSelected(selected, false);
+    }
+
+    private void uploadSelected(List<Uri> selected, boolean portalMode) {
         work("UPLOADING", () -> {
             showCancel(true);
+            boolean succeeded = false;
             try {
                 for (Uri uri : selected) {
                     String name = "file";
@@ -721,7 +798,23 @@ public final class MainActivity extends Activity {
                         uploadHistory.addView(text("↑  " + completed, 12, false));
                     });
                 }
-            } finally { showCancel(false); }
+                succeeded = true;
+            } finally {
+                showCancel(false);
+                if (portalMode) {
+                    boolean completed = succeeded;
+                    runOnUiThread(() -> {
+                        portalSending = false;
+                        if (completed) portalPending.clear();
+                        else {
+                            portalTile.animate().cancel();
+                            portalTile.setTranslationY(0);
+                            portalTile.setAlpha(1f);
+                            portalTile.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }
+            }
         });
     }
 

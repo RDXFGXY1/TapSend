@@ -74,6 +74,11 @@ func (m *Manager) ManualCode() string {
 	defer m.mu.Unlock()
 	return m.manualCode
 }
+func (m *Manager) PairingExpired() bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return !time.Now().Before(m.pairing.Expires)
+}
 func (m *Manager) Pair(code, id, name string, publicKey []byte) error {
 	m.mu.Lock()
 	current := time.Now().Before(m.pairing.Expires)
@@ -162,6 +167,16 @@ func (m *Manager) Access(token string) JoinStatus {
 	}
 	delete(m.sessions, token)
 	return JoinDenied
+}
+func (m *Manager) DeviceName(token string) string {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if session, ok := m.sessions[token]; ok && time.Now().Before(session.Expires) {
+		if device, found := m.devices.Get(session.Value); found {
+			return device.Name
+		}
+	}
+	return "Phone"
 }
 func (m *Manager) Devices() []devices.Device { return m.devices.List() }
 func (m *Manager) Pending() []devices.Device {

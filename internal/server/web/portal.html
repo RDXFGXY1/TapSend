@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Portal Mode · TapSend</title><link rel="stylesheet" href="/portal.css"></head>
+<body>
+<main>
+  <header><div class="brand">Tap<span>Send</span><small> / PORTAL MODE</small></div><div class="actions"><button id="sound" type="button" aria-pressed="false">Sound off</button><button id="fullscreen" type="button">Full screen</button></div></header>
+  <div class="layout">
+    <section class="stage" aria-label="Transfer portal">
+      <div class="stars"></div><div id="portal" class="portal"><div class="portal-inner"><span class="portal-mark">↗</span></div></div>
+      <div class="stage-copy"><span class="eyebrow">YOUR COMPUTER IS READY</span><h1>Throw it<br><em>through.</em></h1><p id="portal-status" role="status" aria-live="polite">Waiting for a file to arrive…</p></div>
+      <div id="arrival" class="arrival" aria-live="polite"></div>
+    </section>
+    <aside class="sidebar">
+      <div class="step">01 / CONNECT YOUR PHONE</div><div class="qr-shell"><img id="pairing-qr" src="/api/portal/qr" alt="Pairing QR code"><span id="qr-fallback" hidden>QR unavailable. Use the link below.</span></div>
+      <p>Scan with TapSend, then choose files and flick them toward this screen. Already paired? Just open Send.</p>
+      <a id="pairing-link" href="#">Loading pairing link…</a><button id="refresh" type="button">New pairing QR ↻</button>
+      <div class="step arrivals-title">02 / LANDED HERE</div><div id="arrivals" class="arrivals"><p class="empty">No arrivals yet.</p></div>
+      <p class="hint">Files save to your configured TapSend inbox. Keep <code>tabsend receive</code> or a TUI share running.</p>
+    </aside>
+  </div>
+</main><script src="/portal.js"></script>
+</body></html>

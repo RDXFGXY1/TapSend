@@ -32,6 +32,9 @@ func TestPairingURLCarriesCurrentCertificatePin(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if current := app.PairingURL(); current != second.String() {
+		t.Fatalf("current pairing URL was not updated: %q != %q", current, second.String())
+	}
 	parts := strings.Split(first.Fragment, "~")
 	newParts := strings.Split(second.Fragment, "~")
 	if len(parts) != 2 || len(newParts) != 2 || len(parts[0]) != 22 || parts[0] == newParts[0] || parts[1] != newParts[1] {

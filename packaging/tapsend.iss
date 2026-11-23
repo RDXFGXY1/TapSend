@@ -1,4 +1,4 @@
-#define TapSendVersion "0.1.0"
+#define TapSendVersion "1.0.0"
 
 [Setup]
 AppId={{0F26897D-BA60-49B8-8342-9831DCDFBA50}
@@ -11,7 +11,7 @@ PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir={#AddBackslash(SourcePath)}..\dist
-OutputBaseFilename=TapSend-Setup-windows-x64
+OutputBaseFilename=TapSend-v{#TapSendVersion}-windows-x64-setup
 Compression=lzma
 SolidCompression=yes
 ChangesEnvironment=yes
@@ -21,7 +21,9 @@ Source: "{#AddBackslash(SourcePath)}..\dist\windows\tapsend.exe"; DestDir: "{app
 Source: "{#AddBackslash(SourcePath)}..\dist\windows\tabsend.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#AddBackslash(SourcePath)}..\dist\windows\tapsend-tui.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#AddBackslash(SourcePath)}..\dist\windows\tapsend-server.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#AddBackslash(SourcePath)}..\README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#AddBackslash(SourcePath)}README.release.md"; DestDir: "{app}"; DestName: "README.md"; Flags: ignoreversion
+Source: "{#AddBackslash(SourcePath)}..\release.md"; DestDir: "{app}"; DestName: "release.md"; Flags: ignoreversion
+Source: "{#AddBackslash(SourcePath)}licenses\go-qrcode.LICENSE"; DestDir: "{app}\licenses"; Flags: ignoreversion
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional icons:"

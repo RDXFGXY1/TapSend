@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -25,6 +26,9 @@ func run(args []string, input io.Reader, output, errorsOut io.Writer) int {
 		return launchTUI(input, output, errorsOut)
 	}
 	switch args[0] {
+	case "version", "--version", "-V":
+		fmt.Fprintln(output, "TapSend 1.0.0")
+		return 0
 	case "help", "-h", "--help":
 		fmt.Fprint(output, usage)
 		return 0
@@ -92,6 +96,7 @@ const usage = `TapSend — share files with paired phones
   tabsend settings set --listen :8443 --pairing-host HOST --direct-joins 2
   tabsend settings defaults                     Preview default settings
   tabsend settings reset                        Restore default settings
+  tabsend --version                             Show the release version
 
 Use -p/--path more than once for multiple files. Quote names and paths with spaces.
 `
@@ -307,7 +312,11 @@ func receive(args []string, output, errorsOut io.Writer) int {
 	if err != nil {
 		return fail(errorsOut, err.Error())
 	}
-	fmt.Fprintf(output, "Ready to receive into %s\nPairing link: %s\nManual code: %s\nSecurity key: %s\nCA certificate: %s\nPress Ctrl+C to stop.\n", cfg.InboxDirectory, app.PairingURL(), app.ManualCode(), app.ManualKey(), app.CAPath())
+	_, port, err := net.SplitHostPort(cfg.ListenAddress)
+	if err != nil {
+		return fail(errorsOut, err.Error())
+	}
+	fmt.Fprintf(output, "Ready to receive into %s\nPortal Mode: https://localhost:%s/portal.html\nPairing link: %s\nManual code: %s\nSecurity key: %s\nCA certificate: %s\nPress Ctrl+C to stop.\n", cfg.InboxDirectory, port, app.PairingURL(), app.ManualCode(), app.ManualKey(), app.CAPath())
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	if err := app.RunContext(ctx); err != nil {

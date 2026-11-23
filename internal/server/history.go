@@ -16,9 +16,14 @@ type historyEntry struct {
 	Name  string    `json:"name"`
 	State string    `json:"state"`
 	Bytes int64     `json:"bytes"`
+	From  string    `json:"from,omitempty"`
 }
 
 func (a *App) record(name, state string, bytes int64) {
+	a.recordFrom(name, state, bytes, "")
+}
+
+func (a *App) recordFrom(name, state string, bytes int64, from string) {
 	historyLock.Lock()
 	defer historyLock.Unlock()
 	path := filepath.Join(a.cfg.DataDirectory, "history.json")
@@ -27,7 +32,7 @@ func (a *App) record(name, state string, bytes int64) {
 	if err == nil && json.Unmarshal(data, &entries) != nil {
 		return
 	}
-	entries = append(entries, historyEntry{time.Now(), name, state, bytes})
+	entries = append(entries, historyEntry{Time: time.Now(), Name: name, State: state, Bytes: bytes, From: from})
 	if len(entries) > 500 {
 		entries = entries[len(entries)-500:]
 	}

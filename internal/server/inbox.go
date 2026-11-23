@@ -52,6 +52,7 @@ func (a *App) handleUpload(w http.ResponseWriter, r *http.Request) {
 			log.Printf("CHAT phone: %q", string(data))
 		}
 	}
-	a.record(name, "saved-to-inbox", n)
+	from := a.pairing.DeviceName(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
+	a.recordFrom(name, "saved-to-inbox", n, from)
 	writeJSON(w, map[string]string{"saved": fmt.Sprintf("%s (%d bytes)", name, n)})
 }

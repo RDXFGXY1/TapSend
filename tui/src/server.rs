@@ -1,10 +1,24 @@
 use std::{
+    ffi::OsString,
     io::{self, BufRead, BufReader, Write},
     path::{Path, PathBuf},
     process::{Child, Command, Stdio},
     sync::{Arc, Mutex},
     thread,
 };
+
+fn server_binary() -> OsString {
+    std::env::var_os("TAPSEND_SERVER").unwrap_or_else(|| {
+        std::env::current_exe()
+            .ok()
+            .and_then(|path| {
+                let sibling =
+                    path.with_file_name(format!("tapsend-server{}", std::env::consts::EXE_SUFFIX));
+                sibling.is_file().then_some(sibling.into_os_string())
+            })
+            .unwrap_or_else(|| format!("tapsend-server{}", std::env::consts::EXE_SUFFIX).into())
+    })
+}
 
 pub struct ServerProcess {
     child: Child,
@@ -13,17 +27,7 @@ pub struct ServerProcess {
 }
 impl ServerProcess {
     pub fn start(files: &[PathBuf]) -> io::Result<Self> {
-        let binary = std::env::var_os("TAPSEND_SERVER").unwrap_or_else(|| {
-            std::env::current_exe()
-                .ok()
-                .and_then(|path| {
-                    let sibling = path
-                        .with_file_name(format!("tapsend-server{}", std::env::consts::EXE_SUFFIX));
-                    sibling.is_file().then_some(sibling.into_os_string())
-                })
-                .unwrap_or_else(|| format!("tapsend-server{}", std::env::consts::EXE_SUFFIX).into())
-        });
-        let mut command = Command::new(binary);
+        let mut command = Command::new(server_binary());
         for file in files {
             command.arg("--file").arg(file);
         }
@@ -139,8 +143,8 @@ impl ServerProcess {
         if cache.0 == url {
             return cache.1.clone();
         }
-        let rows: Vec<String> = Command::new("qrencode")
-            .args(["-t", "UTF8", "-m", "1", &url])
+        let rows: Vec<String> = Command::new(server_binary())
+            .args(["--qr-utf8", &url])
             .output()
             .ok()
             .filter(|out| out.status.success())

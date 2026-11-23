@@ -10,8 +10,8 @@ android {
         applicationId 'com.tapsend.android'
         minSdk 33
         targetSdk 35
-        versionCode 1
-        versionName '0.1.0'
+        versionCode 10000
+        versionName '1.0.0'
     }
 
     compileOptions {
@@ -26,12 +26,25 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (System.getenv('TAPSEND_RELEASE_KEYSTORE') && System.getenv('TAPSEND_RELEASE_STORE_PASSWORD') && System.getenv('TAPSEND_RELEASE_KEY_PASSWORD')) {
+            releaseKey {
+                storeFile file(System.getenv('TAPSEND_RELEASE_KEYSTORE'))
+                storePassword System.getenv('TAPSEND_RELEASE_STORE_PASSWORD')
+                keyAlias System.getenv('TAPSEND_RELEASE_KEY_ALIAS') ?: 'tapsend'
+                keyPassword System.getenv('TAPSEND_RELEASE_KEY_PASSWORD')
+            }
+        }
     }
 
     buildTypes {
         debug {
             if (rootProject.file('.android-user/debug.keystore').exists()) {
                 signingConfig signingConfigs.localDebug
+            }
+        }
+        release {
+            if (signingConfigs.findByName('releaseKey') != null) {
+                signingConfig signingConfigs.releaseKey
             }
         }
     }

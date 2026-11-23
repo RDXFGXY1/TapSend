@@ -37,6 +37,7 @@ type App struct {
 	catalog      *filecatalog.Catalog
 	pairing      *pairing.Manager
 	pairingCode  string
+	pairingMu    sync.Mutex
 	tlsPin       string
 	manualKey    string
 	host         string
@@ -113,10 +114,15 @@ func shortFingerprint(digest []byte) string {
 	return string(key[:])
 }
 func (a *App) PairingURL() string {
+	a.pairingMu.Lock()
+	defer a.pairingMu.Unlock()
 	return fmt.Sprintf("https://%s/#%s~%s", a.host, a.pairingCode, a.tlsPin)
 }
 func (a *App) RefreshPairingURL() string {
-	return fmt.Sprintf("https://%s/#%s~%s", a.host, a.pairing.NewPairingCode(), a.tlsPin)
+	a.pairingMu.Lock()
+	defer a.pairingMu.Unlock()
+	a.pairingCode = a.pairing.NewPairingCode()
+	return fmt.Sprintf("https://%s/#%s~%s", a.host, a.pairingCode, a.tlsPin)
 }
 func (a *App) SelectRecipient(id, name string) error {
 	if err := a.pairing.Select(id); err != nil {
@@ -155,6 +161,9 @@ func (a *App) RunContext(ctx context.Context) error {
 	mux := http.NewServeMux()
 	assets, _ := fs.Sub(webFiles, "web")
 	mux.Handle("GET /", http.FileServer(http.FS(assets)))
+	mux.HandleFunc("GET /api/portal", a.localOnly(a.handlePortal))
+	mux.HandleFunc("GET /api/portal/qr", a.localOnly(a.handlePortalQR))
+	mux.HandleFunc("POST /api/portal/refresh", a.localOnly(a.handlePortalRefresh))
 	mux.HandleFunc("POST /api/pair", a.handlePair)
 	mux.HandleFunc("POST /api/challenge", a.handleChallenge)
 	mux.HandleFunc("POST /api/verify", a.handleVerify)

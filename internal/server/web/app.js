@@ -35,6 +35,13 @@ function enableInbox(){
    status.textContent=`Saved on computer: ${file.name}`;
  }
  input.onchange=async()=>{input.disabled=true;try{for(const file of input.files)await upload(file)}catch(e){status.textContent=e.message}finally{input.disabled=false}};
+ const portalInput=document.querySelector('#portal-files'),tile=document.querySelector('#portal-tile'),portalButton=document.querySelector('#portal-send'),names=document.querySelector('#portal-file-names');
+ let staged=[],sending=false,startY=null;
+ portalInput.onchange=()=>{staged=Array.from(portalInput.files);names.textContent=staged.length===1?staged[0].name:`${staged.length} files ready to fly`;tile.hidden=!staged.length;portalButton.hidden=!staged.length;status.textContent=staged.length?'Flick the file tile upward to send.':''};
+ async function portalSend(){if(sending||!staged.length)return;sending=true;portalButton.disabled=true;tile.classList.add('flying');try{for(const file of staged)await upload(file);status.textContent=`${staged.length} file${staged.length===1?'':'s'} landed on computer`;staged=[];portalInput.value='';tile.hidden=true;portalButton.hidden=true}catch(error){status.textContent=error.message}finally{sending=false;portalButton.disabled=false;setTimeout(()=>tile.classList.remove('flying'),750)}}
+ portalButton.onclick=portalSend;tile.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();portalSend()}};
+ tile.onpointerdown=event=>{startY=event.clientY;tile.setPointerCapture(event.pointerId)};
+ tile.onpointerup=event=>{if(startY!==null&&startY-event.clientY>45)portalSend();startY=null};
  send.onclick=async()=>{if(!note.value.trim())return;send.disabled=true;try{await upload(new File([note.value],`note-${Date.now()}.txt`,{type:'text/plain'}));note.value=''}catch(e){status.textContent=e.message}finally{send.disabled=false}};
  section.ondragover=e=>e.preventDefault();section.ondrop=async e=>{e.preventDefault();try{for(const file of e.dataTransfer.files)await upload(file)}catch(err){status.textContent=err.message}};
 }

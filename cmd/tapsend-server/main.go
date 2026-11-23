@@ -4,10 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 
 	"tapsend/internal/config"
+	"tapsend/internal/qr"
 	"tapsend/internal/server"
 )
 
@@ -24,6 +26,14 @@ func (f *fileList) Set(value string) error {
 }
 
 func main() {
+	if len(os.Args) == 3 && os.Args[1] == "--qr-utf8" {
+		picture, err := qr.Terminal(os.Args[2])
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Print(picture)
+		return
+	}
 	var files fileList
 	cfg, err := config.Load()
 	if err != nil {
@@ -40,6 +50,9 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Printf("TapSend pairing URL: %s", app.PairingURL())
+	if _, port, err := net.SplitHostPort(cfg.ListenAddress); err == nil {
+		log.Printf("TapSend Portal Mode: https://localhost:%s/portal.html", port)
+	}
 	log.Printf("TapSend manual details: %s %s", app.ManualCode(), app.ManualKey())
 	log.Printf("Install this CA certificate on the phone once: %s", app.CAPath())
 	go app.Control(os.Stdin)

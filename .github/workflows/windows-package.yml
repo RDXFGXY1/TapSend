@@ -26,7 +26,12 @@ jobs:
           Copy-Item tui/target/release/tapsend.exe dist/windows/tapsend-tui.exe
       - name: Build portable archive
         shell: pwsh
-        run: Compress-Archive -Path dist/windows/*.exe,README.md -DestinationPath dist/TapSend-portable-windows-x64.zip -Force
+        run: |
+          Copy-Item packaging/README.release.md dist/windows/README.md
+          Copy-Item release.md dist/windows/release.md
+          New-Item -ItemType Directory -Force dist/windows/licenses | Out-Null
+          Copy-Item packaging/licenses/go-qrcode.LICENSE dist/windows/licenses/go-qrcode.LICENSE
+          Compress-Archive -Path dist/windows/* -DestinationPath dist/TapSend-v1.0.0-windows-x64.zip -Force
       - name: Build installer
         shell: pwsh
         run: |
@@ -38,5 +43,5 @@ jobs:
         with:
           name: TapSend-windows-x64
           path: |
-            dist/TapSend-portable-windows-x64.zip
-            dist/TapSend-Setup-windows-x64.exe
+            dist/TapSend-v1.0.0-windows-x64.zip
+            dist/TapSend-v1.0.0-windows-x64-setup.exe

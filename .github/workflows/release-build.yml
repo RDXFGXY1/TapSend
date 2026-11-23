@@ -1,0 +1,108 @@
+name: Build release packages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test sources
+        run: |
+          go test ./...
+          cargo test --manifest-path tui/Cargo.toml
+          node --check internal/server/web/app.js
+          node --check internal/server/web/portal.js
+      - name: Build Linux archive
+        run: |
+          make portable-linux
+          tar -tzf dist/TapSend-v1.0.0-linux-x86_64.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TapSend-v1.0.0-linux-x86_64
+          path: dist/TapSend-v1.0.0-linux-x86_64.tar.gz
+          if-no-files-found: error
+
+  windows:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test sources
+        shell: pwsh
+        run: |
+          go test ./...
+          cargo test --manifest-path tui/Cargo.toml
+      - name: Build Windows binaries and portable ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/windows | Out-Null
+          go build -o dist/windows/tapsend.exe ./cmd/tapsend
+          Copy-Item dist/windows/tapsend.exe dist/windows/tabsend.exe
+          go build -o dist/windows/tapsend-server.exe ./cmd/tapsend-server
+          cargo build --release --manifest-path tui/Cargo.toml
+          Copy-Item tui/target/release/tapsend.exe dist/windows/tapsend-tui.exe
+          Copy-Item packaging/README.release.md dist/windows/README.md
+          Copy-Item release.md dist/windows/release.md
+          New-Item -ItemType Directory -Force dist/windows/licenses | Out-Null
+          Copy-Item packaging/licenses/go-qrcode.LICENSE dist/windows/licenses/go-qrcode.LICENSE
+          Compress-Archive -Path dist/windows/* -DestinationPath dist/TapSend-v1.0.0-windows-x64.zip -Force
+      - name: Build Windows installer
+        shell: pwsh
+        run: |
+          $compiler = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source
+          if (-not $compiler) { $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          if (-not (Test-Path $compiler)) { throw "Inno Setup compiler not found" }
+          & $compiler packaging/tapsend.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path dist/TapSend-v1.0.0-windows-x64-setup.exe)) { throw "Installer missing" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TapSend-v1.0.0-windows-x64
+          path: |
+            dist/TapSend-v1.0.0-windows-x64.zip
+            dist/TapSend-v1.0.0-windows-x64-setup.exe
+          if-no-files-found: error
+
+  android:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Restore release signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.TAPSEND_RELEASE_KEYSTORE_B64 }}
+        run: |
+          test -n "$KEYSTORE_B64" || { echo 'Android release signing key is missing'; exit 1; }
+          mkdir -p android/.android-user
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > android/.android-user/release.keystore
+      - name: Build signed Android APK
+        working-directory: android
+        env:
+          TAPSEND_RELEASE_KEYSTORE: ${{ github.workspace }}/android/.android-user/release.keystore
+          TAPSEND_RELEASE_STORE_PASSWORD: ${{ secrets.TAPSEND_RELEASE_STORE_PASSWORD }}
+          TAPSEND_RELEASE_KEY_PASSWORD: ${{ secrets.TAPSEND_RELEASE_KEY_PASSWORD }}
+          TAPSEND_RELEASE_KEY_ALIAS: tapsend
+        run: ./gradlew --no-daemon :app:assembleRelease
+      - name: Verify and name APK
+        run: |
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android/app/build/outputs/apk/release/app-release.apk
+          mkdir -p dist
+          cp android/app/build/outputs/apk/release/app-release.apk dist/TapSend-v1.0.0-android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TapSend-v1.0.0-android
+          path: dist/TapSend-v1.0.0-android.apk
+          if-no-files-found: error
