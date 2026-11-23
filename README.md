@@ -57,7 +57,9 @@ This starts the server with an empty shared-file list and prints pairing details
 
 ### Settings
 
-Press `g` in the terminal interface to edit the computer inbox folder and listen address, or use `./bin/tabsend settings` and `./bin/tabsend settings set --inbox /absolute/path --listen :8443`. The settings are saved for future shares. Restart a running share after changing them. The phone's `Downloads/TapSend` folder is controlled by the Android app.
+Press `g` in the terminal interface to open Settings. Use ↑/↓ or Tab to select a row, Enter to edit or toggle it, `d` to load defaults, and `s` to save. Press Esc to close; if you changed a value, press Esc again to discard it. The settings include the computer inbox, starting browser folder, hidden files, listen address, pairing link host, and the number of phones that may join directly before approval. A blank starting folder uses the current working directory; a blank pairing host uses automatic detection.
+
+The same values are available through `tabsend settings`, `tabsend settings defaults`, and `tabsend settings reset`. For example, `tabsend settings set --inbox /absolute/path --start-folder /home/me/Pictures --show-hidden=true --listen :8443 --direct-joins 2`. Use `--pairing-host` only when automatic detection picks the wrong address; the chosen IP or hostname must be reachable from the phone and covered by the existing server certificate. TapSend reports a certificate mismatch when starting a share. Restart an active share after changing connection or join settings. The phone's `Downloads/TapSend` folder is controlled by the Android app.
 
 ### Linux installation and portable archive
 

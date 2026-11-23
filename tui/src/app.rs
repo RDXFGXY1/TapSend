@@ -29,17 +29,38 @@ enum Overlay {
         selected: usize,
     },
     Settings {
-        inbox: String,
-        listen: String,
+        values: [String; 6],
         selected: usize,
         edit: Option<String>,
+        error: String,
+        dirty: bool,
+        confirm_exit: bool,
     },
 }
 
+const SETTING_KEYS: [&str; 6] = [
+    "inbox",
+    "start_folder",
+    "show_hidden",
+    "listen",
+    "pairing_host",
+    "direct_joins",
+];
+
 impl App {
     pub fn new() -> io::Result<Self> {
+        let settings = Self::load_settings("show").ok();
+        let start = settings
+            .as_ref()
+            .and_then(|values| (!values[1].is_empty()).then(|| PathBuf::from(&values[1])));
+        let current = env::current_dir()?;
+        let mut explorer = Explorer::new(start.unwrap_or_else(|| current.clone()))
+            .or_else(|_| Explorer::new(current))?;
+        if settings.as_ref().is_some_and(|values| values[2] == "true") {
+            explorer.set_show_hidden(true)?;
+        }
         Ok(Self {
-            explorer: Explorer::new(env::current_dir()?)?,
+            explorer,
             server: None,
             message: "Press S with no file to receive, or focus a file to share".into(),
             pairing_view: 0,
@@ -91,15 +112,19 @@ impl App {
                     suggestions: ui::command_suggestions(input, self.server.is_some()),
                 }),
                 Some(Overlay::Settings {
-                    inbox,
-                    listen,
+                    values,
                     selected,
                     edit,
+                    error,
+                    dirty,
+                    confirm_exit,
                 }) => Some(ui::OverlayView::Settings {
-                    inbox,
-                    listen,
+                    values,
                     selected: *selected,
                     edit: edit.as_deref(),
+                    error,
+                    dirty: *dirty,
+                    confirm_exit: *confirm_exit,
                 }),
                 None => None,
             };
@@ -328,10 +353,12 @@ impl App {
                 self.overlay = Some(Overlay::Command { input, selected });
             }
             Overlay::Settings {
-                mut inbox,
-                mut listen,
+                mut values,
                 mut selected,
                 mut edit,
+                mut error,
+                mut dirty,
+                mut confirm_exit,
             } => {
                 if let Some(value) = edit.as_mut() {
                     match key {
@@ -341,41 +368,61 @@ impl App {
                         }
                         ModalKey::Char(ch) if value.len() < 1024 => value.push(ch),
                         ModalKey::Enter => {
-                            if selected == 0 {
-                                inbox = value.trim().to_string();
-                            } else {
-                                listen = value.trim().to_string();
-                            }
+                            values[selected] = value.trim().to_string();
                             edit = None;
+                            dirty = true;
+                            error.clear();
                         }
                         _ => {}
                     }
                 } else {
                     match key {
-                        ModalKey::Escape => return Ok(()),
+                        ModalKey::Escape if !dirty || confirm_exit => return Ok(()),
+                        ModalKey::Escape => {
+                            confirm_exit = true;
+                            error = "Unsaved changes. Press Esc again to discard.".into();
+                        }
                         ModalKey::Up => selected = selected.saturating_sub(1),
-                        ModalKey::Down => selected = (selected + 1).min(1),
+                        ModalKey::Down | ModalKey::Tab => selected = (selected + 1) % values.len(),
                         ModalKey::Enter => {
-                            edit = Some(if selected == 0 {
-                                inbox.clone()
+                            if selected == 2 {
+                                values[2] =
+                                    if values[2] == "true" { "false" } else { "true" }.into();
+                                dirty = true;
                             } else {
-                                listen.clone()
-                            })
+                                edit = Some(values[selected].clone());
+                            }
+                            error.clear();
                         }
                         ModalKey::Char('s') | ModalKey::Char('S') => {
-                            self.save_settings(&inbox, &listen);
-                            if self.message.starts_with("Settings saved") {
-                                return Ok(());
+                            match self.save_settings(&values) {
+                                Ok(()) => return Ok(()),
+                                Err(message) => error = message,
+                            }
+                        }
+                        ModalKey::Char('d') | ModalKey::Char('D') => {
+                            match Self::load_settings("defaults") {
+                                Ok(defaults) => {
+                                    values = defaults;
+                                    dirty = true;
+                                    error = "Defaults loaded. Press S to save.".into();
+                                }
+                                Err(message) => error = message,
                             }
                         }
                         _ => {}
                     }
+                    if !matches!(key, ModalKey::Escape) {
+                        confirm_exit = false;
+                    }
                 }
                 self.overlay = Some(Overlay::Settings {
-                    inbox,
-                    listen,
+                    values,
                     selected,
                     edit,
+                    error,
+                    dirty,
+                    confirm_exit,
                 });
             }
         }
@@ -500,44 +547,73 @@ impl App {
     }
 
     fn open_settings(&mut self) {
-        match Command::new(Self::launcher())
-            .args(["settings", "show"])
-            .output()
-        {
-            Ok(output) if output.status.success() => {
-                let text = String::from_utf8_lossy(&output.stdout);
-                let mut inbox = String::new();
-                let mut listen = String::new();
-                for line in text.lines() {
-                    if let Some(value) = line.strip_prefix("inbox\t") {
-                        inbox = value.into();
-                    }
-                    if let Some(value) = line.strip_prefix("listen\t") {
-                        listen = value.into();
-                    }
-                }
+        match Self::load_settings("show") {
+            Ok(values) => {
                 self.overlay = Some(Overlay::Settings {
-                    inbox,
-                    listen,
+                    values,
                     selected: 0,
                     edit: None,
-                });
+                    error: String::new(),
+                    dirty: false,
+                    confirm_exit: false,
+                })
             }
-            Ok(output) => self.message = String::from_utf8_lossy(&output.stderr).trim().into(),
-            Err(error) => self.message = format!("Could not open settings: {error}"),
+            Err(error) => self.message = error,
         }
     }
 
-    fn save_settings(&mut self, inbox: &str, listen: &str) {
-        match Command::new(Self::launcher())
-            .args(["settings", "set", "--inbox", inbox, "--listen", listen])
+    fn load_settings(mode: &str) -> Result<[String; 6], String> {
+        let output = Command::new(Self::launcher())
+            .args(["settings", mode])
             .output()
-        {
-            Ok(output) if output.status.success() => {
-                self.message = "Settings saved. Restart the share to apply them.".into()
-            }
-            Ok(output) => self.message = String::from_utf8_lossy(&output.stderr).trim().into(),
-            Err(error) => self.message = format!("Could not save settings: {error}"),
+            .map_err(|error| format!("Could not load settings: {error}"))?;
+        if !output.status.success() {
+            return Err(String::from_utf8_lossy(&output.stderr).trim().into());
         }
+        let text = String::from_utf8_lossy(&output.stdout);
+        let mut values: [String; 6] = std::array::from_fn(|_| String::new());
+        let mut found = [false; 6];
+        for line in text.lines() {
+            if let Some((key, value)) = line.split_once('\t') {
+                if let Some(index) = SETTING_KEYS.iter().position(|candidate| *candidate == key) {
+                    values[index] = value.into();
+                    found[index] = true;
+                }
+            }
+        }
+        if found.iter().any(|found| !found) {
+            return Err("Settings response is incomplete. Rebuild both TapSend binaries.".into());
+        }
+        Ok(values)
+    }
+
+    fn save_settings(&mut self, values: &[String; 6]) -> Result<(), String> {
+        let output = Command::new(Self::launcher())
+            .args([
+                "settings",
+                "set",
+                "--inbox",
+                &values[0],
+                "--start-folder",
+                &values[1],
+                "--listen",
+                &values[3],
+                "--pairing-host",
+                &values[4],
+                "--direct-joins",
+                &values[5],
+            ])
+            .arg(format!("--show-hidden={}", values[2]))
+            .output()
+            .map_err(|error| format!("Could not save settings: {error}"))?;
+        if !output.status.success() {
+            return Err(String::from_utf8_lossy(&output.stderr).trim().into());
+        }
+        self.explorer
+            .set_show_hidden(values[2] == "true")
+            .map_err(|error| error.to_string())?;
+        self.message =
+            "Settings saved. Restart an active share to apply connection changes.".into();
+        Ok(())
     }
 }

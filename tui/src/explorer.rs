@@ -33,6 +33,14 @@ impl Explorer {
         Ok(explorer)
     }
 
+    pub fn set_show_hidden(&mut self, show: bool) -> io::Result<()> {
+        if self.show_hidden != show {
+            self.show_hidden = show;
+            self.refresh()?;
+        }
+        Ok(())
+    }
+
     pub fn directory(&self) -> &Path {
         &self.directory
     }

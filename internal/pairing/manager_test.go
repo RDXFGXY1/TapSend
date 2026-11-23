@@ -117,6 +117,40 @@ func TestThirdDeviceWaitsForSenderApproval(t *testing.T) {
 	}
 }
 
+func TestConfiguredDirectJoinLimit(t *testing.T) {
+	store, err := devices.Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	manager := New(store)
+	manager.SetDirectJoinLimit(1)
+	code := manager.NewPairingCode()
+	for index, id := range []string{"first", "second"} {
+		public, private, err := ed25519.GenerateKey(rand.Reader)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := manager.Pair(code, id, id, public); err != nil {
+			t.Fatal(err)
+		}
+		challenge, err := manager.Challenge(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, status, err := manager.Verify(id, ed25519.Sign(private, []byte(challenge)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := JoinAllowed
+		if index == 1 {
+			want = JoinPending
+		}
+		if status != want {
+			t.Fatalf("%s: got %s, want %s", id, status, want)
+		}
+	}
+}
+
 func TestSelectedRecipientBlocksOtherPairedDevices(t *testing.T) {
 	store, err := devices.Open(t.TempDir())
 	if err != nil {

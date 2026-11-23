@@ -12,15 +12,23 @@ import (
 )
 
 type Config struct {
-	ListenAddress  string
-	DataDirectory  string
-	InboxDirectory string
-	SharedFiles    []string
+	ListenAddress   string
+	AdvertiseHost   string
+	DataDirectory   string
+	InboxDirectory  string
+	StartDirectory  string
+	ShowHidden      bool
+	DirectJoinLimit int
+	SharedFiles     []string
 }
 
 type Settings struct {
-	ListenAddress  string `json:"listen_address"`
-	InboxDirectory string `json:"inbox_directory"`
+	ListenAddress   string `json:"listen_address"`
+	AdvertiseHost   string `json:"advertise_host,omitempty"`
+	InboxDirectory  string `json:"inbox_directory"`
+	StartDirectory  string `json:"start_directory,omitempty"`
+	ShowHidden      bool   `json:"show_hidden"`
+	DirectJoinLimit *int   `json:"direct_join_limit,omitempty"`
 }
 
 func Default() Config {
@@ -32,9 +40,10 @@ func Default() Config {
 		}
 	}
 	return Config{
-		ListenAddress:  ":8443",
-		DataDirectory:  data,
-		InboxDirectory: filepath.Join(data, "inbox"),
+		ListenAddress:   ":8443",
+		DataDirectory:   data,
+		InboxDirectory:  filepath.Join(data, "inbox"),
+		DirectJoinLimit: 2,
 	}
 }
 
@@ -73,6 +82,12 @@ func Load() (Config, error) {
 	if settings.InboxDirectory != "" {
 		cfg.InboxDirectory = settings.InboxDirectory
 	}
+	cfg.AdvertiseHost = settings.AdvertiseHost
+	cfg.StartDirectory = settings.StartDirectory
+	cfg.ShowHidden = settings.ShowHidden
+	if settings.DirectJoinLimit != nil {
+		cfg.DirectJoinLimit = *settings.DirectJoinLimit
+	}
 	if err := Validate(cfg); err != nil {
 		return cfg, err
 	}
@@ -94,12 +109,29 @@ func Validate(cfg Config) error {
 	if strings.TrimSpace(cfg.InboxDirectory) == "" || !filepath.IsAbs(cfg.InboxDirectory) {
 		return fmt.Errorf("inbox directory must be an absolute path")
 	}
+	if cfg.StartDirectory != "" && !filepath.IsAbs(cfg.StartDirectory) {
+		return fmt.Errorf("start directory must be an absolute path")
+	}
+	if cfg.AdvertiseHost != "" {
+		if strings.ContainsAny(cfg.AdvertiseHost, " \t\r\n/?#@[]") || (strings.Contains(cfg.AdvertiseHost, ":") && net.ParseIP(cfg.AdvertiseHost) == nil) {
+			return fmt.Errorf("pairing host must be an IP address or hostname without a port")
+		}
+	}
+	if cfg.DirectJoinLimit < 1 || cfg.DirectJoinLimit > 8 {
+		return fmt.Errorf("direct join limit must be 1–8")
+	}
 	return nil
 }
 
 func Save(cfg Config) error {
 	if err := Validate(cfg); err != nil {
 		return err
+	}
+	if cfg.StartDirectory != "" {
+		info, err := os.Stat(cfg.StartDirectory)
+		if err != nil || !info.IsDir() {
+			return fmt.Errorf("start directory must be an existing folder")
+		}
 	}
 	path, err := SettingsPath()
 	if err != nil {
@@ -108,7 +140,12 @@ func Save(cfg Config) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
 		return err
 	}
-	data, err := json.MarshalIndent(Settings{cfg.ListenAddress, cfg.InboxDirectory}, "", "  ")
+	limit := cfg.DirectJoinLimit
+	data, err := json.MarshalIndent(Settings{
+		ListenAddress: cfg.ListenAddress, AdvertiseHost: cfg.AdvertiseHost,
+		InboxDirectory: cfg.InboxDirectory, StartDirectory: cfg.StartDirectory,
+		ShowHidden: cfg.ShowHidden, DirectJoinLimit: &limit,
+	}, "", "  ")
 	if err != nil {
 		return err
 	}

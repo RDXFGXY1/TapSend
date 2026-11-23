@@ -1,6 +1,6 @@
-# Planned CLI and settings
+# CLI and settings
 
-This document describes the TapSend command interface and settings. The basic commands and first two TUI settings are implemented. Later additions are identified below.
+This document describes the TapSend command interface and settings. Later additions are identified below.
 
 ## Commands
 
@@ -32,17 +32,21 @@ When a value is missing in an interactive terminal, TapSend lists paired devices
 
 ## Terminal settings
 
-The TUI has a **Settings** popup (press `g`) with visible inbox and connection values, validation, and save/cancel actions. Settings persist between runs and have the same meaning for TUI and CLI use. The other rows below are future improvements.
+The TUI has a **Settings** window (press `g`) with six editable values. Use ↑/↓ or Tab to move, Enter to edit or toggle, `d` to load defaults, `s` to save, and Esc to close. Esc twice discards unsaved changes. The CLI uses `tabsend settings`, `tabsend settings set`, `tabsend settings defaults`, and `tabsend settings reset`. Settings persist between runs.
 
 | Section | Setting | Default and behavior |
 | --- | --- | --- |
 | Transfers | Computer inbox folder | Current TapSend data directory's `inbox/`; controls files uploaded **to the computer** |
+| Browser | Starting folder | Current directory by default; must be an absolute path when set |
+| Browser | Show hidden files | Off by default; applies when the TUI opens and immediately after saving |
+| Connection | Listen address | `:8443` by default; binds the server to an address and port |
+| Connection | Pairing host | Automatic by default; overrides the host/IP in pairing links and QR codes, without changing the bind address |
+| Devices | Direct joins | `2` by default; number of paired phones that can join before sender approval, from 1 to 8 |
 | Transfers (planned) | Default send device | None; can preselect a paired device without silently sending to it |
-| Connection | Listen port | `8443`; validate availability before starting a share |
-| Connection (planned) | Network interface | Automatic; display the address that phones must reach |
 | Devices (planned) | Paired devices | Rename, inspect ID, and revoke access |
-| Devices (planned) | Additional receiver approval | Keep the current approval behavior as the default |
 | Notifications (planned) | Transfer and join notices | Show status in the terminal; desktop notifications can be optional |
+
+Connection and direct join changes take effect when a new share starts. The pairing host must be reachable from the phone and covered by the existing server certificate; TapSend reports a mismatch when a share starts. The starting folder and hidden-file preference apply to the terminal interface; the Android download folder remains controlled by the Android app.
 
 The Android download folder is controlled by the Android app, not the computer TUI. The app currently uses `Downloads/TapSend`. A future Android setting may let the phone user choose another destination using Android's file picker.
 

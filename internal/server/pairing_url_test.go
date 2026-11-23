@@ -62,3 +62,20 @@ func TestManualFingerprintEncoding(t *testing.T) {
 		t.Fatalf("manual key encoding changed: %s", got)
 	}
 }
+
+func TestPairingHostMustMatchCertificate(t *testing.T) {
+	cfg := config.Default()
+	cfg.DataDirectory = t.TempDir()
+	cfg.AdvertiseHost = "unlisted.example"
+	if _, err := New(cfg); err == nil || !strings.Contains(err.Error(), "not covered") {
+		t.Fatalf("expected certificate mismatch, got %v", err)
+	}
+	cfg.AdvertiseHost = "127.0.0.1"
+	app, err := New(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(app.PairingURL(), "127.0.0.1:8443") {
+		t.Fatalf("wrong pairing host: %s", app.PairingURL())
+	}
+}

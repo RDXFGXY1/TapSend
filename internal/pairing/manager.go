@@ -20,17 +20,18 @@ type expiringValue struct {
 	Expires time.Time
 }
 type Manager struct {
-	mu          sync.Mutex
-	pairing     expiringValue
-	manualCode  string
-	manualTries int
-	challenges  map[string]expiringValue
-	sessions    map[string]expiringValue
-	devices     *devices.Store
-	recipient   string
-	joined      map[string]bool
-	pending     map[string]bool
-	denied      map[string]bool
+	mu              sync.Mutex
+	pairing         expiringValue
+	manualCode      string
+	manualTries     int
+	challenges      map[string]expiringValue
+	sessions        map[string]expiringValue
+	devices         *devices.Store
+	recipient       string
+	joined          map[string]bool
+	pending         map[string]bool
+	denied          map[string]bool
+	directJoinLimit int
 }
 
 type JoinStatus string
@@ -43,7 +44,12 @@ const (
 
 func New(store *devices.Store) *Manager {
 	return &Manager{devices: store, challenges: make(map[string]expiringValue), sessions: make(map[string]expiringValue),
-		joined: make(map[string]bool), pending: make(map[string]bool), denied: make(map[string]bool)}
+		joined: make(map[string]bool), pending: make(map[string]bool), denied: make(map[string]bool), directJoinLimit: 2}
+}
+func (m *Manager) SetDirectJoinLimit(limit int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.directJoinLimit = limit
 }
 func (m *Manager) NewPairingCode() string {
 	m.mu.Lock()
@@ -130,7 +136,7 @@ func (m *Manager) joinLocked(id string) JoinStatus {
 	if m.pending[id] {
 		return JoinPending
 	}
-	if len(m.joined) < 2 {
+	if m.recipient == id || len(m.joined) < m.directJoinLimit {
 		m.joined[id] = true
 		return JoinAllowed
 	}

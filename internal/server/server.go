@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/sha256"
+	"crypto/x509"
 	"embed"
 	"encoding/base64"
 	"encoding/json"
@@ -63,6 +64,7 @@ func New(cfg config.Config) (*App, error) {
 		return nil, err
 	}
 	manager := pairing.New(store)
+	manager.SetDirectJoinLimit(cfg.DirectJoinLimit)
 	certificate, err := os.ReadFile(certs.Certificate)
 	if err != nil {
 		return nil, err
@@ -71,9 +73,18 @@ func New(cfg config.Config) (*App, error) {
 	if block == nil {
 		return nil, fmt.Errorf("invalid server certificate PEM")
 	}
+	if cfg.AdvertiseHost != "" {
+		parsed, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("parse server certificate: %w", err)
+		}
+		if err := parsed.VerifyHostname(cfg.AdvertiseHost); err != nil {
+			return nil, fmt.Errorf("pairing host %q is not covered by the current server certificate: %w", cfg.AdvertiseHost, err)
+		}
+	}
 	digest := sha256.Sum256(block.Bytes)
 	return &App{cfg: cfg, certificates: certs, catalog: catalog, pairing: manager,
-		pairingCode: manager.NewPairingCode(), host: localHost(cfg.ListenAddress), tlsPin: base64.RawURLEncoding.EncodeToString(digest[:16]),
+		pairingCode: manager.NewPairingCode(), host: localHost(cfg.ListenAddress, cfg.AdvertiseHost), tlsPin: base64.RawURLEncoding.EncodeToString(digest[:16]),
 		manualKey: shortFingerprint(digest[:8])}, nil
 }
 func (a *App) CAPath() string { return a.certificates.CA }
@@ -353,10 +364,13 @@ func writeJSON(w http.ResponseWriter, value any) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(value)
 }
-func localHost(listen string) string {
+func localHost(listen, advertise string) string {
 	port := "8443"
 	if host, p, err := net.SplitHostPort(listen); err == nil {
 		port = p
+		if advertise != "" {
+			return net.JoinHostPort(advertise, port)
+		}
 		if host == "localhost" {
 			return net.JoinHostPort(host, port)
 		}

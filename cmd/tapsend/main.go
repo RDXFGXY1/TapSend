@@ -88,7 +88,10 @@ const usage = `TapSend — share files with paired phones
   tabsend receive                              Accept phone uploads without sharing PC files
   tabsend status                               Show the latest send status
   tabsend settings                             Show saved settings
-  tabsend settings set --inbox DIR --listen :8443
+  tabsend settings set --inbox DIR --start-folder DIR --show-hidden=true
+  tabsend settings set --listen :8443 --pairing-host HOST --direct-joins 2
+  tabsend settings defaults                     Preview default settings
+  tabsend settings reset                        Restore default settings
 
 Use -p/--path more than once for multiple files. Quote names and paths with spaces.
 `
@@ -314,6 +317,17 @@ func receive(args []string, output, errorsOut io.Writer) int {
 }
 
 func settings(args []string, output, errorsOut io.Writer) int {
+	if len(args) == 1 && args[0] == "defaults" {
+		printSettings(output, config.Default())
+		return 0
+	}
+	if len(args) == 1 && args[0] == "reset" {
+		if err := config.Save(config.Default()); err != nil {
+			return fail(errorsOut, err.Error())
+		}
+		fmt.Fprintln(output, "Settings reset to defaults. Restart an active share to apply them.")
+		return 0
+	}
 	cfg, err := config.Load()
 	if err != nil {
 		return fail(errorsOut, err.Error())
@@ -322,7 +336,7 @@ func settings(args []string, output, errorsOut io.Writer) int {
 		if len(args) > 1 {
 			return fail(errorsOut, "settings show takes no arguments")
 		}
-		fmt.Fprintf(output, "inbox\t%s\nlisten\t%s\n", cfg.InboxDirectory, cfg.ListenAddress)
+		printSettings(output, cfg)
 		return 0
 	}
 	if args[0] != "set" {
@@ -332,6 +346,10 @@ func settings(args []string, output, errorsOut io.Writer) int {
 	set.SetOutput(errorsOut)
 	inbox := set.String("inbox", cfg.InboxDirectory, "computer inbox directory")
 	listen := set.String("listen", cfg.ListenAddress, "listen address")
+	start := set.String("start-folder", cfg.StartDirectory, "starting folder for TUI")
+	hidden := set.Bool("show-hidden", cfg.ShowHidden, "show hidden files by default")
+	advertise := set.String("pairing-host", cfg.AdvertiseHost, "host/IP included in pairing links")
+	direct := set.Int("direct-joins", cfg.DirectJoinLimit, "number of devices allowed before approval")
 	if err := set.Parse(args[1:]); err != nil {
 		return 2
 	}
@@ -339,9 +357,16 @@ func settings(args []string, output, errorsOut io.Writer) int {
 		return fail(errorsOut, "unexpected settings arguments")
 	}
 	cfg.InboxDirectory, cfg.ListenAddress = *inbox, *listen
+	cfg.StartDirectory, cfg.ShowHidden = *start, *hidden
+	cfg.AdvertiseHost, cfg.DirectJoinLimit = *advertise, *direct
 	if err := config.Save(cfg); err != nil {
 		return fail(errorsOut, err.Error())
 	}
 	fmt.Fprintln(output, "Settings saved. Restart an active share for connection changes to take effect.")
 	return 0
+}
+
+func printSettings(output io.Writer, cfg config.Config) {
+	fmt.Fprintf(output, "inbox\t%s\nstart_folder\t%s\nshow_hidden\t%t\nlisten\t%s\npairing_host\t%s\ndirect_joins\t%d\n",
+		cfg.InboxDirectory, cfg.StartDirectory, cfg.ShowHidden, cfg.ListenAddress, cfg.AdvertiseHost, cfg.DirectJoinLimit)
 }

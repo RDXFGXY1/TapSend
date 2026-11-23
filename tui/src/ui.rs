@@ -164,10 +164,12 @@ pub enum OverlayView<'a> {
         suggestions: Vec<&'static CommandSpec>,
     },
     Settings {
-        inbox: &'a str,
-        listen: &'a str,
+        values: &'a [String; 6],
         selected: usize,
         edit: Option<&'a str>,
+        error: &'a str,
+        dirty: bool,
+        confirm_exit: bool,
     },
 }
 
@@ -728,41 +730,102 @@ fn overlay_popup(
             )
         }
         OverlayView::Settings {
-            inbox,
-            listen,
+            values,
             selected,
             edit,
+            error,
+            dirty,
+            confirm_exit,
         } => {
-            let popup_height = 10.min(height);
+            let popup_width = width.saturating_sub(2).min(96).max(4).min(width);
+            let left = width.saturating_sub(popup_width) / 2;
+            let popup_height = 19.min(height);
             let top = height.saturating_sub(popup_height) / 2;
-            let row = |index: usize, label: &str, value: &str| {
-                let shown = if selected == index {
-                    edit.unwrap_or(value)
+            let labels = [
+                "Computer inbox",
+                "Starting folder",
+                "Show hidden files",
+                "Listen address",
+                "Pairing host",
+                "Direct joins",
+            ];
+            let descriptions = [
+                "Files sent from a phone are saved in this folder.",
+                "Folder opened when the terminal interface starts.",
+                "Show dotfiles when the terminal interface starts.",
+                "Address and port used by the computer server.",
+                "Host or IP used in QR links; blank uses automatic detection.",
+                "Phones that can join a share before approval (1–8).",
+            ];
+            let groups = [
+                "TRANSFERS",
+                "BROWSER",
+                "BROWSER",
+                "CONNECTION",
+                "CONNECTION",
+                "DEVICES",
+            ];
+            let mut rows = Vec::new();
+            for index in 0..values.len() {
+                if index == 0 || groups[index] != groups[index - 1] {
+                    rows.push(format!("{DIM}{}{}", groups[index], NORMAL));
+                }
+                let value = if selected == index {
+                    edit.unwrap_or(&values[index])
                 } else {
-                    value
+                    &values[index]
+                };
+                let display = match (index, value) {
+                    (1, "") => "Current directory",
+                    (2, "true") => "On",
+                    (2, "false") => "Off",
+                    (4, "") => "Automatic",
+                    _ => value,
                 };
                 let line = format!(
-                    "{label:<15} {}",
-                    crop(shown, popup_width.saturating_sub(22))
+                    "  {:<19} {}",
+                    labels[index],
+                    crop(display, popup_width.saturating_sub(27))
                 );
-                if selected == index {
+                rows.push(if selected == index {
                     format!("{INVERSE}{line}{NORMAL}")
                 } else {
                     line
-                }
+                });
+            }
+            let footer = if edit.is_some() {
+                "ENTER accept value   ESC cancel edit"
+            } else {
+                "↑↓/TAB select   ENTER edit/toggle   D defaults   S save   ESC close"
             };
-            let content = vec![
-                "COMPUTER / TRANSFERS + CONNECTION".into(),
+            let available = popup_height.saturating_sub(7);
+            let selected_row = (0..=selected)
+                .map(|index| {
+                    let group_start = index == 0 || groups[index] != groups[index - 1];
+                    1 + usize::from(group_start)
+                })
+                .sum::<usize>()
+                .saturating_sub(1);
+            let start = selected_row.saturating_sub(available.saturating_sub(2));
+            let mut content = vec![
+                format!(
+                    "{BOLD}COMPUTER  /  PREFERENCES{}{NORMAL}",
+                    if dirty { "  •  UNSAVED" } else { "" }
+                ),
                 String::new(),
-                row(0, "Inbox folder", inbox),
-                row(1, "Listen address", listen),
-                String::new(),
-                if edit.is_some() {
-                    "ENTER accept value   ESC cancel edit".into()
-                } else {
-                    "↑↓ choose   ENTER edit   S save   ESC close".into()
-                },
             ];
+            content.extend(rows.into_iter().skip(start).take(available));
+            content.resize(popup_height.saturating_sub(5), String::new());
+            content.push(format!("{DIM}{}{NORMAL}", descriptions[selected.min(5)]));
+            content.push(if confirm_exit || !error.is_empty() {
+                format!(
+                    "{BOLD}{}{NORMAL}",
+                    crop(error, popup_width.saturating_sub(4))
+                )
+            } else {
+                String::new()
+            });
+            content.push(format!("{DIM}{footer}{NORMAL}"));
             (
                 left,
                 top,
@@ -1774,6 +1837,24 @@ mod tests {
     #[test]
     fn panel_has_requested_height() {
         assert_eq!(panel("FILES", 40, 12, &["one".into()]).len(), 12);
+    }
+
+    #[test]
+    fn compact_settings_keeps_selected_field_visible() {
+        let values = std::array::from_fn(|_| String::new());
+        let (_, _, _, rows) = overlay_popup(
+            OverlayView::Settings {
+                values: &values,
+                selected: 5,
+                edit: None,
+                error: "",
+                dirty: false,
+                confirm_exit: false,
+            },
+            65,
+            10,
+        );
+        assert!(rows.iter().any(|row| row.contains("Direct joins")));
     }
 
     #[test]
