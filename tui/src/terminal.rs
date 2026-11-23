@@ -1,7 +1,8 @@
-use std::{
-    io::{self, Read, Write},
-    process::Command,
-};
+#[cfg(windows)]
+use crate::windows_console;
+use std::io::{self, Read, Write};
+#[cfg(not(windows))]
+use std::process::Command;
 
 pub enum Key {
     Up,
@@ -21,6 +22,7 @@ pub enum Key {
     Command,
     Help,
     RefreshPairing,
+    Settings,
 }
 
 pub enum ModalKey {
@@ -34,28 +36,39 @@ pub enum ModalKey {
     Other,
 }
 
-pub struct RawTerminal;
+pub struct RawTerminal {
+    #[cfg(windows)]
+    modes: windows_console::Modes,
+}
 impl RawTerminal {
     pub fn enter() -> io::Result<Self> {
-        let status = Command::new("stty")
-            .args(["-echo", "-icanon", "min", "0", "time", "2"])
-            .status()?;
-        if !status.success() {
-            return Err(io::Error::other("could not enable terminal raw mode"));
+        #[cfg(windows)]
+        let modes = windows_console::enter()?;
+        #[cfg(not(windows))]
+        {
+            let status = Command::new("stty")
+                .args(["-echo", "-icanon", "min", "0", "time", "2"])
+                .status()?;
+            if !status.success() {
+                return Err(io::Error::other("could not enable terminal raw mode"));
+            }
         }
         print!("\x1b[?1049h\x1b[?25l\x1b[2J");
         io::stdout().flush()?;
-        Ok(Self)
+        Ok(Self {
+            #[cfg(windows)]
+            modes,
+        })
     }
     pub fn read_key(&self) -> io::Result<Key> {
-        let mut first = [0_u8; 1];
-        if io::stdin().read(&mut first)? == 0 {
+        let Some(first) = read_byte(false)? else {
             return Ok(Key::Other);
-        }
-        Ok(match first[0] {
+        };
+        Ok(match first {
             b':' | b';' => Key::Command,
             b'?' => Key::Help,
             b'r' | b'R' => Key::RefreshPairing,
+            b'g' | b'G' => Key::Settings,
             b'\n' | b'\r' => Key::Enter,
             b' ' => Key::Space,
             b's' | b'S' => Key::Start,
@@ -71,9 +84,8 @@ impl RawTerminal {
             b'k' => Key::Up,
             b'j' => Key::Down,
             27 => {
-                let mut tail = [0_u8; 2];
-                if io::stdin().read_exact(&mut tail).is_ok() && tail[0] == b'[' {
-                    match tail[1] {
+                if let Some(direction) = read_escape_direction()? {
+                    match direction {
                         b'A' => Key::Up,
                         b'B' => Key::Down,
                         _ => Key::Other,
@@ -87,18 +99,16 @@ impl RawTerminal {
     }
 
     pub fn read_modal_key(&self) -> io::Result<ModalKey> {
-        let mut first = [0_u8; 1];
-        if io::stdin().read(&mut first)? == 0 {
+        let Some(first) = read_byte(false)? else {
             return Ok(ModalKey::Other);
-        }
-        Ok(match first[0] {
+        };
+        Ok(match first {
             b'\n' | b'\r' => ModalKey::Enter,
             b'\t' => ModalKey::Tab,
             8 | 127 => ModalKey::Backspace,
             27 => {
-                let mut tail = [0_u8; 2];
-                if io::stdin().read_exact(&mut tail).is_ok() && tail[0] == b'[' {
-                    match tail[1] {
+                if let Some(direction) = read_escape_direction()? {
+                    match direction {
                         b'A' => ModalKey::Up,
                         b'B' => ModalKey::Down,
                         _ => ModalKey::Other,
@@ -120,7 +130,16 @@ impl RawTerminal {
                 } else {
                     let mut bytes = [0_u8; 4];
                     bytes[0] = byte;
-                    if io::stdin().read_exact(&mut bytes[1..=extra]).is_ok() {
+                    let mut complete = true;
+                    for slot in &mut bytes[1..=extra] {
+                        if let Some(value) = read_byte(true)? {
+                            *slot = value;
+                        } else {
+                            complete = false;
+                            break;
+                        }
+                    }
+                    if complete {
                         std::str::from_utf8(&bytes[..=extra])
                             .ok()
                             .and_then(|value| value.chars().next())
@@ -135,10 +154,34 @@ impl RawTerminal {
         })
     }
 }
+
+fn read_byte(timeout: bool) -> io::Result<Option<u8>> {
+    #[cfg(windows)]
+    {
+        windows_console::read_byte(if timeout { 100 } else { u32::MAX })
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = timeout;
+        let mut byte = [0_u8; 1];
+        Ok((io::stdin().read(&mut byte)? == 1).then_some(byte[0]))
+    }
+}
+
+fn read_escape_direction() -> io::Result<Option<u8>> {
+    if read_byte(true)? == Some(b'[') {
+        read_byte(true)
+    } else {
+        Ok(None)
+    }
+}
 impl Drop for RawTerminal {
     fn drop(&mut self) {
         print!("\x1b[0m\x1b[?25h\x1b[?1049l");
         let _ = io::stdout().flush();
+        #[cfg(windows)]
+        windows_console::restore(&self.modes);
+        #[cfg(not(windows))]
         let _ = Command::new("stty").arg("sane").status();
     }
 }

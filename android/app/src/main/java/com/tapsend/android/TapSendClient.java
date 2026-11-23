@@ -110,14 +110,18 @@ final class TapSendClient {
 
     JSONArray files() throws Exception { return new JSONArray(jsonText("GET", "/api/files", null, true)); }
     JSONArray messages() throws Exception { return new JSONArray(jsonText("GET", "/api/messages", null, true)); }
-    boolean stopped() throws Exception { return new JSONObject(jsonText("GET", "/api/session", null, true)).getBoolean("stopped"); }
+    JSONObject session() throws Exception { return new JSONObject(jsonText("GET", "/api/session", null, true)); }
+    boolean stopped() throws Exception { return session().getBoolean("stopped"); }
     void message(String text) throws Exception {
         json("POST", "/api/messages", new JSONObject().put("text", text), true);
     }
-    void receipt(String id) {
-        try { json("POST", "/api/receipt", new JSONObject().put("id", id).put("state", "received"), true); }
+    void receipt(String id) { receipt(id, "received"); }
+    void receipt(String id, String state) {
+        try { json("POST", "/api/receipt", new JSONObject().put("id", id).put("state", state), true); }
         catch (Exception ignored) { }
     }
+
+    boolean wasCancelled() { return cancelled; }
 
     void download(String id, long size, OutputStream destination, Progress progress) throws Exception {
         cancelled = false;

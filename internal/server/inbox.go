@@ -17,7 +17,10 @@ func (a *App) handleUpload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "File name required", 400)
 		return
 	}
-	dir := filepath.Join(a.cfg.DataDirectory, "inbox")
+	dir := a.cfg.InboxDirectory
+	if dir == "" {
+		dir = filepath.Join(a.cfg.DataDirectory, "inbox")
+	}
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		http.Error(w, "Inbox unavailable", 500)
 		return

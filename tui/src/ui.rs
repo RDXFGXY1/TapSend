@@ -22,6 +22,12 @@ pub struct CommandSpec {
 
 const COMMANDS: &[CommandSpec] = &[
     CommandSpec {
+        name: "settings",
+        detail: "Change inbox and connection settings",
+        argument: false,
+        live_only: false,
+    },
+    CommandSpec {
         name: "share",
         detail: "Share focused or marked files",
         argument: false,
@@ -151,6 +157,12 @@ pub enum OverlayView<'a> {
         selected: usize,
         suggestions: Vec<&'static CommandSpec>,
     },
+    Settings {
+        inbox: &'a str,
+        listen: &'a str,
+        selected: usize,
+        edit: Option<&'a str>,
+    },
 }
 
 const HELP_LINES: &[&str] = &[
@@ -163,6 +175,7 @@ const HELP_LINES: &[&str] = &[
     " F           Show files in the left column",
     " D           Show saved devices",
     " H           Show or hide dotfiles",
+    " G           Open settings",
     "",
     "SHARING & PAIRING",
     " S           Share focused or marked files",
@@ -424,7 +437,7 @@ pub fn draw(
     } else {
         " [SPACE] mark   [S] share focused or marked   [ENTER] open   [BACKSPACE] up".into()
     });
-    lines.push(" [↑↓/JK] browse   [H] hidden   [;] commands   [?] help   [Q] quit".into());
+    lines.push(" [↑↓/JK] browse   [G] settings   [;] commands   [?] help   [Q] quit".into());
 
     paint_frame(&lines, width, height, overlay)
 }
@@ -625,7 +638,7 @@ fn draw_reference_layout(
     } else {
         " [F] files  [D] devices  [SPACE] mark  [S] share  [ENTER] open folder  [BACKSPACE] up".into()
     });
-    lines.push(" [↑↓/JK] browse  [H] hidden  [;] commands  [?] help  [Q] quit".into());
+    lines.push(" [↑↓/JK] browse  [G] settings  [;] commands  [?] help  [Q] quit".into());
     paint_frame(&lines, width, height, overlay)
 }
 
@@ -707,11 +720,57 @@ fn overlay_popup(
                 panel("CMDLINE  /  ;", popup_width, popup_height, &content),
             )
         }
+        OverlayView::Settings {
+            inbox,
+            listen,
+            selected,
+            edit,
+        } => {
+            let popup_height = 10.min(height);
+            let top = height.saturating_sub(popup_height) / 2;
+            let row = |index: usize, label: &str, value: &str| {
+                let shown = if selected == index {
+                    edit.unwrap_or(value)
+                } else {
+                    value
+                };
+                let line = format!(
+                    "{label:<15} {}",
+                    crop(shown, popup_width.saturating_sub(22))
+                );
+                if selected == index {
+                    format!("{INVERSE}{line}{NORMAL}")
+                } else {
+                    line
+                }
+            };
+            let content = vec![
+                "COMPUTER / TRANSFERS + CONNECTION".into(),
+                String::new(),
+                row(0, "Inbox folder", inbox),
+                row(1, "Listen address", listen),
+                String::new(),
+                if edit.is_some() {
+                    "ENTER accept value   ESC cancel edit".into()
+                } else {
+                    "↑↓ choose   ENTER edit   S save   ESC close".into()
+                },
+            ];
+            (
+                left,
+                top,
+                popup_width,
+                panel("SETTINGS  /  G", popup_width, popup_height, &content),
+            )
+        }
     }
 }
 
 fn device_rows(server: Option<&ServerProcess>, _width: usize, height: usize) -> Vec<String> {
-    let mut rows = vec![format!("{INVERSE}  DEVICES + JOIN REQUESTS  {NORMAL}"), String::new()];
+    let mut rows = vec![
+        format!("{INVERSE}  DEVICES + JOIN REQUESTS  {NORMAL}"),
+        String::new(),
+    ];
     let Some(server) = server else {
         rows.push("Start sharing to view paired phones".into());
         rows.push("Press F to return to files".into());
@@ -719,7 +778,10 @@ fn device_rows(server: Option<&ServerProcess>, _width: usize, height: usize) -> 
     };
     let logs = server.logs();
     let pending = pending_from_logs(&logs);
-    rows.push(format!("{BOLD}WAITING FOR APPROVAL  /  {}{NORMAL}", pending.len()));
+    rows.push(format!(
+        "{BOLD}WAITING FOR APPROVAL  /  {}{NORMAL}",
+        pending.len()
+    ));
     for (id, name) in pending.iter().take(3) {
         rows.push(format!("! {}  {}", crop(id, 8), crop(name, 22)));
     }
@@ -745,17 +807,26 @@ fn device_rows(server: Option<&ServerProcess>, _width: usize, height: usize) -> 
 }
 
 fn pending_from_logs(logs: &[String]) -> Vec<(String, String)> {
-    let Some(end) = logs.iter().rposition(|line| line.contains("CONTROL devices applied")) else {
+    let Some(end) = logs
+        .iter()
+        .rposition(|line| line.contains("CONTROL devices applied"))
+    else {
         return Vec::new();
     };
-    let start = logs[..end].iter().rposition(|line| line.contains("CONTROL devices applied"))
-        .map(|index| index + 1).unwrap_or(0);
-    logs[start..end].iter().filter_map(|line| {
-        let (_, value) = line.split_once("JOIN REQUEST ")?;
-        let (id, rest) = value.split_once(' ')?;
-        let name = rest.split('"').nth(1)?;
-        Some((id.to_string(), name.to_string()))
-    }).collect()
+    let start = logs[..end]
+        .iter()
+        .rposition(|line| line.contains("CONTROL devices applied"))
+        .map(|index| index + 1)
+        .unwrap_or(0);
+    logs[start..end]
+        .iter()
+        .filter_map(|line| {
+            let (_, value) = line.split_once("JOIN REQUEST ")?;
+            let (id, rest) = value.split_once(' ')?;
+            let name = rest.split('"').nth(1)?;
+            Some((id.to_string(), name.to_string()))
+        })
+        .collect()
 }
 
 fn devices_from_logs(logs: &[String]) -> Vec<(String, String)> {
@@ -803,7 +874,11 @@ fn dashboard_rows(
     )];
     let graph_width = width * 68 / 100;
     let stats_width = width.saturating_sub(graph_width + 3);
-    rows.push(format!("{}┬{}", "─".repeat(graph_width + 1), "─".repeat(stats_width + 1)));
+    rows.push(format!(
+        "{}┬{}",
+        "─".repeat(graph_width + 1),
+        "─".repeat(stats_width + 1)
+    ));
     rows.push(format!(
         "{BOLD}{:<graph_width$}{NORMAL} │ {BOLD}CONNECTION DATA{NORMAL}",
         "CONNECTION + TRANSFERS"
@@ -813,8 +888,14 @@ fn dashboard_rows(
     for row in 0..height.saturating_sub(3) {
         rows.push(format!(
             "{} │ {}",
-            padded(graph.get(row).map(String::as_str).unwrap_or(""), graph_width),
-            padded(stats.get(row).map(String::as_str).unwrap_or(""), stats_width)
+            padded(
+                graph.get(row).map(String::as_str).unwrap_or(""),
+                graph_width
+            ),
+            padded(
+                stats.get(row).map(String::as_str).unwrap_or(""),
+                stats_width
+            )
         ));
     }
     rows
@@ -1410,11 +1491,16 @@ fn pairing_rows(
             Some(base.to_string())
         })
         .unwrap_or_default();
-    let (code, key) = server.logs().iter().rev().find_map(|line| {
-        let (_, details) = line.split_once("TapSend manual details: ")?;
-        let (code, key) = details.trim().split_once(' ')?;
-        Some((code.to_string(), key.to_string()))
-    }).unwrap_or_else(|| ("Preparing…".into(), "Preparing…".into()));
+    let (code, key) = server
+        .logs()
+        .iter()
+        .rev()
+        .find_map(|line| {
+            let (_, details) = line.split_once("TapSend manual details: ")?;
+            let (code, key) = details.trim().split_once(' ')?;
+            Some((code.to_string(), key.to_string()))
+        })
+        .unwrap_or_else(|| ("Preparing…".into(), "Preparing…".into()));
     if !manual_only {
         if qr.is_empty() {
             rows.push("Preparing QR; check qrencode installation".into());
@@ -1645,6 +1731,7 @@ fn cell_width(c: char) -> usize {
     }
 }
 
+#[cfg(not(windows))]
 fn terminal_size() -> (usize, usize) {
     Command::new("stty")
         .arg("size")
@@ -1659,6 +1746,11 @@ fn terminal_size() -> (usize, usize) {
         .map(|(height, width)| (width, height))
         .filter(|(width, height)| *width > 0 && *height > 0)
         .unwrap_or((110, 32))
+}
+
+#[cfg(windows)]
+fn terminal_size() -> (usize, usize) {
+    crate::windows_console::terminal_size().unwrap_or((110, 32))
 }
 
 #[cfg(test)]
@@ -1684,7 +1776,10 @@ mod tests {
             "JOIN REQUEST phone-cccc \"Phone C\" — approve phone-cccc or deny phone-cccc".into(),
             "CONTROL devices applied".into(),
         ];
-        assert_eq!(pending_from_logs(&logs), vec![("phone-cccc".into(), "Phone C".into())]);
+        assert_eq!(
+            pending_from_logs(&logs),
+            vec![("phone-cccc".into(), "Phone C".into())]
+        );
         let mut after_approval = logs;
         after_approval.push("JOIN APPROVED phone-cccc".into());
         after_approval.push("CONTROL devices applied".into());

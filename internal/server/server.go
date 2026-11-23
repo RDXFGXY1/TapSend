@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/sha256"
 	"embed"
 	"encoding/base64"
@@ -23,6 +24,7 @@ import (
 	"tapsend/internal/devices"
 	filecatalog "tapsend/internal/files"
 	"tapsend/internal/pairing"
+	"tapsend/internal/sendstatus"
 )
 
 //go:embed web/*
@@ -38,6 +40,13 @@ type App struct {
 	manualKey    string
 	host         string
 	session      sessionState
+	targeted     bool
+	targetID     string
+	targetName   string
+	statusMu     sync.Mutex
+	received     map[string]bool
+	done         chan struct{}
+	doneOnce     sync.Once
 }
 
 func New(cfg config.Config) (*App, error) {
@@ -98,7 +107,40 @@ func (a *App) PairingURL() string {
 func (a *App) RefreshPairingURL() string {
 	return fmt.Sprintf("https://%s/#%s~%s", a.host, a.pairing.NewPairingCode(), a.tlsPin)
 }
+func (a *App) SelectRecipient(id, name string) error {
+	if err := a.pairing.Select(id); err != nil {
+		return err
+	}
+	a.targeted, a.targetID, a.targetName = true, id, name
+	a.received = make(map[string]bool)
+	a.done = make(chan struct{})
+	a.setStatus("waiting for device")
+	return nil
+}
+
+func (a *App) Done() <-chan struct{}      { return a.done }
+func (a *App) SetSendStatus(state string) { a.setStatus(state) }
+
+func (a *App) setStatus(state string) {
+	if !a.targeted {
+		return
+	}
+	a.statusMu.Lock()
+	defer a.statusMu.Unlock()
+	files := make([]string, 0)
+	for _, file := range a.catalog.Public() {
+		files = append(files, file.Name)
+	}
+	if err := sendstatus.Write(a.cfg.DataDirectory, sendstatus.Status{Device: a.targetName, State: state, Files: files}); err != nil {
+		log.Printf("STATUS save failed: %s", err)
+	}
+}
+
 func (a *App) Run() error {
+	return a.RunContext(context.Background())
+}
+
+func (a *App) RunContext(ctx context.Context) error {
 	mux := http.NewServeMux()
 	assets, _ := fs.Sub(webFiles, "web")
 	mux.Handle("GET /", http.FileServer(http.FS(assets)))
@@ -125,7 +167,19 @@ func (a *App) Run() error {
 	mux.HandleFunc("GET /api/files", a.requireAuth(a.handleFiles))
 	mux.HandleFunc("GET /api/files/{id}", a.requireAuth(a.handleDownload))
 	server := &http.Server{Addr: a.cfg.ListenAddress, Handler: securityHeaders(mux), ReadHeaderTimeout: 5e9}
-	return server.ListenAndServeTLS(a.certificates.Certificate, a.certificates.Key)
+	if ctx.Done() != nil {
+		go func() {
+			<-ctx.Done()
+			shutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = server.Shutdown(shutdown)
+		}()
+	}
+	err := server.ListenAndServeTLS(a.certificates.Certificate, a.certificates.Key)
+	if err == http.ErrServerClosed {
+		return nil
+	}
+	return err
 }
 
 type pairRequest struct{ Code, DeviceID, Name, PublicKey string }
@@ -178,6 +232,9 @@ func (a *App) handleVerify(w http.ResponseWriter, r *http.Request) {
 		log.Printf("JOIN REQUEST %s — sender approval needed", request.DeviceID)
 	} else if join == pairing.JoinAllowed {
 		log.Printf("CONNECTED authenticated device %q", request.DeviceID)
+		if a.targeted && request.DeviceID == a.targetID {
+			a.setStatus("offered")
+		}
 	}
 }
 func (a *App) handleFiles(w http.ResponseWriter, _ *http.Request) {
@@ -198,6 +255,7 @@ func (a *App) handleDownload(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", item.Name))
 	log.Printf("SENDING %q to %s", item.Name, r.RemoteAddr)
+	a.setStatus("downloading")
 	writer := &transferWriter{ResponseWriter: w, started: time.Now(), last: time.Now(), total: item.Size}
 	lane, _ := strconv.Atoi(r.Header.Get("X-TapSend-Stream"))
 	if lane < 1 || lane > 4 {
@@ -297,8 +355,14 @@ func writeJSON(w http.ResponseWriter, value any) {
 }
 func localHost(listen string) string {
 	port := "8443"
-	if _, p, err := net.SplitHostPort(listen); err == nil {
+	if host, p, err := net.SplitHostPort(listen); err == nil {
 		port = p
+		if host == "localhost" {
+			return net.JoinHostPort(host, port)
+		}
+		if ip := net.ParseIP(host); ip != nil && !ip.IsUnspecified() {
+			return net.JoinHostPort(host, port)
+		}
 	}
 	connections, _ := net.InterfaceAddrs()
 	for _, connection := range connections {

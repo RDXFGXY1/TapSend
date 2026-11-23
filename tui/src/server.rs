@@ -13,7 +13,16 @@ pub struct ServerProcess {
 }
 impl ServerProcess {
     pub fn start(files: &[PathBuf]) -> io::Result<Self> {
-        let binary = std::env::var_os("TAPSEND_SERVER").unwrap_or_else(|| "tapsend-server".into());
+        let binary = std::env::var_os("TAPSEND_SERVER").unwrap_or_else(|| {
+            std::env::current_exe()
+                .ok()
+                .and_then(|path| {
+                    let sibling = path
+                        .with_file_name(format!("tapsend-server{}", std::env::consts::EXE_SUFFIX));
+                    sibling.is_file().then_some(sibling.into_os_string())
+                })
+                .unwrap_or_else(|| format!("tapsend-server{}", std::env::consts::EXE_SUFFIX).into())
+        });
         let mut command = Command::new(binary);
         for file in files {
             command.arg("--file").arg(file);

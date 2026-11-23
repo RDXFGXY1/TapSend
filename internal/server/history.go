@@ -68,5 +68,19 @@ func (a *App) handleReceipt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.record(item.Name, receipt.State, item.Size)
+	if a.targeted {
+		a.statusMu.Lock()
+		if receipt.State == "received" {
+			a.received[item.ID] = true
+		}
+		complete := len(a.received) == len(a.catalog.Public())
+		a.statusMu.Unlock()
+		if complete {
+			a.setStatus("saved")
+			a.doneOnce.Do(func() { close(a.done) })
+		} else if receipt.State != "received" {
+			a.setStatus(receipt.State)
+		}
+	}
 	writeJSON(w, map[string]bool{"ok": true})
 }

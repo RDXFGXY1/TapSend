@@ -3,6 +3,8 @@ mod explorer;
 mod server;
 mod terminal;
 mod ui;
+#[cfg(windows)]
+mod windows_console;
 
 use std::io;
 

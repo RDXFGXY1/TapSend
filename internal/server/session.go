@@ -69,7 +69,7 @@ func (a *App) handleSession(w http.ResponseWriter, _ *http.Request) {
 	a.session.Lock()
 	stopped := a.session.stopped
 	a.session.Unlock()
-	writeJSON(w, map[string]bool{"stopped": stopped})
+	writeJSON(w, map[string]bool{"stopped": stopped, "targeted": a.targeted})
 }
 func (a *App) handleMessages(w http.ResponseWriter, r *http.Request) {
 	a.session.Lock()

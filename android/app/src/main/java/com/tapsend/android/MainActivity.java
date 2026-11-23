@@ -82,6 +82,7 @@ public final class MainActivity extends Activity {
     private Button cancelButton;
     private volatile long latestMessageId = -1;
     private volatile String lastCatalog = "";
+    private volatile boolean targetedShare;
     private volatile boolean destroyed;
 
     @Override public void onCreate(Bundle state) {
@@ -435,13 +436,17 @@ public final class MainActivity extends Activity {
 
     private void refreshFiles() throws Exception {
         if (!client.hasIdentity()) throw new IllegalStateException("Pair this phone first.");
+        boolean targeted = client.session().optBoolean("targeted", false);
         JSONArray files = client.files();
-        String catalog = files.toString();
+        String catalog = targeted + ":" + files;
         if (catalog.equals(lastCatalog)) return;
         lastCatalog = catalog;
+        targetedShare = targeted;
         runOnUiThread(() -> {
+            if (targeted && files.length() > 0 && activeTab != TAB_RECEIVE) selectTab(TAB_RECEIVE);
             fileList.removeAllViews();
             if (files.length() == 0) fileList.addView(text("NO FILES SELECTED", 12, false));
+            if (targeted && files.length() > 0) fileList.addView(text("INCOMING OFFER FOR THIS PHONE", 13, true));
             for (int i = 0; i < files.length(); i++) {
                 JSONObject file = files.optJSONObject(i);
                 if (file == null) continue;
@@ -457,7 +462,7 @@ public final class MainActivity extends Activity {
                 fileList.addView(card, cardParams);
                 card.addView(text(name, 15, true));
                 card.addView(text(String.format(Locale.US, "%s  •  %.1f MiB", id.substring(0, Math.min(8, id.length())), size / 1048576.0), 11, false));
-                card.addView(button("[ SAVE TO DOWNLOADS ]", false, view -> download(id, name, size)));
+                card.addView(button(targeted ? "[ ACCEPT & SAVE ]" : "[ SAVE TO DOWNLOADS ]", false, view -> download(id, name, size)));
             }
         });
     }
@@ -487,6 +492,7 @@ public final class MainActivity extends Activity {
                 postStatus("Saved to Downloads/TapSend: " + name);
             } catch (Exception error) {
                 if (uri != null) getContentResolver().delete(uri, null, null);
+                client.receipt(id, client.wasCancelled() ? "cancelled" : "failed");
                 throw error;
             } finally { showCancel(false); }
         });
@@ -737,7 +743,7 @@ public final class MainActivity extends Activity {
             if (client.hasIdentity()) {
                 try {
                     boolean stopped = client.stopped();
-                    runOnUiThread(() -> session.setText(stopped ? "TRANSFER STOPPED ON COMPUTER" : "READY TO RECEIVE"));
+                    runOnUiThread(() -> session.setText(stopped ? "TRANSFER STOPPED ON COMPUTER" : targetedShare ? "OFFER FOR THIS PHONE" : "READY TO RECEIVE"));
                     refreshMessages();
                     refreshFiles();
                 } catch (Exception error) {

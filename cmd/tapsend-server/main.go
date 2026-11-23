@@ -25,7 +25,10 @@ func (f *fileList) Set(value string) error {
 
 func main() {
 	var files fileList
-	cfg := config.Default()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 	flag.StringVar(&cfg.ListenAddress, "listen", cfg.ListenAddress, "HTTPS listen address")
 	flag.StringVar(&cfg.DataDirectory, "data-dir", cfg.DataDirectory, "private TapSend data directory")
 	flag.Var(&files, "file", "file to share (repeatable)")

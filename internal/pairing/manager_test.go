@@ -116,3 +116,40 @@ func TestThirdDeviceWaitsForSenderApproval(t *testing.T) {
 		t.Fatal("denial did not block the session")
 	}
 }
+
+func TestSelectedRecipientBlocksOtherPairedDevices(t *testing.T) {
+	store, err := devices.Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	manager := New(store)
+	code := manager.NewPairingCode()
+	tokens := make(map[string]string)
+	for _, id := range []string{"target", "other"} {
+		public, private, err := ed25519.GenerateKey(rand.Reader)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := manager.Pair(code, id, id, public); err != nil {
+			t.Fatal(err)
+		}
+		challenge, err := manager.Challenge(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		token, _, err := manager.Verify(id, ed25519.Sign(private, []byte(challenge)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		tokens[id] = token
+	}
+	if err := manager.Select("target"); err != nil {
+		t.Fatal(err)
+	}
+	if got := manager.Access(tokens["target"]); got != JoinAllowed {
+		t.Fatalf("target access: %s", got)
+	}
+	if got := manager.Access(tokens["other"]); got != JoinDenied {
+		t.Fatalf("other access: %s", got)
+	}
+}

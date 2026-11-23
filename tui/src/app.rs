@@ -1,4 +1,4 @@
-use std::{env, io, path::PathBuf};
+use std::{env, io, path::PathBuf, process::Command};
 
 use crate::{
     explorer::Explorer,
@@ -21,8 +21,19 @@ pub struct App {
 }
 
 enum Overlay {
-    Help { scroll: usize },
-    Command { input: String, selected: usize },
+    Help {
+        scroll: usize,
+    },
+    Command {
+        input: String,
+        selected: usize,
+    },
+    Settings {
+        inbox: String,
+        listen: String,
+        selected: usize,
+        edit: Option<String>,
+    },
 }
 
 impl App {
@@ -48,11 +59,16 @@ impl App {
                 break;
             }
             if let Some(request) = self.server.as_ref().and_then(|server| {
-                server.logs().into_iter().rev().find(|line| line.contains("JOIN REQUEST "))
+                server
+                    .logs()
+                    .into_iter()
+                    .rev()
+                    .find(|line| line.contains("JOIN REQUEST "))
             }) {
                 if request != self.last_join_request {
                     self.last_join_request = request;
-                    self.message = "New phone waiting: press D, then ; approve ID or ; deny ID".into();
+                    self.message =
+                        "New phone waiting: press D, then ; approve ID or ; deny ID".into();
                 }
             }
             if self.auto_dashboard
@@ -73,6 +89,17 @@ impl App {
                     input,
                     selected: *selected,
                     suggestions: ui::command_suggestions(input, self.server.is_some()),
+                }),
+                Some(Overlay::Settings {
+                    inbox,
+                    listen,
+                    selected,
+                    edit,
+                }) => Some(ui::OverlayView::Settings {
+                    inbox,
+                    listen,
+                    selected: *selected,
+                    edit: edit.as_deref(),
                 }),
                 None => None,
             };
@@ -138,6 +165,7 @@ impl App {
                     })
                 }
                 Key::Help => self.overlay = Some(Overlay::Help { scroll: 0 }),
+                Key::Settings => self.open_settings(),
                 _ => {}
             }
         }
@@ -289,6 +317,57 @@ impl App {
                 }
                 self.overlay = Some(Overlay::Command { input, selected });
             }
+            Overlay::Settings {
+                mut inbox,
+                mut listen,
+                mut selected,
+                mut edit,
+            } => {
+                if let Some(value) = edit.as_mut() {
+                    match key {
+                        ModalKey::Escape => edit = None,
+                        ModalKey::Backspace => {
+                            value.pop();
+                        }
+                        ModalKey::Char(ch) if value.len() < 1024 => value.push(ch),
+                        ModalKey::Enter => {
+                            if selected == 0 {
+                                inbox = value.trim().to_string();
+                            } else {
+                                listen = value.trim().to_string();
+                            }
+                            edit = None;
+                        }
+                        _ => {}
+                    }
+                } else {
+                    match key {
+                        ModalKey::Escape => return Ok(()),
+                        ModalKey::Up => selected = selected.saturating_sub(1),
+                        ModalKey::Down => selected = (selected + 1).min(1),
+                        ModalKey::Enter => {
+                            edit = Some(if selected == 0 {
+                                inbox.clone()
+                            } else {
+                                listen.clone()
+                            })
+                        }
+                        ModalKey::Char('s') | ModalKey::Char('S') => {
+                            self.save_settings(&inbox, &listen);
+                            if self.message.starts_with("Settings saved") {
+                                return Ok(());
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+                self.overlay = Some(Overlay::Settings {
+                    inbox,
+                    listen,
+                    selected,
+                    edit,
+                });
+            }
         }
         Ok(())
     }
@@ -340,13 +419,19 @@ impl App {
             }
             "pause" | "stop" if self.server.is_some() => self.set_transfers(true),
             "resume" if self.server.is_some() => self.set_transfers(false),
-            "message" | "rename" | "revoke" | "recipient" | "approve" | "deny" if self.server.is_some() => {
+            "message" | "rename" | "revoke" | "recipient" | "approve" | "deny"
+                if self.server.is_some() =>
+            {
                 if argument.is_empty() {
                     self.message = format!("{action} needs an argument");
                 } else if let Some(server) = self.server.as_mut() {
                     self.message = match server.control(raw) {
                         Ok(()) => {
-                            if action == "rename" || action == "revoke" || action == "approve" || action == "deny" {
+                            if action == "rename"
+                                || action == "revoke"
+                                || action == "approve"
+                                || action == "deny"
+                            {
                                 let _ = server.control("devices");
                             }
                             format!("{action} sent; see connection logs for the result")
@@ -360,6 +445,7 @@ impl App {
                 self.update(result);
             }
             "help" => self.overlay = Some(Overlay::Help { scroll: 0 }),
+            "settings" => self.open_settings(),
             "quit" => self.quit_requested = true,
             "" => {}
             _ => self.message = format!("Unknown or unavailable command: {action}"),
@@ -387,6 +473,59 @@ impl App {
     fn update(&mut self, result: io::Result<()>) {
         if let Err(error) = result {
             self.message = error.to_string();
+        }
+    }
+
+    fn launcher() -> PathBuf {
+        let name = format!("tapsend{}", env::consts::EXE_SUFFIX);
+        env::current_exe()
+            .ok()
+            .and_then(|path| {
+                let sibling = path.with_file_name(&name);
+                sibling.is_file().then_some(sibling)
+            })
+            .unwrap_or_else(|| PathBuf::from(name))
+    }
+
+    fn open_settings(&mut self) {
+        match Command::new(Self::launcher())
+            .args(["settings", "show"])
+            .output()
+        {
+            Ok(output) if output.status.success() => {
+                let text = String::from_utf8_lossy(&output.stdout);
+                let mut inbox = String::new();
+                let mut listen = String::new();
+                for line in text.lines() {
+                    if let Some(value) = line.strip_prefix("inbox\t") {
+                        inbox = value.into();
+                    }
+                    if let Some(value) = line.strip_prefix("listen\t") {
+                        listen = value.into();
+                    }
+                }
+                self.overlay = Some(Overlay::Settings {
+                    inbox,
+                    listen,
+                    selected: 0,
+                    edit: None,
+                });
+            }
+            Ok(output) => self.message = String::from_utf8_lossy(&output.stderr).trim().into(),
+            Err(error) => self.message = format!("Could not open settings: {error}"),
+        }
+    }
+
+    fn save_settings(&mut self, inbox: &str, listen: &str) {
+        match Command::new(Self::launcher())
+            .args(["settings", "set", "--inbox", inbox, "--listen", listen])
+            .output()
+        {
+            Ok(output) if output.status.success() => {
+                self.message = "Settings saved. Restart the share to apply them.".into()
+            }
+            Ok(output) => self.message = String::from_utf8_lossy(&output.stderr).trim().into(),
+            Err(error) => self.message = format!("Could not save settings: {error}"),
         }
     }
 }

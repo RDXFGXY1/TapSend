@@ -1,0 +1,42 @@
+name: Windows package
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test Go
+        run: go test ./...
+      - name: Test terminal
+        run: cargo test --manifest-path tui/Cargo.toml
+      - name: Build binaries
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/windows | Out-Null
+          go build -o dist/windows/tapsend.exe ./cmd/tapsend
+          Copy-Item dist/windows/tapsend.exe dist/windows/tabsend.exe
+          go build -o dist/windows/tapsend-server.exe ./cmd/tapsend-server
+          cargo build --release --manifest-path tui/Cargo.toml
+          Copy-Item tui/target/release/tapsend.exe dist/windows/tapsend-tui.exe
+      - name: Build portable archive
+        shell: pwsh
+        run: Compress-Archive -Path dist/windows/*.exe,README.md -DestinationPath dist/TapSend-portable-windows-x64.zip -Force
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $compiler = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source
+          if (-not $compiler) { $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          if (-not (Test-Path $compiler)) { throw "Inno Setup compiler not found" }
+          & $compiler packaging/tapsend.iss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TapSend-windows-x64
+          path: |
+            dist/TapSend-portable-windows-x64.zip
+            dist/TapSend-Setup-windows-x64.exe

@@ -1,6 +1,7 @@
 # Rust and Go build outputs
 /tui/target/
 /bin/
+/dist/
 /android/.gradle/
 /android/build/
 /android/app/build/
@@ -26,6 +27,7 @@ Thumbs.db
 **/tapsend-ca.crt
 **/devices.json
 **/history.json
+**/send-status.json
 **/inbox/
 *.legacy-backup
 
