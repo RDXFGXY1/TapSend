@@ -32,7 +32,7 @@ For computer-to-phone sharing, TapSend uses a local HTTPS certificate. A phone b
 
 ## Android app and phone-to-phone sharing
 
-Install `TapSend-v1.0.1-android.apk` on Android 13 or newer. Pair with a computer through **Connect**, then use **Send**, **Receive**, and **Messages**. QR scanning uses Google Play services; manual pairing and pasted links are also available. If you previously installed a debug APK, uninstall it first because the release uses a different signing key.
+Install the [v1.0.0 Android APK](https://github.com/RDXFGXY1/TapSend/releases/tag/v1.0.0) on Android 13 or newer until the v1.0.1 APK is available. Pair with a computer through **Connect**, then use **Send**, **Receive**, and **Messages**. QR scanning uses Google Play services; manual pairing and pasted links are also available. If you previously installed a debug APK, uninstall it first because the release uses a different signing key.
 
 To share directly between phones, connect both to the same Wi-Fi network or hotspot. On the sending phone, choose **Send → Add files to phone share**. The other phone can scan the displayed QR code or open its link in a browser. Keep the sending app open. Nearby phone sharing uses unencrypted local HTTP, so use a network you trust.
 

@@ -24,11 +24,11 @@ After upgrading, restart the computer share and scan a fresh QR. If the server c
 
 | Device | File | What is inside |
 | --- | --- | --- |
-| Linux x86_64 | `TapSend-v1.0.1-linux-x86_64.tar.gz` | Portable desktop commands, terminal interface, server, and installer script |
-| Windows x64 | `TapSend-v1.0.1-windows-x64.zip` | Portable desktop commands, terminal interface, and server |
-| Android 13+ | `TapSend-v1.0.1-android.apk` | Signed Android app |
+| Windows x64 | `TapSend-v1.0.1-windows-x64.zip` | Updated desktop commands and server, with the unchanged v1.0.0 terminal executable |
 
 Download `SHA256SUMS.txt` alongside the package to verify its SHA-256 checksum.
+
+The v1.0.0 [Linux and Android downloads](https://github.com/RDXFGXY1/TapSend/releases/tag/v1.0.0) remain available. GitHub Actions did not start the v1.0.1 platform jobs because the account is locked due to a billing issue, so this release currently has a Windows ZIP only. The Windows installer, Linux archive, and Android APK will be added after those jobs can run.
 
 ## Get started
 
@@ -44,6 +44,6 @@ Download `SHA256SUMS.txt` alongside the package to verify its SHA-256 checksum.
 - Portal arrival details and pairing QR are available only to a browser running on the computer.
 - The Android release APK uses a release signing key. An older debug APK has a different signature and must be uninstalled before installing this release.
 - The app supports Linux x86_64, Windows x64, and Android 13 or newer in this release. There is no macOS or iOS app in this package.
-- The Linux archive uses static binaries. The Windows package is built on a Windows runner. Confirm pairing and transfers on physical Windows and Android devices before relying on this fix.
+- The Windows ZIP was assembled from locally cross compiled v1.0.1 Go binaries and the unchanged v1.0.0 terminal executable. Confirm pairing and transfers on physical Windows and Android devices before relying on this fix.
 
 For controls, settings, and source build instructions, see [README.md](README.md).

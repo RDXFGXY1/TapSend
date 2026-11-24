@@ -72,7 +72,7 @@ The same values are available through `tabsend settings`, `tabsend settings defa
 
 Run `make install-linux` to install the binaries in `~/.local/bin` and create a **TapSend** launcher in your desktop application menu. If that folder is on your `PATH`, you can then type `tabsend` or `tapsend` from any terminal. Install the Rust `x86_64-unknown-linux-musl` target, then run `make portable-linux` to create a static `.tar.gz` archive under `dist/`; extract it and run `bin/tabsend` without installing.
 
-The Windows release includes `TapSend-v1.0.1-windows-x64.zip`; extract it and run the included commands together. The **Build release packages** workflow also prepares an installer. Pairing and transfers still need a hands-on check on Windows and Android devices.
+The Windows release includes `TapSend-v1.0.1-windows-x64.zip`; extract it and run the included commands together. The v1.0.1 installer is pending the GitHub Actions release build. Pairing and transfers still need a hands-on check on Windows and Android devices.
 
 In the terminal, focus a file and press `s` to share it. Use Space to select multiple files first. Scan the displayed QR code with the Android app, or open the pairing link in a phone browser. You can also enter the displayed address, code, and security key manually in the app. Press `r` to issue a fresh pairing code.
 
