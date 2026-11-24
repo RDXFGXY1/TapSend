@@ -389,7 +389,7 @@ func localHost(listen, advertise string) string {
 	}
 	connections, _ := net.InterfaceAddrs()
 	for _, connection := range connections {
-		if ipnet, ok := connection.(*net.IPNet); ok && ipnet.IP.To4() != nil && !ipnet.IP.IsLoopback() {
+		if ipnet, ok := connection.(*net.IPNet); ok && ipnet.IP.To4() != nil && ipnet.IP.IsPrivate() {
 			return net.JoinHostPort(ipnet.IP.String(), port)
 		}
 	}

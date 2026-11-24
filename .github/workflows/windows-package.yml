@@ -31,7 +31,7 @@ jobs:
           Copy-Item release.md dist/windows/release.md
           New-Item -ItemType Directory -Force dist/windows/licenses | Out-Null
           Copy-Item packaging/licenses/go-qrcode.LICENSE dist/windows/licenses/go-qrcode.LICENSE
-          Compress-Archive -Path dist/windows/* -DestinationPath dist/TapSend-v1.0.0-windows-x64.zip -Force
+          Compress-Archive -Path dist/windows/* -DestinationPath dist/TapSend-v1.0.1-windows-x64.zip -Force
       - name: Build installer
         shell: pwsh
         run: |
@@ -43,5 +43,5 @@ jobs:
         with:
           name: TapSend-windows-x64
           path: |
-            dist/TapSend-v1.0.0-windows-x64.zip
-            dist/TapSend-v1.0.0-windows-x64-setup.exe
+            dist/TapSend-v1.0.1-windows-x64.zip
+            dist/TapSend-v1.0.1-windows-x64-setup.exe

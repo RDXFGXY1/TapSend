@@ -1,4 +1,4 @@
-# TapSend v1.0.0 — quick start
+# TapSend v1.0.1 — quick start
 
 TapSend shares files and messages between devices on the same local network. The computer app runs on Linux or Windows; phones can connect through a browser or the TapSend Android app. The Android app can also share files directly with another phone.
 
@@ -11,6 +11,8 @@ TapSend is in development. Try it with non-critical files before relying on it f
 **Windows (x64 portable ZIP):** Extract the entire ZIP and run `tapsend.exe` from a terminal. Keep all four `.exe` files together.
 
 The four desktop executables must stay together; the server generates pairing QR codes without an extra program. The computer and phone must be on the same reachable local network, and the computer must allow inbound connections on port `8443`.
+
+After the computer changes IP address, restart the share and scan a fresh QR in the Android app. On an existing v1.0.0 installation, the first such change also creates a new local CA; install the new CA certificate again if you use a phone browser. On Windows, allow TapSend through the firewall for the current network profile.
 
 ## Share with a phone
 
@@ -30,7 +32,7 @@ For computer-to-phone sharing, TapSend uses a local HTTPS certificate. A phone b
 
 ## Android app and phone-to-phone sharing
 
-Install `TapSend-v1.0.0-android.apk` on Android 13 or newer. Pair with a computer through **Connect**, then use **Send**, **Receive**, and **Messages**. QR scanning uses Google Play services; manual pairing and pasted links are also available. If you previously installed a debug APK, uninstall it first because the release uses a different signing key.
+Install `TapSend-v1.0.1-android.apk` on Android 13 or newer. Pair with a computer through **Connect**, then use **Send**, **Receive**, and **Messages**. QR scanning uses Google Play services; manual pairing and pasted links are also available. If you previously installed a debug APK, uninstall it first because the release uses a different signing key.
 
 To share directly between phones, connect both to the same Wi-Fi network or hotspot. On the sending phone, choose **Send → Add files to phone share**. The other phone can scan the displayed QR code or open its link in a browser. Keep the sending app open. Nearby phone sharing uses unencrypted local HTTP, so use a network you trust.
 

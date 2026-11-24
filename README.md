@@ -2,7 +2,7 @@
 
 TapSend shares files and messages across devices on the same local network. Run the terminal app on a Linux or Windows computer to share selected files with a phone through a browser or the Android app. The Android app can also share files directly with another phone, without a computer or cloud service.
 
-See [release.md](release.md) for v1.0.0 downloads, features, and setup.
+See [release.md](release.md) for v1.0.1 downloads, features, and setup.
 
 > TapSend is in development. Try it with non-critical files before relying on it for important transfers.
 
@@ -26,6 +26,8 @@ See [release.md](release.md) for v1.0.0 downloads, features, and setup.
 | Android app | Android 13+; to build it, Android SDK platform 35, build tools 35.0.0, and Java 17 |
 
 The computer and phone must be able to reach each other on the same local network. The computer's firewall must allow inbound connections to port `8443`.
+
+If a QR stops connecting after the computer gets a new IP address, restart the computer share and scan its new QR in **Connect → Scan QR**. TapSend renews its server certificate for the new address when the share starts. On an installation made before this renewal support, the first IP change also replaces the local CA; browser users must install the new CA certificate, and Android users must scan the fresh QR. If the QR shows an address on the wrong network adapter, set **Settings → Pairing host** to the computer's Wi-Fi or Ethernet IPv4 address and restart the share. On Windows, also check that the firewall permits TapSend on the current network profile.
 
 ## Build and run on Linux
 
@@ -70,7 +72,7 @@ The same values are available through `tabsend settings`, `tabsend settings defa
 
 Run `make install-linux` to install the binaries in `~/.local/bin` and create a **TapSend** launcher in your desktop application menu. If that folder is on your `PATH`, you can then type `tabsend` or `tapsend` from any terminal. Install the Rust `x86_64-unknown-linux-musl` target, then run `make portable-linux` to create a static `.tar.gz` archive under `dist/`; extract it and run `bin/tabsend` without installing.
 
-The Windows release includes `TapSend-v1.0.0-windows-x64.zip`; extract it and run the included commands together. The **Build release packages** workflow also prepares an installer when GitHub Actions is available. The Windows console backend and cross-compiled archive still need a hands-on Windows run.
+The Windows release includes `TapSend-v1.0.1-windows-x64.zip`; extract it and run the included commands together. The **Build release packages** workflow also prepares an installer. Pairing and transfers still need a hands-on check on Windows and Android devices.
 
 In the terminal, focus a file and press `s` to share it. Use Space to select multiple files first. Scan the displayed QR code with the Android app, or open the pairing link in a phone browser. You can also enter the displayed address, code, and security key manually in the app. Press `r` to issue a fresh pairing code.
 

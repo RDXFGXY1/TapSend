@@ -1,6 +1,6 @@
 .PHONY: build test fmt android portable-linux install-linux
 ANDROID_GRADLE ?= ./gradlew
-RELEASE_VERSION := 1.0.0
+RELEASE_VERSION := 1.0.1
 LINUX_RELEASE := TapSend-v$(RELEASE_VERSION)-linux-$(shell uname -m)
 build:
 	mkdir -p bin

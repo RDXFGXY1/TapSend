@@ -1,6 +1,14 @@
-# TapSend v1.0.0
+# TapSend v1.0.1
 
 TapSend moves files and short messages between devices on the same local network. It has a terminal app for Linux and Windows, an Android app, and a phone browser interface. Transfers go directly between your devices; no TapSend account or cloud storage is needed.
+
+## Fixed in v1.0.1
+
+- A new computer IP address no longer leaves the pairing QR pointing at an address missing from the server certificate. Starting a share renews the server certificate for the current private IPv4 addresses.
+- New installations retain the local CA signing key, so later IP changes keep the same CA trusted by phone browsers.
+- Automatic pairing addresses now skip public and link-local IPv4 adapters that the Android app cannot use for local pairing.
+
+After upgrading, restart the computer share and scan a fresh QR. If the server certificate changes, Android phones need to pair again. If this is the first IP change on an installation from v1.0.0, TapSend must also create a new local CA; phone browsers need to trust its new CA certificate. Windows Firewall must allow inbound connections on the current network profile.
 
 ## What you can do
 
@@ -16,9 +24,9 @@ TapSend moves files and short messages between devices on the same local network
 
 | Device | File | What is inside |
 | --- | --- | --- |
-| Linux x86_64 | `TapSend-v1.0.0-linux-x86_64.tar.gz` | Portable desktop commands, terminal interface, server, and installer script |
-| Windows x64 | `TapSend-v1.0.0-windows-x64.zip` | Portable desktop commands, terminal interface, and server |
-| Android 13+ | `TapSend-v1.0.0-android.apk` | Signed Android app |
+| Linux x86_64 | `TapSend-v1.0.1-linux-x86_64.tar.gz` | Portable desktop commands, terminal interface, server, and installer script |
+| Windows x64 | `TapSend-v1.0.1-windows-x64.zip` | Portable desktop commands, terminal interface, and server |
+| Android 13+ | `TapSend-v1.0.1-android.apk` | Signed Android app |
 
 Download `SHA256SUMS.txt` alongside the package to verify its SHA-256 checksum.
 
@@ -36,6 +44,6 @@ Download `SHA256SUMS.txt` alongside the package to verify its SHA-256 checksum.
 - Portal arrival details and pairing QR are available only to a browser running on the computer.
 - The Android release APK uses a release signing key. An older debug APK has a different signature and must be uninstalled before installing this release.
 - The app supports Linux x86_64, Windows x64, and Android 13 or newer in this release. There is no macOS or iOS app in this package.
-- The Linux archive uses static binaries. The Windows archive was cross compiled on Linux and still needs a hands-on Windows run. The Android APK was compiled and signed but still needs a device smoke test.
+- The Linux archive uses static binaries. The Windows package is built on a Windows runner. Confirm pairing and transfers on physical Windows and Android devices before relying on this fix.
 
 For controls, settings, and source build instructions, see [README.md](README.md).

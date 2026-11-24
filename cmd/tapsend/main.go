@@ -27,7 +27,7 @@ func run(args []string, input io.Reader, output, errorsOut io.Writer) int {
 	}
 	switch args[0] {
 	case "version", "--version", "-V":
-		fmt.Fprintln(output, "TapSend 1.0.0")
+		fmt.Fprintln(output, "TapSend 1.0.1")
 		return 0
 	case "help", "-h", "--help":
 		fmt.Fprint(output, usage)

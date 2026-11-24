@@ -1,4 +1,4 @@
-#define TapSendVersion "1.0.0"
+#define TapSendVersion "1.0.1"
 
 [Setup]
 AppId={{0F26897D-BA60-49B8-8342-9831DCDFBA50}
