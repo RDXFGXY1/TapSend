@@ -1,4 +1,4 @@
-# TapSend
+# [BETA] TapSend
 
 TapSend shares files and messages across devices on the same local network. Run the terminal app on a Linux or Windows computer to share selected files with a phone through a browser or the Android app. The Android app can also share files directly with another phone, without a computer or cloud service.
 
