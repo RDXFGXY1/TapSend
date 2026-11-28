@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 476" fill="none" aria-labelledby="title">
+  <title id="title">TapSend desktop transfer queue and an Android save confirmation</title>
+  <defs>
+    <pattern id="dots" width="12" height="12" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1" fill="#313a2e"/>
+    </pattern>
+    <linearGradient id="frame" x1="0" y1="0" x2="680" y2="476" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#283427"/>
+      <stop offset="1" stop-color="#151a16"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="678" height="474" rx="4" fill="#111511" stroke="#455344"/>
+  <path d="M1 42h678" stroke="#455344"/>
+  <rect x="2" y="43" width="676" height="430" fill="url(#dots)"/>
+  <g font-family="Consolas, monospace">
+    <text x="24" y="27" fill="#d9f2c5" font-size="14" font-weight="700">TapSend / transfer session</text>
+    <circle cx="551" cy="22" r="4" fill="#c4e7aa"/>
+    <text x="564" y="27" fill="#b9cfb0" font-size="13">LAN READY</text>
+    <rect x="30" y="91" width="510" height="314" rx="6" fill="#090c09"/>
+    <rect x="24" y="84" width="510" height="314" rx="6" fill="#101410" stroke="#71846a"/>
+    <path d="M25 90a5 5 0 0 1 5-5h498a5 5 0 0 1 5 5v34H25z" fill="url(#frame)"/>
+    <path d="M24 124h510" stroke="#52624e"/>
+    <text x="44" y="110" fill="#d9f2c5" font-size="15" font-weight="700">&gt;_  TapSend</text>
+    <text x="406" y="110" fill="#a3b09e" font-size="12">V DEVICES  N HELP</text>
+    <text x="44" y="159" fill="#f3f5ef" font-size="23" font-weight="700">Transfer queue</text>
+    <text x="46" y="185" fill="#a9b5a4" font-size="14">To Pixel 8 · 2 files</text>
+    <rect x="44" y="208" width="395" height="139" rx="3" fill="#141a14" stroke="#3c493a"/>
+    <path d="M44 244h395M44 284h395" stroke="#3c493a"/>
+    <text x="59" y="230" fill="#a9b5a4" font-size="13">FILE</text>
+    <text x="308" y="230" fill="#a9b5a4" font-size="13">STATUS</text>
+    <text x="59" y="269" fill="#eee" font-size="15">session-notes.txt</text>
+    <text x="308" y="269" fill="#d9f2c5" font-size="15" font-weight="700">✓ Saved</text>
+    <text x="59" y="307" fill="#eee" font-size="15">field-footage.mp4</text>
+    <text x="308" y="307" fill="#d9f2c5" font-size="14">68%</text>
+    <rect x="59" y="323" width="335" height="6" rx="3" fill="#333f31"/>
+    <rect x="59" y="323" width="228" height="6" rx="3" fill="#c4e7aa"/>
+    <text x="44" y="376" fill="#a9b5a4" font-size="13">S  SEND FILES</text>
+    <rect x="464" y="151" width="181" height="297" rx="19" fill="#090c09"/>
+    <rect x="456" y="143" width="181" height="297" rx="19" fill="#131a14" stroke="#869a7e" stroke-width="2"/>
+    <path d="M525 154h43" stroke="#60705a" stroke-width="3" stroke-linecap="round"/>
+    <text x="474" y="180" fill="#d9f2c5" font-size="12">10:42</text>
+    <path d="M472 196h149" stroke="#455344"/>
+    <text x="474" y="218" fill="#f3f5ef" font-size="15" font-weight="700">TapSend</text>
+    <text x="474" y="241" fill="#b0bbaa" font-size="11">From Windows PC</text>
+    <rect x="473" y="256" width="147" height="80" rx="3" fill="#263323" stroke="#5b7352"/>
+    <text x="484" y="278" fill="#d9f2c5" font-size="14" font-weight="700">✓ File saved</text>
+    <text x="484" y="301" fill="#eee" font-size="11.5">session-notes.txt</text>
+    <text x="484" y="320" fill="#b0bbaa" font-size="10">Downloads/TapSend</text>
+    <rect x="473" y="350" width="147" height="43" rx="3" stroke="#455344"/>
+    <text x="484" y="376" fill="#b0bbaa" font-size="11.5">Receiving 1 file</text>
+    <path d="M527 423h39" stroke="#869a7e" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

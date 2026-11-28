@@ -7,17 +7,18 @@
   <meta name="description" content="Deliver a file between Windows PCs using an always-on shared folder">
   <title>File Relay · TapSend Docs</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="assets/site.css?v=a1a634b91967">
+  <link rel="stylesheet" href="assets/site.css?v=a9e41724bff3">
   <script defer src="assets/search-index.js"></script>
-  <script defer src="assets/site.js"></script>
+  <script defer src="assets/site.js?v=1510e802811c"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="topbar">
     <div class="top-inner">
-      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <a class="brand" href="index.html" aria-label="TapSend home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
       <div class="top-actions">
         <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <a class="top-docs" href="docs.html">Docs</a>
         <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
         <a class="top-release" href="releases.html">Downloads</a>
       </div>
@@ -28,13 +29,13 @@
     <main id="main" tabindex="-1">
       <div class="article-layout">
         <article class="article">
-          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Workflows</span></nav>
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="docs.html">Docs</a> <span aria-hidden="true">/</span> <span>Workflows</span></nav>
           <h1>File Relay</h1>
           <p class="article-intro">Deliver a file between Windows PCs using an always-on shared folder</p>
           
-        <figure class="guide-visual">
+        <figure class="guide-visual guide-diagram">
           <figcaption>A file’s route through File Relay</figcaption>
-          <ol class="visual-flow"><li><strong>Sending PC</strong><span>Queues the file using its relay pass</span></li><li><strong>Shared folder</strong><span>Holds encrypted contents while the receiver is away</span></li><li><strong>Destination PC</strong><span>Saves to its Relay inbox and confirms delivery</span></li></ol>
+          <img src="assets/relay-diagram.svg" width="600" height="220" alt="The sending PC queues a file. A shared folder holds its encrypted contents until the destination PC returns and saves it.">
         </figure>
     
           <div class="prose"><p>File Relay delivers a file between two Windows computers when the destination is asleep or TapSend is closed there. A third computer needs to stay on and provide a shared folder both endpoints can write to. That folder holds encrypted file contents until the destination returns.</p>
@@ -59,7 +60,7 @@
       </div>
     </main>
   </div>
-  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <footer class="footer"><div><a href="index.html">TapSend</a><a href="docs.html">Documentation</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
   <dialog class="search-dialog" aria-labelledby="search-title">
     <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
     <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>

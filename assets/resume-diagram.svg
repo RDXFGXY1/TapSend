@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 236" fill="none" aria-labelledby="title">
+  <title id="title">A resumed download reuses chunks saved before the connection dropped</title>
+  <path d="M0 0h600v236H0z" fill="#121712"/>
+  <g font-family="Consolas, monospace">
+    <text x="28" y="32" fill="#eff4ed" font-size="17" font-weight="700">Connection drops</text>
+    <text x="570" y="32" text-anchor="end" fill="#c2cfbf" font-size="14">4 of 6 chunks stored</text>
+    <g fill="#9db98f">
+      <rect x="28" y="49" width="84" height="25" rx="3"/><rect x="120" y="49" width="84" height="25" rx="3"/>
+      <rect x="212" y="49" width="84" height="25" rx="3"/><rect x="304" y="49" width="84" height="25" rx="3"/>
+    </g>
+    <path d="M396 49h84v25h-84zm92 0h84v25h-84z" stroke="#778873" stroke-dasharray="4 3"/>
+    <path d="M28 102h544" stroke="#3f4b3c"/>
+    <text x="28" y="134" fill="#eff4ed" font-size="17" font-weight="700">Retry the same file</text>
+    <text x="570" y="134" text-anchor="end" fill="#d4efc2" font-size="14">Fetch the last 2 chunks</text>
+    <g fill="#9db98f">
+      <rect x="28" y="151" width="84" height="25" rx="3"/><rect x="120" y="151" width="84" height="25" rx="3"/>
+      <rect x="212" y="151" width="84" height="25" rx="3"/><rect x="304" y="151" width="84" height="25" rx="3"/>
+    </g>
+    <rect x="396" y="151" width="84" height="25" rx="3" fill="#d4efc2"/>
+    <rect x="488" y="151" width="84" height="25" rx="3" fill="#d4efc2"/>
+    <path d="M28 190v7h360v-7m8 0v7h176v-7" stroke="#778873"/>
+    <text x="208" y="220" text-anchor="middle" fill="#c2cfbf" font-size="14">Reused</text>
+    <text x="484" y="220" text-anchor="middle" fill="#d4efc2" font-size="14">Downloaded</text>
+  </g>
+</svg>

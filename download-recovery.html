@@ -7,17 +7,18 @@
   <meta name="description" content="Resume a computer-to-phone download after closing the app or page">
   <title>Download recovery · TapSend Docs</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="assets/site.css?v=a1a634b91967">
+  <link rel="stylesheet" href="assets/site.css?v=a9e41724bff3">
   <script defer src="assets/search-index.js"></script>
-  <script defer src="assets/site.js"></script>
+  <script defer src="assets/site.js?v=1510e802811c"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="topbar">
     <div class="top-inner">
-      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <a class="brand" href="index.html" aria-label="TapSend home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
       <div class="top-actions">
         <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <a class="top-docs" href="docs.html">Docs</a>
         <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
         <a class="top-release" href="releases.html">Downloads</a>
       </div>
@@ -28,13 +29,13 @@
     <main id="main" tabindex="-1">
       <div class="article-layout">
         <article class="article">
-          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Workflows</span></nav>
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="docs.html">Docs</a> <span aria-hidden="true">/</span> <span>Workflows</span></nav>
           <h1>Download recovery</h1>
           <p class="article-intro">Resume a computer-to-phone download after closing the app or page</p>
           
-        <figure class="guide-visual">
+        <figure class="guide-visual guide-diagram">
           <figcaption>Resume an interrupted download</figcaption>
-          <ol class="visual-flow"><li><strong>Connection drops</strong><span>Eligible chunks stay in app or browser storage</span></li><li><strong>Reopen TapSend</strong><span>Use the same phone app or browser profile</span></li><li><strong>Retry the same file</strong><span>Resume from the chunks that are still stored</span></li></ol>
+          <img src="assets/resume-diagram.svg" width="600" height="236" alt="Example showing four chunks stored before a connection drop. Retrying the same file reuses those four chunks and downloads the remaining two.">
         </figure>
     
           <div class="prose"><p>TapSend can reuse parts of an interrupted <strong>computer-to-phone</strong> download in current Android and browser builds.</p>
@@ -53,7 +54,7 @@
       </div>
     </main>
   </div>
-  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <footer class="footer"><div><a href="index.html">TapSend</a><a href="docs.html">Documentation</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
   <dialog class="search-dialog" aria-labelledby="search-title">
     <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
     <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
