@@ -2,6 +2,8 @@
 
 The website renders the Markdown in [docs/](../docs/) to HTML. The guide pages and navigation work without JavaScript. Search and the compact navigation use a small local script. Artwork comes from HTML and CSS, and fonts come from the Android app's bundled JetBrains Mono files.
 
+The home page includes visual examples for targeted sends, Linux setup, and Paste Stack. It links directly to the Windows EXE and serves a copy of the Linux installer from `downloads/install.sh`. [Open the published website](https://rdxfgxy1.github.io/TapSend/)
+
 ## Preview locally
 
 ```text
@@ -13,6 +15,10 @@ python -m http.server 8090 --bind 127.0.0.1 --directory dist/tapsend-site
 Open [the local preview](http://127.0.0.1:8090/) or open `dist/tapsend-site/index.html` directly. Re-run the build after editing a guide or a site asset.
 
 ## Publish on GitHub Pages
+
+The live site currently publishes from the root of `gh-pages`. Build the site on `tap-send`, then publish the contents of `dist/tapsend-site/` to `gh-pages`, including `.nojekyll` and the `downloads/` directory.
+
+### Custom workflow
 
 1. Push the website source, documentation, and [workflow](../.github/workflows/docs-pages.yml) to GitHub. The workflow must be present on the repository's default branch for manual runs.
 2. Open **Settings → Pages** and set **Source** to **GitHub Actions**.

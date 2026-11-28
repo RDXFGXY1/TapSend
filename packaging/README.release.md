@@ -6,6 +6,8 @@ TapSend is in development. Try it with non-critical files before relying on it f
 
 ## Install and run
 
+Get the [Windows setup EXE](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64-setup.exe) or the [Linux installer](https://raw.githubusercontent.com/RDXFGXY1/TapSend/tap-send/install.sh). For Linux setup and the optional Android APK build, see the [installer guide](https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/development.md#interactive-linux-installer).
+
 **Linux (x86_64 portable archive):** Extract the archive and run `bin/tapsend` from a terminal. To install the included binaries and an application-menu launcher for your user account, run `bash scripts/install-linux.sh` from the extracted folder. The four executables in `bin/` must stay together.
 
 **Windows (x64 portable ZIP):** Extract the entire ZIP and open `TapSend-Desktop.exe`. Keep the executables together.
@@ -36,7 +38,7 @@ For computer-to-phone sharing, TapSend uses a local HTTPS certificate. A phone b
 
 ## Android app and phone-to-phone sharing
 
-Install the [v1.0.0 Android APK](https://github.com/RDXFGXY1/TapSend/releases/tag/v1.0.0) on Android 13 or newer until the v1.0.1 APK is available. Pair with a computer through **Connect**, then use **Send**, **Receive**, and **Messages**. QR scanning uses Google Play services; manual pairing and pasted links are also available. If you previously installed a debug APK, uninstall it first because the release uses a different signing key.
+The [v1.0.0 Android APK](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.0/TapSend-v1.0.0-android.apk) works on Android 13 or newer. The current Linux installer can build a debug APK on x64 Linux. Android requires matching signing keys for an in-place update.
 
 To share directly between phones, connect both to the same Wi-Fi network or hotspot. On the sending phone, choose **Send → Add files to phone share**. The other phone can scan the displayed QR code or open its link in a browser. Keep the sending app open. Nearby phone sharing uses unencrypted local HTTP, so use a network you trust.
 

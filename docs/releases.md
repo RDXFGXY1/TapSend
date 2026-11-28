@@ -1,5 +1,13 @@
 # Releases and downloads
 
+## Download TapSend
+
+| Platform | Download | How to start |
+| --- | --- | --- |
+| Windows x64 | [v1.0.2 setup EXE](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64-setup.exe) · [Portable ZIP](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64.zip) | Run the EXE with an internet connection, or extract the complete ZIP and launch `TapSend-Desktop.exe`. |
+| Linux x64 / ARM64 | [Interactive installer](https://raw.githubusercontent.com/RDXFGXY1/TapSend/tap-send/install.sh) · [v1.0.0 x64 archive](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.0/TapSend-v1.0.0-linux-x86_64.tar.gz) | The installer checks dependencies and builds the current console app. [Install guide](development.md#interactive-linux-installer). |
+| Android 13+ | [v1.0.0 APK](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.0/TapSend-v1.0.0-android.apk) | To build a current debug APK and share it by QR, use the optional Android step on x64 Linux. |
+
 ## Current workspace builds
 
 The following packages are in this checkout's `dist/` folder. Install the matching Windows and Android builds for the newest workflows.

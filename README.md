@@ -7,11 +7,20 @@ TapSend moves files, screenshots, and messages between devices on your local net
 | Platform | Download |
 | --- | --- |
 | Windows x64 | [v1.0.2 setup EXE](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64-setup.exe) · [Portable ZIP](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64.zip) |
-| Android 13+ and Linux x86-64 | [Earlier public packages](https://github.com/RDXFGXY1/TapSend/releases/tag/v1.0.0) · [Build the current source](docs/development.md) |
+| Linux x64 / ARM64 | [Interactive installer](https://raw.githubusercontent.com/RDXFGXY1/TapSend/tap-send/install.sh) · [Older x64 portable archive](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.0/TapSend-v1.0.0-linux-x86_64.tar.gz) |
+| Android 13+ | [v1.0.0 APK](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.0/TapSend-v1.0.0-android.apk) · [Build a current APK on x64 Linux](docs/development.md#interactive-linux-installer) |
 
 Open the setup EXE by itself. It downloads and verifies the ZIP over the internet, then installs to the folder you choose. The default is `C:\TapSend`. For portable use, extract the full ZIP and run `TapSend-Desktop.exe`.
 
-[Read the v1.0.2 release notes](https://github.com/RDXFGXY1/TapSend/releases/tag/v1.0.2) · [Browse the documentation](docs/README.md)
+[Website and visual examples](https://rdxfgxy1.github.io/TapSend/) · [v1.0.2 release notes](https://github.com/RDXFGXY1/TapSend/releases/tag/v1.0.2) · [Documentation](docs/README.md)
+
+## Quick start on Linux
+
+```bash
+curl -fsSLo install.sh https://raw.githubusercontent.com/RDXFGXY1/TapSend/tap-send/install.sh && bash install.sh
+```
+
+The installer lists ready, missing, and outdated dependencies, then asks before installing tools or building TapSend. Run `bash install.sh --check` to see the table first. On x64 Linux, you can also build the Android APK and download it to your phone using the QR shown in the terminal. [Linux setup guide](docs/development.md#interactive-linux-installer)
 
 ## Quick start on Windows
 
@@ -39,7 +48,7 @@ See the [feature and compatibility list](docs/features.md) for which clients sup
 
 | Component | Requirement |
 | --- | --- |
-| Computer | Linux or Windows; Go 1.24+ and Rust with edition 2024 support to build from source (`make` for Linux builds) |
+| Computer | Linux or Windows. Source builds need Go 1.24+ and Rust 1.88+. Linux builds also use `make`. |
 | Terminal and portal QR code | Built in |
 | File previews | `ffmpeg` and `ffprobe` (optional) |
 | Android app | Android 13+; to build it, Android SDK platform 35, build tools 35.0.0, and Java 17 |

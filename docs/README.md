@@ -2,7 +2,7 @@
 
 TapSend moves files, text, and live Android screen images between devices on your local network. The Windows desktop app uses a terminal-style interface. Linux has a terminal app, and phones can use the Android app or the browser interface for supported workflows.
 
-Start with [Quick start](quick-start.md) or check [Releases and downloads](releases.md) if you need a build.
+Start with [Quick start](quick-start.md), get the [Windows EXE or Linux installer](releases.md), or see the [visual examples on the website](https://rdxfgxy1.github.io/TapSend/#examples-title).
 
 ## Using TapSend
 

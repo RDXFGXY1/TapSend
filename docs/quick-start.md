@@ -4,7 +4,7 @@
 
 - **Windows.** Quit TapSend in the tray if it is already open. Run the installer to choose the program location, inbox, private storage, and upload limit. For portable use, extract the complete ZIP, open `TapSend-Desktop.exe`, and complete First-Run Setup if prompted.
 - **Android.** Install the matching APK on Android 13 or newer. Android can update an installed copy in place when the packages have matching signatures.
-- **Linux.** Extract the Linux archive and run `bin/tapsend` from a terminal. See the [terminal guide](tui-2.md) for its controls.
+- **Linux.** Run the [interactive Linux installer](development.md#interactive-linux-installer) to check dependencies and build the current console app. Then open `tapsend` from a terminal. If you downloaded the older portable archive, extract it and run `bin/tapsend`. See the [terminal guide](tui-2.md) for controls.
 - **Phone browser.** Open the computer's pairing link. Follow [browser setup](browser.md) if the browser warns about TapSend's local certificate.
 
 See [Releases and downloads](releases.md) for the correct package.

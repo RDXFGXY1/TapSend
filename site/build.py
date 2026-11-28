@@ -16,6 +16,7 @@ SITE = ROOT / "site"
 OUTPUT = ROOT / "dist" / "tapsend-site"
 REPO = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'RDXFGXY1/TapSend')}"
 SOURCE_BRANCH = os.environ.get("GITHUB_REF_NAME", "tap-send")
+WINDOWS_SETUP = f"{REPO}/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64-setup.exe"
 INDEX_ROW = re.compile(r"^\| \[([^\]]+)\]\(([\w-]+)\.md\) \| (.+?) \|$", re.MULTILINE)
 LOCAL_ASSET = re.compile(r"\[([^\]]+)\]\(\.\./dist/[^)]+\)")
 MARKDOWN = MarkdownIt("commonmark", {"html": False}).enable("table")
@@ -158,7 +159,7 @@ def layout(title, description, current, content, guides):
       <div class="top-actions">
         <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
         <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
-        <a class="top-release" href="releases.html">Releases</a>
+        <a class="top-release" href="releases.html">Downloads</a>
       </div>
     </div>
   </header>
@@ -201,7 +202,12 @@ def home(guides):
           <p class="prompt"><span aria-hidden="true">~/</span> documentation</p>
           <h1 id="home-title">TapSend<span>.</span></h1>
           <p class="hero-description">Move files, text, and live screens across your local network.</p>
-          <div class="hero-actions"><a class="button primary" href="quick-start.html">Get started</a><a class="button" href="releases.html">View releases</a></div>
+          <div class="hero-actions">
+            <a class="button primary" href="{WINDOWS_SETUP}" download>↓ Windows EXE</a>
+            <a class="button" href="downloads/install.sh" download>↓ Linux installer</a>
+          </div>
+          <p class="download-note">Windows x64 · Linux x64 and ARM64</p>
+          <a class="hero-link" href="releases.html">Portable downloads and install instructions →</a>
         </div>
         <figure class="terminal-trace">
           <div class="trace-title"><span class="trace-icon" aria-hidden="true">◈</span><figcaption>Example transfer</figcaption><span class="trace-index" aria-hidden="true">[ LAN ]</span></div>
@@ -212,11 +218,74 @@ def home(guides):
           <div class="trace-footer"><kbd>V</kbd> Choose device <kbd>S</kbd> Send</div>
         </figure>
       </section>
+      {examples()}
       <section class="guide-overview" aria-labelledby="start-title">
         <div class="section-heading"><h2 id="start-title">Explore the guides</h2><a href="features.html">All features</a></div>
         <div class="guide-grid">{card_markup}</div>
       </section>
       <div class="support-panel"><div><h2>Need help connecting?</h2><p>Find pairing fixes, download recovery, and Screen Share help.</p></div><a class="button" href="troubleshooting.html">Troubleshooting</a></div>
+    """
+
+
+def examples():
+    return """
+      <section class="examples" aria-labelledby="examples-title">
+        <div class="section-heading"><h2 id="examples-title">See TapSend in action</h2></div>
+        <div class="example-tabs" aria-label="Workflow examples">
+          <a href="#example-send">Send files</a>
+          <a href="#example-linux">Linux setup</a>
+          <a href="#example-stack">Paste Stack</a>
+        </div>
+        <article class="example" id="example-send">
+          <div class="example-copy">
+            <h3>Send to a specific phone</h3>
+            <p>Pick the phone, mark the files, and send. The queue updates when your phone accepts, downloads, and confirms the save.</p>
+            <div class="example-keys"><span><kbd>V</kbd> Device</span><span><kbd>Space</kbd> Mark</span><span><kbd>S</kbd> Send</span></div>
+            <a href="transfers.html">File transfer guide →</a>
+          </div>
+          <div class="example-terminal">
+            <div class="example-bar"><span>⇄ &nbsp; Send queue</span><span>Pixel 8</span></div>
+            <ul class="example-list">
+              <li><span>session-notes.txt</span><strong>✓ Saved</strong></li>
+              <li><span>field-footage.mp4</span><span>68% · Downloading</span></li>
+              <li class="example-meter"><progress aria-label="Example download progress" max="100" value="68">68%</progress></li>
+              <li><span>reference.zip</span><span>Waiting for phone</span></li>
+            </ul>
+          </div>
+        </article>
+        <article class="example" id="example-linux">
+          <div class="example-copy">
+            <h3>See what Linux setup needs</h3>
+            <p>Review installed, missing, and outdated tools before approving any changes. Build the Android APK on x64 Linux to download it on your phone using a local QR.</p>
+            <a href="development.html#interactive-linux-installer">Linux installer guide →</a>
+          </div>
+          <div class="example-terminal">
+            <div class="example-bar"><span>&gt;_ &nbsp; Linux setup</span></div>
+            <ul class="example-list">
+              <li><span>Go 1.26 · requires 1.24+</span><strong>✓ Ready</strong></li>
+              <li><span>Rust 1.86 · requires 1.88+</span><span class="example-attention">Upgrade needed</span></li>
+              <li><span>Java JDK · optional</span><span class="example-attention">Missing</span></li>
+            </ul>
+            <div class="example-prompt">Install desktop dependencies? <kbd>y</kbd> <kbd>N</kbd></div>
+          </div>
+        </article>
+        <article class="example" id="example-stack">
+          <div class="example-copy">
+            <h3>Share to Paste Stack</h3>
+            <p>On Android, share a screenshot or text to TapSend. Items can queue while the PC is offline. Open the stack on Windows to get them when you reconnect.</p>
+            <div class="example-keys"><span><kbd>Shift</kbd> + <kbd>V</kbd> Open stack</span></div>
+            <a href="paste-stack.html">Paste Stack guide →</a>
+          </div>
+          <div class="example-terminal">
+            <div class="example-bar"><span>≡ &nbsp; Paste Stack</span><span>Android → PC</span></div>
+            <ul class="example-list">
+              <li><span>Screenshot_1420.png</span><strong>Image</strong></li>
+              <li><span>Meet at the north entrance.</span><strong>Text</strong></li>
+            </ul>
+            <div class="example-prompt">Two items received</div>
+          </div>
+        </article>
+      </section>
     """
 
 
@@ -256,6 +325,9 @@ def main():
     # Regenerate only files owned by this build. Preserve unrelated outputs under dist/.
     assets = OUTPUT / "assets"
     assets.mkdir(parents=True, exist_ok=True)
+    downloads = OUTPUT / "downloads"
+    downloads.mkdir(exist_ok=True)
+    shutil.copyfile(ROOT / "install.sh", downloads / "install.sh")
     for name, page in pages.items():
         (OUTPUT / name).write_text(page, encoding="utf-8")
     for asset in (SITE / "assets").iterdir():
