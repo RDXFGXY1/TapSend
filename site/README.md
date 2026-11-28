@@ -2,7 +2,7 @@
 
 The website renders the Markdown in [docs/](../docs/) to HTML. The guide pages and navigation work without JavaScript. Search and the compact navigation use a small local script. Artwork comes from HTML and CSS, and fonts come from the Android app's bundled JetBrains Mono files.
 
-The home page has a desktop preview and examples for targeted sends, Linux setup, Paste Stack, Screen Share, and folder drops. Each guide has a matching visual defined in [visuals.py](visuals.py). The home page links directly to the Windows EXE and serves a copy of the Linux installer from `downloads/install.sh`. [Open the published website](https://rdxfgxy1.github.io/TapSend/)
+The landing page at `index.html` has a desktop illustration, direct downloads, and five interactive examples. The guide hub is at `docs.html`. Each guide has a matching visual defined in [visuals.py](visuals.py). Pairing, File Relay, and download recovery use SVG diagrams from `site/assets/`. [Open the published website](https://rdxfgxy1.github.io/TapSend/)
 
 ## Preview locally
 

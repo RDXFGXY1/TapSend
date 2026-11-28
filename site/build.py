@@ -20,6 +20,7 @@ OUTPUT = ROOT / "dist" / "tapsend-site"
 REPO = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'RDXFGXY1/TapSend')}"
 SOURCE_BRANCH = os.environ.get("GITHUB_REF_NAME", "tap-send")
 STYLE_REVISION = sha256((SITE / "assets/site.css").read_bytes()).hexdigest()[:12]
+SCRIPT_REVISION = sha256((SITE / "assets/site.js").read_bytes()).hexdigest()[:12]
 WINDOWS_SETUP = f"{REPO}/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64-setup.exe"
 INDEX_ROW = re.compile(r"^\| \[([^\]]+)\]\(([\w-]+)\.md\) \| (.+?) \|$", re.MULTILINE)
 LOCAL_ASSET = re.compile(r"\[([^\]]+)\]\(\.\./dist/[^)]+\)")
@@ -85,7 +86,7 @@ def rewrite_link(guide, value, guides):
     requested = (DOCS / parts.path).resolve()
     if requested.parent == DOCS and requested.suffix == ".md":
         if requested.stem == "README":
-            target = "index.html"
+            target = "docs.html"
         elif requested.stem in guides:
             target = guides[requested.stem].href
         else:
@@ -143,7 +144,16 @@ def navigation(current, guides):
 
 
 def layout(title, description, current, content, guides):
-    page_title = "TapSend Docs" if current == "home" else f"{title} · TapSend Docs"
+    landing_page = current == "landing"
+    page_title = title if current in ("landing", "docs") else f"{title} · TapSend Docs"
+    menu = "" if landing_page else '<button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>'
+    site_links = (
+        '<a class="top-examples" href="#examples-title">Showcase</a><a class="top-docs" href="docs.html">Docs</a>'
+        if landing_page else '<a class="top-docs" href="docs.html">Docs</a>'
+    )
+    sidebar = "" if landing_page else navigation(current, guides)
+    shell_class = "landing-shell" if landing_page else "shell"
+    brand_section = "" if landing_page else '<span class="brand-section">/ DOCS</span>'
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -155,25 +165,26 @@ def layout(title, description, current, content, guides):
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="assets/site.css?v={STYLE_REVISION}">
   <script defer src="assets/search-index.js"></script>
-  <script defer src="assets/site.js"></script>
+  <script defer src="assets/site.js?v={SCRIPT_REVISION}"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="topbar">
     <div class="top-inner">
-      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <a class="brand" href="index.html" aria-label="TapSend home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong>{brand_section}</a>
       <div class="top-actions">
-        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        {menu}
+        {site_links}
         <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
         <a class="top-release" href="releases.html">Downloads</a>
       </div>
     </div>
   </header>
-  <div class="shell">
-    {navigation(current, guides)}
+  <div class="{shell_class}">
+    {sidebar}
     <main id="main" tabindex="-1">{content}</main>
   </div>
-  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="{REPO}">Source on GitHub</a></div></footer>
+  <footer class="footer"><div><a href="index.html">TapSend</a><a href="docs.html">Documentation</a><a href="{REPO}">Source on GitHub</a></div></footer>
   <dialog class="search-dialog" aria-labelledby="search-title">
     <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
     <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
@@ -188,7 +199,36 @@ def layout(title, description, current, content, guides):
 """
 
 
-def home(guides):
+def landing():
+    return f"""
+      <section class="landing-hero" aria-labelledby="landing-title">
+        <div class="landing-copy">
+          <h1 id="landing-title">Local transfers.<br><span>Terminal controls.</span></h1>
+          <p>Send files, text, and live Android screens between devices on the same local network. Use the Windows desktop app, Linux console, or phone browser.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="{WINDOWS_SETUP}">↓ Windows EXE</a>
+            <a class="button" href="downloads/install.sh" download>↓ Linux installer</a>
+          </div>
+          <p class="download-note">Windows x64 · Linux x64 and ARM64</p>
+          <a class="hero-link" href="quick-start.html">Open the quick start →</a>
+        </div>
+        <figure class="landing-art">
+          <img src="assets/landing-preview.svg" width="680" height="476" alt="Illustration of the Windows transfer queue showing a saved file and a download in progress. Android confirms the saved file.">
+        </figure>
+      </section>
+      {examples()}
+      <section class="landing-guides" aria-labelledby="landing-guides-title">
+        <div class="section-heading"><h2 id="landing-guides-title">From pairing to first transfer</h2><a href="docs.html">All guides →</a></div>
+        <div class="landing-guide-grid">
+          <a class="guide-card" href="pairing.html"><span class="card-mark" aria-hidden="true">[↔]</span><div><h3>Pair a phone</h3><p>Scan a QR or paste the pairing pass.</p></div></a>
+          <a class="guide-card" href="transfers.html"><span class="card-mark" aria-hidden="true">[↑]</span><div><h3>Send and receive</h3><p>Send to one phone and follow the save confirmation.</p></div></a>
+          <a class="guide-card" href="releases.html"><span class="card-mark" aria-hidden="true">[↓]</span><div><h3>Browse downloads</h3><p>Find the Windows ZIP, Linux installer, and older packages.</p></div></a>
+        </div>
+      </section>
+    """
+
+
+def docs_home(guides):
     cards = (
         ("[+]", "quick-start", "Quick start", "Install TapSend, pair a phone, and send your first file."),
         ("[⇄]", "transfers", "File transfers", "Choose a device, queue files, and see when they’re saved."),
@@ -217,7 +257,6 @@ def home(guides):
         </div>
         {desktop_preview()}
       </section>
-      {examples()}
       <section class="guide-overview" aria-labelledby="start-title">
         <div class="section-heading"><h2 id="start-title">Explore the guides</h2><a href="features.html">All features</a></div>
         <div class="guide-grid">{card_markup}</div>
@@ -318,7 +357,7 @@ def article(guide, title, content, sections):
     return f"""
       <div class="article-layout">
         <article class="article">
-          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>{group}</span></nav>
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="docs.html">Docs</a> <span aria-hidden="true">/</span> <span>{group}</span></nav>
           <h1>{escape(title)}</h1>
           <p class="article-intro">{escape(guide.description)}</p>
           {GUIDE_VISUALS[guide.slug]}
@@ -332,7 +371,10 @@ def article(guide, title, content, sections):
 
 def main():
     guides = read_guides()
-    pages = {"index.html": layout("TapSend Docs", "Guides, features, and releases for TapSend.", "home", home(guides), guides)}
+    pages = {
+        "index.html": layout("TapSend · Local file transfer", "Local file transfer for Windows, Linux, and Android.", "landing", landing(), guides),
+        "docs.html": layout("TapSend Docs", "Guides, features, and releases for TapSend.", "docs", docs_home(guides), guides),
+    }
     search = []
     for slug, guide in guides.items():
         title, content, sections, text = render_guide(guide, guides)

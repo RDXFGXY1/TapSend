@@ -48,10 +48,12 @@ if (exampleTabs) {
 
 const menuButton = document.querySelector(".menu-button");
 const navigation = document.querySelector(".guide-nav");
-menuButton.addEventListener("click", () => {
-  const expanded = navigation.classList.toggle("expanded");
-  menuButton.setAttribute("aria-expanded", String(expanded));
-});
+if (menuButton && navigation) {
+  menuButton.addEventListener("click", () => {
+    const expanded = navigation.classList.toggle("expanded");
+    menuButton.setAttribute("aria-expanded", String(expanded));
+  });
+}
 
 const dialog = document.querySelector(".search-dialog");
 const searchButton = document.querySelector(".search-button");

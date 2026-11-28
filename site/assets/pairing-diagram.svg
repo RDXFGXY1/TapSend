@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 220" fill="none" aria-labelledby="title">
+  <title id="title">Pair a Windows computer with an Android phone by QR or pairing pass</title>
+  <defs>
+    <pattern id="dots" width="12" height="12" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#313b2e"/>
+    </pattern>
+  </defs>
+  <path d="M0 0h600v220H0z" fill="#121712"/>
+  <path d="M0 0h600v220H0z" fill="url(#dots)"/>
+  <g font-family="Consolas, monospace">
+    <rect x="33" y="33" width="172" height="153" rx="5" fill="#1b231b" stroke="#65775f"/>
+    <rect x="395" y="33" width="172" height="153" rx="5" fill="#1b231b" stroke="#65775f"/>
+    <path d="M92 76V62h16m22 0h16v14m0 22v14h-16m-22 0H92V98" stroke="#d2eec0" stroke-width="3"/>
+    <path d="M111 79h16v16h-16z" stroke="#8ba283" stroke-width="2"/>
+    <rect x="466" y="55" width="31" height="62" rx="5" stroke="#d2eec0" stroke-width="2"/>
+    <path d="M477 108h9m-12-24 5 5 10-11" stroke="#d2eec0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="119" y="144" text-anchor="middle" font-size="17" font-weight="700" fill="#f3f5ef">Windows</text>
+    <text x="119" y="165" text-anchor="middle" font-size="14" fill="#b7c3b4">P · Show pairing</text>
+    <text x="481" y="144" text-anchor="middle" font-size="17" font-weight="700" fill="#f3f5ef">Android</text>
+    <text x="481" y="165" text-anchor="middle" font-size="14" fill="#b7c3b4">Tools · Connect a PC</text>
+    <path d="M218 109h164m-8-7 8 7-8 7" stroke="#d2eec0" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M224 123h146" stroke="#61775b" stroke-dasharray="3 5"/>
+    <text x="300" y="86" text-anchor="middle" font-size="15" fill="#d2eec0">Scan QR</text>
+    <text x="300" y="151" text-anchor="middle" font-size="13" fill="#b7c3b4">or paste pass</text>
+  </g>
+</svg>

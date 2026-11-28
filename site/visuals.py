@@ -27,6 +27,15 @@ def readout(title, *rows):
     """
 
 
+def diagram(title, name, height, description):
+    return f"""
+        <figure class="guide-visual guide-diagram">
+          <figcaption>{escape(title)}</figcaption>
+          <img src="assets/{name}.svg" width="600" height="{height}" alt="{escape(description)}">
+        </figure>
+    """
+
+
 def screen_view(mode):
     title, status, shortcut = {
         "live": ("Android screen on Windows", "LIVE", "Esc ends the viewer"),
@@ -103,11 +112,10 @@ GUIDE_VISUALS = {
         ("Find shared files", "Trust the PC’s local CA if needed"),
         ("Download", "Check the browser’s Downloads for the file"),
     ),
-    "pairing": flow(
+    "pairing": diagram(
         "Pair by QR or pass",
-        ("Windows · P", "Show the QR or copy the pass with Y"),
-        ("Android · Tools", "Open Connect a PC"),
-        ("Scan or paste", "Approve the phone if requested"),
+        "pairing-diagram", 220,
+        "Press P on Windows to show pairing. On Android, open Tools, then Connect a PC. Scan the QR or paste the pairing pass.",
     ),
     "transfers": readout(
         "What the transfer queue shows",
@@ -115,11 +123,10 @@ GUIDE_VISUALS = {
         ("Downloading · 68%", "The phone accepted and is receiving data"),
         ("✓ Saved", "The destination confirmed the file was saved"),
     ),
-    "download-recovery": flow(
+    "download-recovery": diagram(
         "Resume an interrupted download",
-        ("Connection drops", "Eligible chunks stay in app or browser storage"),
-        ("Reopen TapSend", "Use the same phone app or browser profile"),
-        ("Retry the same file", "Resume from the chunks that are still stored"),
+        "resume-diagram", 236,
+        "Example showing four chunks stored before a connection drop. Retrying the same file reuses those four chunks and downloads the remaining two.",
     ),
     "messages": readout(
         "Messages and reusable text",
@@ -148,11 +155,10 @@ GUIDE_VISUALS = {
         ("J in Paste Stack", "When the selected phone reconnects"),
         ("B in Paste Stack", "Bring all held items back now"),
     ),
-    "file-relay": flow(
+    "file-relay": diagram(
         "A file’s route through File Relay",
-        ("Sending PC", "Queues the file using its relay pass"),
-        ("Shared folder", "Holds encrypted contents while the receiver is away"),
-        ("Destination PC", "Saves to its Relay inbox and confirms delivery"),
+        "relay-diagram", 220,
+        "The sending PC queues a file. A shared folder holds its encrypted contents until the destination PC returns and saves it.",
     ),
     "releases": readout(
         "Choose the right download",

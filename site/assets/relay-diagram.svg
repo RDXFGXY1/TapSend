@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 220" fill="none" aria-labelledby="title">
+  <title id="title">A Windows PC sends encrypted content through a shared folder to another Windows PC</title>
+  <path d="M0 0h600v220H0z" fill="#121712"/>
+  <path d="M0 109h600" stroke="#263227" stroke-width="2" stroke-dasharray="4 6"/>
+  <g font-family="Consolas, monospace" text-anchor="middle">
+    <rect x="21" y="40" width="160" height="146" rx="4" fill="#191f19" stroke="#62735e"/>
+    <rect x="220" y="29" width="160" height="166" rx="4" fill="#212d20" stroke="#8eac80"/>
+    <rect x="419" y="40" width="160" height="146" rx="4" fill="#191f19" stroke="#62735e"/>
+    <path d="M186 109h28m-7-6 7 6-7 6m178-6h28m-7-6 7 6-7 6" stroke="#d4efc2" stroke-width="2"/>
+    <path d="M79 68h44v28H79zm12 35h20m-10-7v7M477 68h44v28h-44zm12 35h20m-10-7v7" stroke="#d4efc2" stroke-width="2" stroke-linecap="round"/>
+    <path d="M279 69h15l5 6h22v29h-42z" stroke="#d4efc2" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="294" y="83" width="12" height="12" rx="2" fill="#d4efc2"/>
+    <path d="M297 83v-3a3 3 0 1 1 6 0v3" stroke="#d4efc2" stroke-width="2"/>
+    <text x="101" y="138" fill="#f3f5ef" font-size="16" font-weight="700">Sending PC</text>
+    <text x="101" y="163" fill="#adbbab" font-size="13">Queue file</text>
+    <text x="300" y="138" fill="#f3f5ef" font-size="16" font-weight="700">Shared folder</text>
+    <text x="300" y="163" fill="#d4efc2" font-size="13">Holds encrypted file</text>
+    <text x="499" y="138" fill="#f3f5ef" font-size="16" font-weight="700">Destination PC</text>
+    <text x="499" y="163" fill="#adbbab" font-size="13">Save when online</text>
+  </g>
+</svg>
