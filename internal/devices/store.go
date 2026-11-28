@@ -2,6 +2,8 @@ package devices
 
 import (
 	"encoding/json"
+	"errors"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -33,17 +35,28 @@ func Open(directory string) (*Store, error) {
 	if os.IsNotExist(err) {
 		err = nil
 	}
+	if s.devices == nil {
+		s.devices = make(map[string]Device)
+	}
 	return s, err
 }
 func (s *Store) Put(device Device) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.devices[device.ID] = device
-	data, err := json.MarshalIndent(s.devices, "", "  ")
-	if err != nil {
-		return err
+	return s.putLocked(device)
+}
+func (s *Store) Register(device Device) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, exists := s.devices[device.ID]; exists {
+		return errors.New("device ID is already paired")
 	}
-	return os.WriteFile(s.path, data, 0600)
+	return s.putLocked(device)
+}
+func (s *Store) putLocked(device Device) error {
+	next := maps.Clone(s.devices)
+	next[device.ID] = device
+	return s.replaceLocked(next)
 }
 func (s *Store) Get(id string) (Device, bool) {
 	s.mu.RLock()
@@ -70,11 +83,33 @@ func (s *Store) Delete(id string) error {
 			next[k] = v
 		}
 	}
+	return s.replaceLocked(next)
+}
+
+func (s *Store) Clear() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.replaceLocked(make(map[string]Device))
+}
+
+func (s *Store) replaceLocked(next map[string]Device) error {
 	data, err := json.MarshalIndent(next, "", "  ")
 	if err != nil {
 		return err
 	}
-	if err = os.WriteFile(s.path, data, 0600); err != nil {
+	file, err := os.CreateTemp(filepath.Dir(s.path), ".devices-*")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(file.Name())
+	_, err = file.Write(data)
+	if closeErr := file.Close(); err == nil {
+		err = closeErr
+	}
+	if err != nil {
+		return err
+	}
+	if err = os.Rename(file.Name(), s.path); err != nil {
 		return err
 	}
 	s.devices = next

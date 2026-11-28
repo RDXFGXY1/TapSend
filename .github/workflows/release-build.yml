@@ -2,6 +2,11 @@ name: Build release packages
 
 on:
   workflow_dispatch:
+    inputs:
+      windows_version:
+        description: Windows release version without the v prefix
+        type: string
+        default: "1.0.2"
 
 permissions:
   contents: read
@@ -32,47 +37,9 @@ jobs:
           if-no-files-found: error
 
   windows:
-    runs-on: windows-2025
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - name: Test sources
-        shell: pwsh
-        run: |
-          go test ./...
-          cargo test --manifest-path tui/Cargo.toml
-      - name: Build Windows binaries and portable ZIP
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force dist/windows | Out-Null
-          go build -o dist/windows/tapsend.exe ./cmd/tapsend
-          Copy-Item dist/windows/tapsend.exe dist/windows/tabsend.exe
-          go build -o dist/windows/tapsend-server.exe ./cmd/tapsend-server
-          cargo build --release --manifest-path tui/Cargo.toml
-          Copy-Item tui/target/release/tapsend.exe dist/windows/tapsend-tui.exe
-          Copy-Item packaging/README.release.md dist/windows/README.md
-          Copy-Item release.md dist/windows/release.md
-          New-Item -ItemType Directory -Force dist/windows/licenses | Out-Null
-          Copy-Item packaging/licenses/go-qrcode.LICENSE dist/windows/licenses/go-qrcode.LICENSE
-          Compress-Archive -Path dist/windows/* -DestinationPath dist/TapSend-v1.0.1-windows-x64.zip -Force
-      - name: Build Windows installer
-        shell: pwsh
-        run: |
-          $compiler = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source
-          if (-not $compiler) { $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
-          if (-not (Test-Path $compiler)) { throw "Inno Setup compiler not found" }
-          & $compiler packaging/tapsend.iss
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if (-not (Test-Path dist/TapSend-v1.0.1-windows-x64-setup.exe)) { throw "Installer missing" }
-      - uses: actions/upload-artifact@v4
-        with:
-          name: TapSend-v1.0.1-windows-x64
-          path: |
-            dist/TapSend-v1.0.1-windows-x64.zip
-            dist/TapSend-v1.0.1-windows-x64-setup.exe
-          if-no-files-found: error
+    uses: ./.github/workflows/windows-package.yml
+    with:
+      version: ${{ inputs.windows_version }}
 
   android:
     runs-on: ubuntu-24.04

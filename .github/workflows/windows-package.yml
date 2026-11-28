@@ -2,15 +2,30 @@ name: Windows package
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Release version without the v prefix
+        type: string
+        default: "1.0.2"
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        default: "1.0.2"
 
 jobs:
   build:
     runs-on: windows-2025
+    env:
+      TAPSEND_PACKAGE_VERSION: ${{ inputs.version }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
       - name: Test Go
         run: go test ./...
       - name: Test terminal
@@ -19,29 +34,39 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force dist/windows | Out-Null
-          go build -o dist/windows/tapsend.exe ./cmd/tapsend
+          go build -ldflags "-X main.releaseVersion=$env:TAPSEND_PACKAGE_VERSION -X main.releaseRepository=$env:GITHUB_REPOSITORY" -o dist/windows/tapsend.exe ./cmd/tapsend
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Copy-Item dist/windows/tapsend.exe dist/windows/tabsend.exe
           go build -o dist/windows/tapsend-server.exe ./cmd/tapsend-server
           cargo build --release --manifest-path tui/Cargo.toml
           Copy-Item tui/target/release/tapsend.exe dist/windows/tapsend-tui.exe
-      - name: Build portable archive
+          Copy-Item tui/target/release/tapsend-desktop.exe dist/windows/TapSend-Desktop.exe
+      - name: Stage Windows viewer and documentation
         shell: pwsh
         run: |
+          dotnet publish camera-scanner/TapSend.CameraScanner.csproj -c Release --self-contained false -o dist/windows
           Copy-Item packaging/README.release.md dist/windows/README.md
           Copy-Item release.md dist/windows/release.md
           New-Item -ItemType Directory -Force dist/windows/licenses | Out-Null
           Copy-Item packaging/licenses/go-qrcode.LICENSE dist/windows/licenses/go-qrcode.LICENSE
-          Compress-Archive -Path dist/windows/* -DestinationPath dist/TapSend-v1.0.1-windows-x64.zip -Force
-      - name: Build installer
+      - name: Build matching ZIP and installer
         shell: pwsh
         run: |
-          $compiler = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source
-          if (-not $compiler) { $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
-          if (-not (Test-Path $compiler)) { throw "Inno Setup compiler not found" }
-          & $compiler packaging/tapsend.iss
+          $setup = Join-Path $env:RUNNER_TEMP 'innosetup-6.7.4.exe'
+          $compilerDirectory = Join-Path $env:RUNNER_TEMP 'inno-tapsend'
+          Invoke-WebRequest 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_4/innosetup-6.7.4.exe' -OutFile $setup
+          $signature = Get-AuthenticodeSignature $setup
+          if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch 'CN=Pyrsys B\.V\.') {
+            throw 'Unexpected Inno Setup signature.'
+          }
+          $installation = Start-Process -FilePath $setup -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/CURRENTUSER', "/DIR=`"$compilerDirectory`"") -WindowStyle Hidden -PassThru -Wait
+          if ($installation.ExitCode -ne 0) { throw "Inno Setup install failed with exit code $($installation.ExitCode)." }
+          ./packaging/build-windows-installer.ps1 -ReleaseVersion $env:TAPSEND_PACKAGE_VERSION -Repository $env:GITHUB_REPOSITORY -Compiler (Join-Path $compilerDirectory 'ISCC.exe')
       - uses: actions/upload-artifact@v4
         with:
-          name: TapSend-windows-x64
+          name: TapSend-v${{ inputs.version }}-windows-x64
           path: |
-            dist/TapSend-v1.0.1-windows-x64.zip
-            dist/TapSend-v1.0.1-windows-x64-setup.exe
+            dist/TapSend-v${{ inputs.version }}-windows-x64.zip
+            dist/TapSend-v${{ inputs.version }}-windows-x64-setup.exe
+            dist/TapSend-v${{ inputs.version }}-windows-x64-SHA256SUMS.txt
+          if-no-files-found: error

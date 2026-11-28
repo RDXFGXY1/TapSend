@@ -1,6 +1,6 @@
 # CLI and settings
 
-This document describes the TapSend command interface and settings. Later additions are identified below.
+This document describes the command-line interface and persistent settings. For Windows desktop shortcuts, see [Windows desktop](windows.md).
 
 ## Commands
 
@@ -16,23 +16,23 @@ tabsend receive                              Start phone uploads with no PC file
 tabsend status                               Show the active transfer and its result
 ```
 
-`--device` (`-d`) accepts a saved device name or ID. A name with spaces must be quoted according to the user's shell. If two devices have the same name, TapSend must ask for an ID instead of guessing. Device names should be matched exactly; the device list can show the names and IDs.
+`--device` (`-d`) accepts a saved device name or ID. Quote names containing spaces. If a name is ambiguous, use the ID shown by `tabsend devices`.
 
-`--path` (`-p`) accepts a local file path. It can be repeated to send several files. Named options can be mixed with a single positional value when the missing role is clear, for example `tabsend send -d "My Phone" photo.jpg`. If both values are positional, their order is always `DEVICE PATH`; guessing from whether a string looks like a file path would be unreliable. Paths with spaces must be quoted. The parser should support `--` before a positional path beginning with `-`.
+`--path` (`-p`) accepts a local file path. Repeat it for several files. You can mix named options with one positional value, as in `tabsend send -d "My Phone" photo.jpg`. With two positional values, use `DEVICE PATH` order. Quote paths containing spaces. Use `--` before a positional path beginning with `-`.
 
-When a value is missing in an interactive terminal, TapSend lists paired devices and prompts for the missing name or file path. In scripts and other noninteractive contexts, it prints usage and returns a nonzero exit code. `tabsend send --help` shows examples. A visual file picker remains a later improvement.
+When a value is missing in an interactive terminal, TapSend prompts for it. In scripts, provide the recipient and file paths explicitly. Run `tabsend send --help` for examples.
 
 ## Send flow
 
 1. Resolve the device name to a unique paired device ID and validate each path before opening a share.
 2. Start a share restricted to that device. A previously paired Android app reconnects without a new QR code.
-3. Show an incoming offer in the Android app when it is open. The phone user accepts the download; automatic saving is a separate opt-in setting on the phone.
-4. Show distinct states: `waiting for device`, `offered`, `downloading`, `saved`, `failed`, and `cancelled`. Report `saved` only after the phone confirms that it finished writing the file.
-5. Keep the sender command running until completion or cancellation. A later background service can add queued sending while the command is closed.
+3. Review the offer on the phone and accept or decline it.
+4. Use `tabsend status` to check progress. TapSend reports a confirmed save when the phone finishes writing the file.
+5. Keep the sender command running until completion or cancellation. The standalone Windows app has a separate persistent [Send Later](transfers.md#send-later) queue.
 
 ## Terminal settings
 
-The TUI has a **Settings** window (press `g`) with six editable values. Use ↑/↓ or Tab to move, Enter to edit or toggle, `d` to load defaults, `s` to save, and Esc to close. Esc twice discards unsaved changes. The CLI uses `tabsend settings`, `tabsend settings set`, `tabsend settings defaults`, and `tabsend settings reset`. Settings persist between runs.
+Press **G** for Settings. Use arrows or Tab to move, Enter to edit or toggle, **D** to load defaults, **S** to save, and **Esc** to close. Press Esc again to discard unsaved changes. The CLI equivalents are `tabsend settings`, `tabsend settings set`, `tabsend settings defaults`, and `tabsend settings reset`.
 
 | Section | Setting | Default and behavior |
 | --- | --- | --- |
@@ -42,16 +42,14 @@ The TUI has a **Settings** window (press `g`) with six editable values. Use ↑/
 | Connection | Listen address | `:8443` by default; binds the server to an address and port |
 | Connection | Pairing host | Automatic by default; overrides the host/IP in pairing links and QR codes, without changing the bind address |
 | Devices | Direct joins | `2` by default; number of paired phones that can join before sender approval, from 1 to 8 |
-| Transfers (planned) | Default send device | None; can preselect a paired device without silently sending to it |
-| Devices (planned) | Paired devices | Rename, inspect ID, and revoke access |
-| Notifications (planned) | Transfer and join notices | Show status in the terminal; desktop notifications can be optional |
+| Storage | Private data folder | Platform-specific TapSend data directory. See [Privacy and storage](privacy-and-storage.md). |
+| Transfers | Upload limit | 8 GiB by default on the server. The setting accepts 1–64 GiB. Client limits can also apply. |
+| Connection | Portal Mode | Enabled by default. Change it with `--portal-enabled=false` or through Settings. |
 
 Connection and direct join changes take effect when a new share starts. The pairing host must be reachable from the phone and covered by the existing server certificate; TapSend reports a mismatch when a share starts. The starting folder and hidden-file preference apply to the terminal interface; the Android download folder remains controlled by the Android app.
 
-The Android download folder is controlled by the Android app, not the computer TUI. The app currently uses `Downloads/TapSend`. A future Android setting may let the phone user choose another destination using Android's file picker.
+Android downloads go to `Downloads/TapSend`. The computer inbox setting applies to uploads received by the computer.
 
-## Platform packaging
+## File Relay commands
 
-- Windows: a manual GitHub Actions workflow builds an installer `.exe` that places the binaries together, adds `tabsend` to `PATH`, and creates a Start menu shortcut, plus a portable `.zip` with the same binaries. This workflow has not yet been run on a Windows runner.
-- Linux: installable package or installer that puts `tabsend` on `PATH` and creates a desktop entry; portable archive with the binaries together.
-- The Rust terminal now uses Windows console modes on Windows and Unix `stty` on Linux. Windows behavior still needs a successful runner build and hands-on verification.
+The CLI exposes `relay create SHARED_FOLDER`, `relay connect` (reads the pass from standard input), `relay send FILE`, and `relay status`. See the [File Relay guide](file-relay.md) for the Windows walkthrough.

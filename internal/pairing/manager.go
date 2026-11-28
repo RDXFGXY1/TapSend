@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"tapsend/internal/devices"
 )
@@ -89,14 +90,25 @@ func (m *Manager) Pair(code, id, name string, publicKey []byte) error {
 			m.manualTries++
 		}
 	}
-	m.mu.Unlock()
 	if !valid {
-		return errors.New("pairing code is invalid, expired, or locked; press r on the sender for a new code")
+		m.mu.Unlock()
+		return errors.New("pairing code is invalid, expired, or locked; open a fresh pairing screen on the computer")
 	}
 	if len(publicKey) != ed25519.PublicKeySize {
+		m.mu.Unlock()
 		return errors.New("invalid Ed25519 public key")
 	}
-	return m.devices.Put(devices.Device{ID: id, Name: name, PublicKey: publicKey, PairedAt: time.Now()})
+	defer m.mu.Unlock()
+	name = strings.TrimSpace(strings.Map(func(r rune) rune {
+		if unicode.IsControl(r) {
+			return -1
+		}
+		return r
+	}, name))
+	if name == "" || len(name) > 80 {
+		name = "Unnamed device"
+	}
+	return m.devices.Register(devices.Device{ID: id, Name: name, PublicKey: publicKey, PairedAt: time.Now()})
 }
 func (m *Manager) Challenge(deviceID string) (string, error) {
 	if _, ok := m.devices.Get(deviceID); !ok {
@@ -178,7 +190,18 @@ func (m *Manager) DeviceName(token string) string {
 	}
 	return "Phone"
 }
-func (m *Manager) Devices() []devices.Device { return m.devices.List() }
+
+// DeviceID identifies the authenticated receiver across renewed session tokens.
+func (m *Manager) DeviceID(token string) string {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if session, ok := m.sessions[token]; ok && time.Now().Before(session.Expires) {
+		return session.Value
+	}
+	return ""
+}
+func (m *Manager) Devices() []devices.Device               { return m.devices.List() }
+func (m *Manager) Device(id string) (devices.Device, bool) { return m.devices.Get(id) }
 func (m *Manager) Pending() []devices.Device {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -243,11 +266,28 @@ func (m *Manager) Revoke(id string) error {
 	delete(m.joined, id)
 	delete(m.pending, id)
 	delete(m.denied, id)
+	delete(m.challenges, id)
 	for token, session := range m.sessions {
 		if session.Value == id {
 			delete(m.sessions, token)
 		}
 	}
+	return nil
+}
+func (m *Manager) RevokeAll() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if err := m.devices.Clear(); err != nil {
+		return err
+	}
+	clear(m.sessions)
+	clear(m.challenges)
+	clear(m.joined)
+	clear(m.pending)
+	clear(m.denied)
+	m.recipient = ""
+	// Previously displayed passes no longer authorize a pairing.
+	m.pairing.Expires = time.Time{}
 	return nil
 }
 func (m *Manager) Select(id string) error {
@@ -265,11 +305,14 @@ func (m *Manager) Select(id string) error {
 	return nil
 }
 func (m *Manager) Rename(id, name string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	d, ok := m.devices.Get(id)
 	if !ok {
 		return errors.New("unknown device")
 	}
-	if name == "" || len(name) > 80 {
+	name = strings.TrimSpace(name)
+	if name == "" || len(name) > 80 || strings.ContainsFunc(name, unicode.IsControl) {
 		return errors.New("name must be 1–80 bytes")
 	}
 	d.Name = name

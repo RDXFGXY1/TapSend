@@ -1,7 +1,22 @@
 # Release maintenance
 
-The v1.0.1 release initially contains a Windows ZIP assembled locally from new Go binaries and the unchanged v1.0.0 terminal executable. GitHub Actions did not start its jobs because the account is locked due to a billing issue. Once Actions is available, run `.github/workflows/release-build.yml` from the release commit, download its artifacts, verify the APK signature and archive contents, and add the Windows installer, Linux archive, and Android APK to the existing `v1.0.1` release. Replace the Windows ZIP with the Windows runner build after checking it. Update `SHA256SUMS.txt` and the release notes to match the final assets. If GitHub Actions remains unavailable, the Linux archive can be built with `make portable-linux` after installing the Rust `x86_64-unknown-linux-musl` target. The Windows ZIP can be cross compiled with a Windows GNU Rust target and linker.
+Use [Releases and downloads](releases.md) for the published release history and workspace builds.
 
-The Android APK is signed with the keystore at `android/.android-user/release.keystore`. Its credentials are in `android/.android-user/release.properties`. Both are ignored by Git and the key was uploaded to GitHub Actions secrets as `TAPSEND_RELEASE_KEYSTORE_B64`, `TAPSEND_RELEASE_STORE_PASSWORD`, and `TAPSEND_RELEASE_KEY_PASSWORD`. **Back up both local files securely.** Losing the signing key means future APKs cannot update this release in place.
+## Prepare a version
 
-For a later release, increment the Android `versionCode`, update `versionName`, Rust package version, Windows installer version, CLI version, release filenames, and release notes together. Build and test all platforms before publishing the new tag.
+Update Android's `versionCode` and `versionName`, the Rust package version, the Go CLI version, the Windows installer version, archive names, and release notes together. Run the checks in [Development](development.md).
+
+## Build the packages
+
+- **Linux.** Run `make portable-linux` after installing the `x86_64-unknown-linux-musl` Rust target. Check that the archive includes the CLI, terminal app, server, and installer script.
+- **Windows.** Run the [Windows package workflow](../.github/workflows/windows-package.yml) with the version you plan to tag. It packages the Go, Rust, and .NET files and pins the ZIP's checksum inside the installer. For a local build, follow [Development](development.md) to stage the Windows files, then run `pwsh -File packaging/build-windows-installer.ps1 -ReleaseVersion 1.0.2`. Upload the matching ZIP, installer, and checksum file to the same GitHub release tag, with their generated filenames intact.
+
+- **Android.** Assemble the release APK using the existing signing key and check it with `apksigner verify --verbose`. Keep the keystore and passwords private and backed up. Updates to an installed release need the same key.
+
+Windows update notifications look for a stable public release tagged `vMAJOR.MINOR.PATCH` that has both the installer and matching ZIP. The packaging workflow stamps the GitHub repository and version into the Windows CLI used by the desktop updater. For a different version in a local build, set both values on the Go CLI using `-ldflags "-X main.releaseVersion=VERSION -X main.releaseRepository=OWNER/REPO"` before packaging. Add your own `packaging/tapsend.ico` to use it in the setup EXE, installed shortcuts, desktop window, and notification area.
+
+## Verify and publish
+
+Install or extract the packages on their target devices. Verify startup, pairing, sends in both directions, save confirmations, and any features listed in the release notes. On Windows, open the actual packaged EXE and verify that Screen Share loads with its companion files.
+
+Generate `SHA256SUMS.txt` for the final assets. Publish the verified packages and checksums with the intended tag. List which platforms are available and identify which workflows the packages contain.

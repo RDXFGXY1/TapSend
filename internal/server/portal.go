@@ -11,6 +11,16 @@ import (
 )
 
 // Portal controls and arrival details are visible only in a browser on the computer.
+func (a *App) portalOnly(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !a.cfg.PortalEnabled {
+			http.Error(w, "Portal Mode is disabled in Settings", http.StatusNotFound)
+			return
+		}
+		next(w, r)
+	}
+}
+
 func (a *App) localOnly(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		host, _, err := net.SplitHostPort(r.RemoteAddr)

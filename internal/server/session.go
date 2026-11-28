@@ -65,11 +65,15 @@ func (s *sessionState) post(from, text string) {
 		s.messages = s.messages[len(s.messages)-100:]
 	}
 }
-func (a *App) handleSession(w http.ResponseWriter, _ *http.Request) {
+func (a *App) handleSession(w http.ResponseWriter, r *http.Request) {
+	a.pastePhoneSeen(a.requestPeer(r))
 	a.session.Lock()
 	stopped := a.session.stopped
 	a.session.Unlock()
-	writeJSON(w, map[string]bool{"stopped": stopped, "targeted": a.targeted})
+	writeJSON(w, map[string]any{
+		"stopped": stopped, "targeted": a.targeted, "offers": a.pendingOffers(a.requestPeer(r)),
+		"scratchpad": true, "uploadLimitGiB": a.cfg.UploadLimitGiB,
+	})
 }
 func (a *App) handleMessages(w http.ResponseWriter, r *http.Request) {
 	a.session.Lock()

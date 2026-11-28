@@ -3,6 +3,9 @@ use std::{ffi::c_void, io, mem::MaybeUninit};
 type Handle = *mut c_void;
 const STD_INPUT_HANDLE: u32 = -10_i32 as u32;
 const STD_OUTPUT_HANDLE: u32 = -11_i32 as u32;
+const ENABLE_PROCESSED_INPUT: u32 = 0x0001;
+const ENABLE_QUICK_EDIT_MODE: u32 = 0x0040;
+const ENABLE_EXTENDED_FLAGS: u32 = 0x0080;
 const ENABLE_LINE_INPUT: u32 = 0x0002;
 const ENABLE_ECHO_INPUT: u32 = 0x0004;
 const ENABLE_PROCESSED_OUTPUT: u32 = 0x0001;
@@ -115,7 +118,13 @@ pub fn enter() -> io::Result<Modes> {
     if unsafe {
         SetConsoleMode(
             input_handle,
-            (input & !(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT)) | ENABLE_VIRTUAL_TERMINAL_INPUT,
+            (input
+                & !(ENABLE_LINE_INPUT
+                    | ENABLE_ECHO_INPUT
+                    | ENABLE_PROCESSED_INPUT
+                    | ENABLE_QUICK_EDIT_MODE))
+                | ENABLE_VIRTUAL_TERMINAL_INPUT
+                | ENABLE_EXTENDED_FLAGS,
         )
     } == 0
     {

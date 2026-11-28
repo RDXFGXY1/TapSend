@@ -5,6 +5,7 @@ import android.util.Base64;
 
 import java.util.regex.Pattern;
 import java.util.Locale;
+import java.util.Arrays;
 
 final class PairingLink {
     private static final Pattern CODE = Pattern.compile("[A-Za-z0-9_-]{22}");
@@ -21,7 +22,20 @@ final class PairingLink {
     }
 
     static PairingLink parse(String text) {
-        return parse(text, false);
+        String value = text.trim();
+        if (value.startsWith("TS1-")) {
+            byte[] pass;
+            try { pass = Base64.decode(value.substring(4), Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING); }
+            catch (IllegalArgumentException error) { throw new IllegalArgumentException("Copy a fresh pairing pass from the PC.", error); }
+            if (pass.length != 39 || pass[0] != 1) throw new IllegalArgumentException("Copy a fresh pairing pass from the PC.");
+            String host = (pass[1] & 255) + "." + (pass[2] & 255) + "." + (pass[3] & 255) + "." + (pass[4] & 255);
+            int port = (pass[5] & 255) * 256 + (pass[6] & 255);
+            if (!privateIPv4(host) || port == 0) throw new IllegalArgumentException("This pass needs a valid local PC address.");
+            return new PairingLink("https://" + host + ":" + port,
+                    Base64.encodeToString(Arrays.copyOfRange(pass, 7, 23), Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING),
+                    Arrays.copyOfRange(pass, 23, 39));
+        }
+        return parse(value, false);
     }
 
     private static PairingLink parse(String text, boolean manual) {

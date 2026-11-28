@@ -21,6 +21,9 @@ func TestSettingsPersistAndValidate(t *testing.T) {
 	cfg.ShowHidden = true
 	cfg.AdvertiseHost = "192.0.2.42"
 	cfg.DirectJoinLimit = 4
+	cfg.DataDirectory = filepath.Join(t.TempDir(), "private")
+	cfg.UploadLimitGiB = 12
+	cfg.PortalEnabled = false
 	if err := Save(cfg); err != nil {
 		t.Fatal(err)
 	}
@@ -28,7 +31,7 @@ func TestSettingsPersistAndValidate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if loaded.ListenAddress != cfg.ListenAddress || loaded.InboxDirectory != cfg.InboxDirectory || loaded.StartDirectory != cfg.StartDirectory || loaded.ShowHidden != cfg.ShowHidden || loaded.AdvertiseHost != cfg.AdvertiseHost || loaded.DirectJoinLimit != cfg.DirectJoinLimit {
+	if loaded.ListenAddress != cfg.ListenAddress || loaded.InboxDirectory != cfg.InboxDirectory || loaded.StartDirectory != cfg.StartDirectory || loaded.ShowHidden != cfg.ShowHidden || loaded.AdvertiseHost != cfg.AdvertiseHost || loaded.DirectJoinLimit != cfg.DirectJoinLimit || loaded.DataDirectory != cfg.DataDirectory || loaded.UploadLimitGiB != cfg.UploadLimitGiB || loaded.PortalEnabled != cfg.PortalEnabled {
 		t.Fatalf("settings did not persist: %+v", loaded)
 	}
 	loaded.ListenAddress = ":0"
@@ -63,6 +66,9 @@ func TestLegacySettingsKeepDirectJoinDefault(t *testing.T) {
 	}
 	if loaded.DirectJoinLimit != 2 {
 		t.Fatalf("legacy direct join limit = %d", loaded.DirectJoinLimit)
+	}
+	if loaded.UploadLimitGiB != 8 || !loaded.PortalEnabled {
+		t.Fatalf("legacy upload and portal defaults lost: %+v", loaded)
 	}
 }
 

@@ -30,6 +30,66 @@ func TestRefreshingPairingCodeInvalidatesOldCode(t *testing.T) {
 	}
 }
 
+func TestRenameAndForgetPairedDevices(t *testing.T) {
+	dir := t.TempDir()
+	store, err := devices.Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manager := New(store)
+	code := manager.NewPairingCode()
+	tokens := make(map[string]string)
+	for _, id := range []string{"one", "two"} {
+		public, private, err := ed25519.GenerateKey(nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := manager.Pair(code, id, " ", public); err != nil {
+			t.Fatal(err)
+		}
+		device, _ := store.Get(id)
+		if device.Name != "Unnamed device" {
+			t.Fatalf("missing fallback name: %q", device.Name)
+		}
+		challenge, err := manager.Challenge(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		token, _, err := manager.Verify(id, ed25519.Sign(private, []byte(challenge)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		tokens[id] = token
+	}
+	if err := manager.Rename("one", " My Pixel "); err != nil {
+		t.Fatal(err)
+	}
+	reopened, err := devices.Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if device, ok := reopened.Get("one"); !ok || device.Name != "My Pixel" ||
+		manager.Access(tokens["one"]) != JoinAllowed {
+		t.Fatal("rename changed the device identity or did not persist")
+	}
+	if err := manager.Revoke("one"); err != nil {
+		t.Fatal(err)
+	}
+	if manager.Access(tokens["one"]) != JoinDenied || manager.Access(tokens["two"]) != JoinAllowed {
+		t.Fatal("forgetting one device changed the wrong session")
+	}
+	if err := manager.RevokeAll(); err != nil {
+		t.Fatal(err)
+	}
+	reopened, err = devices.Open(dir)
+	if err != nil || len(reopened.List()) != 0 || manager.Access(tokens["two"]) != JoinDenied {
+		t.Fatal("cleared devices were restored or their sessions stayed authorized")
+	}
+	if err := manager.Pair(code, "new", "New phone", make([]byte, ed25519.PublicKeySize)); err == nil {
+		t.Fatal("clear paired devices kept the previous invitation valid")
+	}
+}
+
 func TestManualCodeHasGuessLimitAndDoesNotWeakenQR(t *testing.T) {
 	store, err := devices.Open(t.TempDir())
 	if err != nil {

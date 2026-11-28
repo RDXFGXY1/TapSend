@@ -1,11 +1,12 @@
 <resources>
+    <!-- TapSend's Android UI uses the same black-and-white terminal style throughout. -->
     <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
-        <item name="android:fontFamily">monospace</item>
+        <item name="android:fontFamily">@font/jetbrains_mono</item>
         <item name="android:colorAccent">#FFFFFF</item>
         <item name="android:statusBarColor">#000000</item>
         <item name="android:navigationBarColor">#000000</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
-        <item name="android:windowBackground">#000000</item>
+        <item name="android:windowBackground">#0D0D0D</item>
     </style>
 </resources>

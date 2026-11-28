@@ -96,11 +96,27 @@ impl Explorer {
         Ok(())
     }
     pub fn toggle(&mut self) {
-        if let Some(entry) = self.entries.get(self.cursor) {
+        self.toggle_entry(self.cursor);
+    }
+    pub(crate) fn toggle_entry(&mut self, index: usize) {
+        if let Some(entry) = self.entries.get(index) {
             if !entry.directory && !self.selected.remove(&entry.path) {
                 self.selected.insert(entry.path.clone());
             }
         }
+    }
+    #[cfg(windows)]
+    pub(crate) fn file_matches(&self, query: &str) -> Vec<usize> {
+        let needle = query.trim().to_lowercase();
+        self.entries
+            .iter()
+            .enumerate()
+            .filter_map(|(index, entry)| {
+                (!entry.directory
+                    && (needle.is_empty() || entry.name.to_lowercase().contains(&needle)))
+                .then_some(index)
+            })
+            .collect()
     }
     pub fn clear_selection(&mut self) {
         self.selected.clear();
@@ -119,7 +135,7 @@ impl Explorer {
         self.refresh()
     }
 
-    fn refresh(&mut self) -> io::Result<()> {
+    pub(crate) fn refresh(&mut self) -> io::Result<()> {
         let mut entries = Vec::new();
         for result in fs::read_dir(&self.directory)? {
             let item = match result {

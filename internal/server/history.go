@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -57,13 +58,15 @@ func (a *App) recordFrom(name, state string, bytes int64, from string) {
 
 func (a *App) handleReceipt(w http.ResponseWriter, r *http.Request) {
 	var receipt struct {
-		ID    string
-		State string
+		ID              string
+		State           string
+		SaveUnconfirmed bool
 	}
 	if !decode(w, r, &receipt) {
 		return
 	}
-	item, ok := a.catalog.Get(receipt.ID)
+	peer := a.requestPeer(r)
+	item, ok := a.sharedItem(receipt.ID, peer)
 	if !ok {
 		http.NotFound(w, r)
 		return
@@ -72,7 +75,16 @@ func (a *App) handleReceipt(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid receipt", 400)
 		return
 	}
+	state := receipt.State
+	if receipt.State == "received" && receipt.SaveUnconfirmed {
+		state = "unconfirmed"
+	}
+	if err := a.saveOfferReceipt(item.ID, peer, state); err != nil {
+		http.Error(w, "The computer could not save your receipt. Try again.", http.StatusServiceUnavailable)
+		return
+	}
 	a.record(item.Name, receipt.State, item.Size)
+	log.Printf("TUI_RECEIPT file=%s peer=%x state=%s", item.ID, peer, state)
 	if a.targeted {
 		a.statusMu.Lock()
 		if receipt.State == "received" {

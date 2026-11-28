@@ -15,9 +15,14 @@ import (
 
 	"tapsend/internal/config"
 	"tapsend/internal/devices"
+	"tapsend/internal/relay"
 	"tapsend/internal/sendstatus"
 	"tapsend/internal/server"
+	"tapsend/internal/updates"
 )
+
+var releaseVersion = "1.0.2"
+var releaseRepository = "RDXFGXY1/TapSend"
 
 func main() { os.Exit(run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr)) }
 
@@ -27,7 +32,21 @@ func run(args []string, input io.Reader, output, errorsOut io.Writer) int {
 	}
 	switch args[0] {
 	case "version", "--version", "-V":
-		fmt.Fprintln(output, "TapSend 1.0.1")
+		fmt.Fprintln(output, "TapSend "+releaseVersion)
+		return 0
+	case "update-check":
+		if len(args) != 1 {
+			return fail(errorsOut, "update-check takes no arguments")
+		}
+		latest, err := updates.Check(context.Background(), releaseRepository, releaseVersion)
+		if err != nil {
+			return fail(errorsOut, err.Error())
+		}
+		if latest == nil {
+			fmt.Fprintln(output, "current\t"+releaseVersion)
+		} else {
+			fmt.Fprintln(output, "available\t"+releaseVersion+"\t"+latest.Tag+"\t"+latest.URL)
+		}
 		return 0
 	case "help", "-h", "--help":
 		fmt.Fprint(output, usage)
@@ -77,9 +96,41 @@ func run(args []string, input io.Reader, output, errorsOut io.Writer) int {
 		return 0
 	case "settings":
 		return settings(args[1:], output, errorsOut)
+	case "relay":
+		return runRelay(args[1:], input, output, errorsOut)
 	default:
 		return fail(errorsOut, fmt.Sprintf("unknown command %q\n%s", args[0], usage))
 	}
+}
+
+func runRelay(args []string, input io.Reader, out, errorsOut io.Writer) int {
+	cfg, err := config.Load()
+	if err != nil {
+		return fail(errorsOut, err.Error())
+	}
+	result := ""
+	switch {
+	case len(args) == 2 && args[0] == "create":
+		result, err = relay.Create(cfg.DataDirectory, args[1])
+	case len(args) == 1 && args[0] == "connect":
+		var pass []byte
+		pass, err = io.ReadAll(io.LimitReader(input, 8193))
+		if err == nil {
+			err = relay.Connect(cfg.DataDirectory, string(pass))
+			result = "Relay paired · send a focused file"
+		}
+	case len(args) == 2 && args[0] == "send":
+		result, err = relay.Send(cfg.DataDirectory, args[1])
+	case len(args) == 1 && args[0] == "status":
+		result, err = relay.Status(cfg.DataDirectory)
+	default:
+		return fail(errorsOut, "relay commands: create SHARED_FOLDER, connect (pass from stdin), send FILE, status")
+	}
+	if err != nil {
+		return fail(errorsOut, err.Error())
+	}
+	fmt.Fprintln(out, result)
+	return 0
 }
 
 const usage = `TapSend — share files with paired phones
@@ -326,6 +377,22 @@ func receive(args []string, output, errorsOut io.Writer) int {
 }
 
 func settings(args []string, output, errorsOut io.Writer) int {
+	if len(args) == 1 && args[0] == "state" {
+		path, err := config.SettingsPath()
+		if err != nil {
+			return fail(errorsOut, err.Error())
+		}
+		if _, err = os.Stat(path); os.IsNotExist(err) {
+			fmt.Fprintln(output, "missing")
+		} else if err != nil {
+			return fail(errorsOut, err.Error())
+		} else if _, err = config.Load(); err != nil {
+			return fail(errorsOut, err.Error())
+		} else {
+			fmt.Fprintln(output, "configured")
+		}
+		return 0
+	}
 	if len(args) == 1 && args[0] == "defaults" {
 		printSettings(output, config.Default())
 		return 0
@@ -348,7 +415,8 @@ func settings(args []string, output, errorsOut io.Writer) int {
 		printSettings(output, cfg)
 		return 0
 	}
-	if args[0] != "set" {
+	onboarding := args[0] == "setup"
+	if args[0] != "set" && !onboarding {
 		return fail(errorsOut, "use tabsend settings or tabsend settings set")
 	}
 	set := flag.NewFlagSet("settings set", flag.ContinueOnError)
@@ -356,9 +424,12 @@ func settings(args []string, output, errorsOut io.Writer) int {
 	inbox := set.String("inbox", cfg.InboxDirectory, "computer inbox directory")
 	listen := set.String("listen", cfg.ListenAddress, "listen address")
 	start := set.String("start-folder", cfg.StartDirectory, "starting folder for TUI")
+	data := set.String("data-dir", cfg.DataDirectory, "private device and certificate storage")
 	hidden := set.Bool("show-hidden", cfg.ShowHidden, "show hidden files by default")
 	advertise := set.String("pairing-host", cfg.AdvertiseHost, "host/IP included in pairing links")
 	direct := set.Int("direct-joins", cfg.DirectJoinLimit, "number of devices allowed before approval")
+	uploadLimit := set.Int("upload-limit-gib", cfg.UploadLimitGiB, "maximum size of a phone upload in GiB")
+	portal := set.Bool("portal-enabled", cfg.PortalEnabled, "allow Portal Mode on this computer")
 	if err := set.Parse(args[1:]); err != nil {
 		return 2
 	}
@@ -368,6 +439,12 @@ func settings(args []string, output, errorsOut io.Writer) int {
 	cfg.InboxDirectory, cfg.ListenAddress = *inbox, *listen
 	cfg.StartDirectory, cfg.ShowHidden = *start, *hidden
 	cfg.AdvertiseHost, cfg.DirectJoinLimit = *advertise, *direct
+	cfg.DataDirectory, cfg.UploadLimitGiB, cfg.PortalEnabled = *data, *uploadLimit, *portal
+	if onboarding {
+		if err := config.PrepareStorage(cfg); err != nil {
+			return fail(errorsOut, err.Error())
+		}
+	}
 	if err := config.Save(cfg); err != nil {
 		return fail(errorsOut, err.Error())
 	}
@@ -376,6 +453,6 @@ func settings(args []string, output, errorsOut io.Writer) int {
 }
 
 func printSettings(output io.Writer, cfg config.Config) {
-	fmt.Fprintf(output, "inbox\t%s\nstart_folder\t%s\nshow_hidden\t%t\nlisten\t%s\npairing_host\t%s\ndirect_joins\t%d\n",
-		cfg.InboxDirectory, cfg.StartDirectory, cfg.ShowHidden, cfg.ListenAddress, cfg.AdvertiseHost, cfg.DirectJoinLimit)
+	fmt.Fprintf(output, "inbox\t%s\nstart_folder\t%s\nshow_hidden\t%t\nlisten\t%s\npairing_host\t%s\ndirect_joins\t%d\ndata_dir\t%s\nupload_limit_gib\t%d\nportal_enabled\t%t\n",
+		cfg.InboxDirectory, cfg.StartDirectory, cfg.ShowHidden, cfg.ListenAddress, cfg.AdvertiseHost, cfg.DirectJoinLimit, cfg.DataDirectory, cfg.UploadLimitGiB, cfg.PortalEnabled)
 }

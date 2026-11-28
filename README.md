@@ -2,7 +2,9 @@
 
 TapSend shares files and messages across devices on the same local network. Run the terminal app on a Linux or Windows computer to share selected files with a phone through a browser or the Android app. The Android app can also share files directly with another phone, without a computer or cloud service.
 
-See [release.md](release.md) for v1.0.1 downloads, features, and setup.
+Start with the [documentation index](docs/README.md) for installation, current Windows and Android workflows, individual feature guides, and troubleshooting. See [Releases and downloads](docs/releases.md) for public packages and workspace builds.
+
+See the [documentation website guide](site/README.md) to preview the terminal-style site or publish it on GitHub Pages.
 
 > TapSend is in development. Try it with non-critical files before relying on it for important transfers.
 
@@ -84,7 +86,9 @@ TapSend creates a local certificate authority at `~/.local/share/tapsend/tapsend
 
 The Android app verifies the server fingerprint from the pairing QR or manual security key. Keep the server's private key (`server.key` in the same data folder) private. If you replace the local CA or server certificate, pair again with a fresh QR.
 
-## Terminal controls
+## Console terminal controls
+
+For the standalone `TapSend-Desktop.exe`, use the [Windows desktop shortcuts](docs/windows.md).
 
 | Key | Action |
 | --- | --- |
@@ -109,7 +113,7 @@ The command menu supports actions such as `add /path/to/file`, `message Hello`, 
 
 ### Browser
 
-Open the pairing link and choose **Download** for a shared file. **Send to computer** uploads files to the configured computer inbox (`~/.local/share/tapsend/inbox/` by default). The **Messages** section exchanges messages with the terminal. Browser retry can reuse completed chunks while the page remains open for supported file sizes; it does not provide permanent resume after a page reload.
+Open the pairing link and choose **Download** for a shared file. **Send to computer** uploads files to the configured computer inbox (`~/.local/share/tapsend/inbox/` by default). The **Messages** section exchanges messages with the terminal. Current builds can reuse completed chunks after a reload when the browser retains TapSend's site data and the file is unchanged. See [Download recovery](docs/download-recovery.md).
 
 ### Android app
 

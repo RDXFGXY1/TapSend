@@ -1,0 +1,27 @@
+name: Desktop compatibility checks
+on:
+  workflow_dispatch:
+  push:
+    paths: ['tui/**', 'cmd/**', 'internal/**', 'go.mod', 'go.sum', '.github/workflows/tui-check.yml']
+  pull_request:
+    paths: ['tui/**', 'cmd/**', 'internal/**', 'go.mod', 'go.sum', '.github/workflows/tui-check.yml']
+permissions:
+  contents: read
+jobs:
+  desktop:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: cargo test --manifest-path tui/Cargo.toml
+      - run: cargo build --release --manifest-path tui/Cargo.toml
+      - if: runner.os == 'Windows'
+        run: cargo build --release --manifest-path tui/Cargo.toml --bin tapsend-desktop
+      - run: go test ./...
+      - run: go build ./cmd/tapsend-server
+      - run: go build ./cmd/tapsend

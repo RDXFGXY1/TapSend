@@ -1,4 +1,4 @@
-# TapSend v1.0.1 — quick start
+# TapSend quick start
 
 TapSend shares files and messages between devices on the same local network. The computer app runs on Linux or Windows; phones can connect through a browser or the TapSend Android app. The Android app can also share files directly with another phone.
 
@@ -8,9 +8,13 @@ TapSend is in development. Try it with non-critical files before relying on it f
 
 **Linux (x86_64 portable archive):** Extract the archive and run `bin/tapsend` from a terminal. To install the included binaries and an application-menu launcher for your user account, run `bash scripts/install-linux.sh` from the extracted folder. The four executables in `bin/` must stay together.
 
-**Windows (x64 portable ZIP):** Extract the entire ZIP and run `tapsend.exe` from a terminal. Keep all four `.exe` files together.
+**Windows (x64 portable ZIP):** Extract the entire ZIP and open `TapSend-Desktop.exe`. Keep the executables together.
 
-The four desktop executables must stay together; the server generates pairing QR codes without an extra program. The computer and phone must be on the same reachable local network, and the computer must allow inbound connections on port `8443`.
+**Windows installer:** The default install directory is `C:\TapSend`. Choose where to save phone uploads, where to store TapSend's private data, and the maximum size of each incoming file. An existing installation can keep its settings. Run the setup EXE with an internet connection. After you click **Install**, setup downloads and verifies the package from GitHub Releases, then installs it into your chosen folder. For a portable first launch, press **S** on the First-Run Setup screen once the settings are ready.
+
+The server generates pairing QR codes locally. The computer and phone must be on the same reachable local network, and the computer must allow inbound connections on port `8443`.
+
+In TapSend Desktop, press **W** for Windows options. **Receive in background and show notifications** keeps TapSend in the tray when you close its window. To stop receiving and exit, right-click the tray icon and choose **Quit TapSend**. **File Explorer Send to shortcut** adds **Send to → TapSend Desktop** to the file context menu. TapSend shows the selected files for confirmation before sharing.
 
 After the computer changes IP address, restart the share and scan a fresh QR in the Android app. On an existing v1.0.0 installation, the first such change also creates a new local CA; install the new CA certificate again if you use a phone browser. On Windows, allow TapSend through the firewall for the current network profile.
 
@@ -37,3 +41,11 @@ Install the [v1.0.0 Android APK](https://github.com/RDXFGXY1/TapSend/releases/ta
 To share directly between phones, connect both to the same Wi-Fi network or hotspot. On the sending phone, choose **Send → Add files to phone share**. The other phone can scan the displayed QR code or open its link in a browser. Keep the sending app open. Nearby phone sharing uses unencrypted local HTTP, so use a network you trust.
 
 For all controls, settings, and source-build instructions, see the [project README](https://github.com/RDXFGXY1/TapSend#readme).
+
+## Windows Screen Share and file tools
+
+- **Freeze & Grab.** Open **Screen Share**. Press **Space** and drag over an area. Press **G** to save the image or **T** to read text using Windows OCR. Open Paste Stack with **Shift+V**. Press **Space** again for the live feed.
+- **Throw to This Folder.** Press **V** to choose a paired phone. Open **Files**, navigate to the destination, and press **Shift+R**. Send from Android and confirm the folder. The destination stays available for ten minutes. Duplicate files receive numbered names.
+- **Hold This for Me.** In Paste Stack, press **H** to hold the selected item until you return to the folder open in Files, or **J** to hold it until the selected phone reconnects. In Files, **Shift+H** holds a reference to the focused file until you return. **B** in Paste Stack restores all held items.
+- **Live Red Pen.** On Android, choose **Tools → Share screen with Live Red Pen** and allow TapSend to display over other apps. On the PC, right-drag on the live picture to send a temporary arrow.
+- **File Relay.** Set up a writable Windows network share on a PC that will stay on. On the destination PC, run `:relay create \\relay-pc\share` in TapSend to copy a relay pass. Share the pass privately with the sending PC. Copy it there and press **Shift+J**. Focus a file in **Files** and run `:relay send`, then use `:relay status` to see its route. When TapSend runs on the destination PC again, it saves the file to the **Relay** folder inside its inbox and confirms the save.

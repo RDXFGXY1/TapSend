@@ -48,7 +48,7 @@ final class PeerShareClient {
         } finally { connection.disconnect(); }
     }
 
-    void download(int id, OutputStream output, Progress progress) throws Exception {
+    long download(int id, long size, OutputStream output, Progress progress) throws Exception {
         if (id < 0 || id > 99999) throw new IOException("Invalid file number.");
         HttpURLConnection connection = open("file/" + id);
         try (InputStream input = connection.getInputStream()) {
@@ -60,7 +60,27 @@ final class PeerShareClient {
                 done += count;
                 progress.update(done);
             }
+            if (size >= 0 && done != size) throw new IOException("Download incomplete. Try saving again.");
+            try { return Long.parseLong(connection.getHeaderField("X-TapSend-Transfer")); }
+            catch (NumberFormatException ignored) { return 0; }
         } finally { connection.disconnect(); }
+    }
+
+    void confirmSaved(int id, long transfer) {
+        if (transfer <= 0) return;
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) new URL(base + "receipt/" + id + "/" + transfer).openConnection();
+            connection.setConnectTimeout(3000);
+            connection.setReadTimeout(3000);
+            connection.setInstanceFollowRedirects(false);
+            connection.setRequestMethod("POST");
+            connection.getResponseCode();
+        } catch (IOException ignored) {
+            // The file is already saved even when the sender cannot be reached.
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
     }
 
     private HttpURLConnection open(String path) throws Exception {

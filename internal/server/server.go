@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/sha256"
+	"crypto/tls"
 	"crypto/x509"
 	"embed"
 	"encoding/base64"
@@ -15,6 +16,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -25,6 +27,7 @@ import (
 	"tapsend/internal/devices"
 	filecatalog "tapsend/internal/files"
 	"tapsend/internal/pairing"
+	"tapsend/internal/relay"
 	"tapsend/internal/sendstatus"
 )
 
@@ -35,6 +38,14 @@ type App struct {
 	cfg          config.Config
 	certificates certificates.Paths
 	catalog      *filecatalog.Catalog
+	publishMu    sync.Mutex
+	offers       []*fileOffer
+	scratchMu    sync.Mutex
+	scratchpad   []storedSnippet
+	paste        pasteStack
+	drop         folderDrop
+	screen       liveScreen
+	screenPin    string
 	pairing      *pairing.Manager
 	pairingCode  string
 	pairingMu    sync.Mutex
@@ -84,9 +95,19 @@ func New(cfg config.Config) (*App, error) {
 		}
 	}
 	digest := sha256.Sum256(block.Bytes)
-	return &App{cfg: cfg, certificates: certs, catalog: catalog, pairing: manager,
+	app := &App{cfg: cfg, certificates: certs, catalog: catalog, pairing: manager,
 		pairingCode: manager.NewPairingCode(), host: localHost(cfg.ListenAddress, cfg.AdvertiseHost), tlsPin: base64.RawURLEncoding.EncodeToString(digest[:16]),
-		manualKey: shortFingerprint(digest[:8])}, nil
+		manualKey: shortFingerprint(digest[:8]), screenPin: fmt.Sprintf("%x", digest)}
+	if err := app.restoreOffers(); err != nil {
+		return nil, fmt.Errorf("could not read the outbox: %w", err)
+	}
+	if err := app.restoreScratchpad(); err != nil {
+		return nil, fmt.Errorf("could not read the scratchpad: %w", err)
+	}
+	if err := app.restorePasteStack(); err != nil {
+		return nil, fmt.Errorf("could not read the Paste Stack: %w", err)
+	}
+	return app, nil
 }
 func (a *App) CAPath() string { return a.certificates.CA }
 func (a *App) ManualCode() string {
@@ -161,13 +182,15 @@ func (a *App) RunContext(ctx context.Context) error {
 	mux := http.NewServeMux()
 	assets, _ := fs.Sub(webFiles, "web")
 	mux.Handle("GET /", http.FileServer(http.FS(assets)))
-	mux.HandleFunc("GET /api/portal", a.localOnly(a.handlePortal))
-	mux.HandleFunc("GET /api/portal/qr", a.localOnly(a.handlePortalQR))
-	mux.HandleFunc("POST /api/portal/refresh", a.localOnly(a.handlePortalRefresh))
+	mux.HandleFunc("GET /portal.html", a.portalOnly(a.localOnly(http.FileServer(http.FS(assets)).ServeHTTP)))
+	mux.HandleFunc("GET /api/portal", a.portalOnly(a.localOnly(a.handlePortal)))
+	mux.HandleFunc("GET /api/portal/qr", a.portalOnly(a.localOnly(a.handlePortalQR)))
+	mux.HandleFunc("POST /api/portal/refresh", a.portalOnly(a.localOnly(a.handlePortalRefresh)))
 	mux.HandleFunc("POST /api/pair", a.handlePair)
 	mux.HandleFunc("POST /api/challenge", a.handleChallenge)
 	mux.HandleFunc("POST /api/verify", a.handleVerify)
 	mux.HandleFunc("POST /api/upload", a.requireAuth(a.handleUpload))
+	mux.HandleFunc("GET /api/folder-drop", a.requireAuth(a.handleFolderDrop))
 	mux.HandleFunc("POST /api/receipt", a.requireAuth(a.handleReceipt))
 	mux.HandleFunc("GET /api/session", a.requireAuth(a.handleSession))
 	mux.HandleFunc("GET /api/messages", a.requireAuth(a.handleMessages))
@@ -186,7 +209,31 @@ func (a *App) RunContext(ctx context.Context) error {
 	}))
 	mux.HandleFunc("GET /api/files", a.requireAuth(a.handleFiles))
 	mux.HandleFunc("GET /api/files/{id}", a.requireAuth(a.handleDownload))
-	server := &http.Server{Addr: a.cfg.ListenAddress, Handler: securityHeaders(mux), ReadHeaderTimeout: 5e9}
+	mux.HandleFunc("POST /api/offers/{id}", a.requireAuth(a.handleOfferDecision))
+	mux.HandleFunc("GET /api/scratchpad", a.requireAuth(a.handleScratchpad))
+	mux.HandleFunc("POST /api/scratchpad", a.requireAuth(a.handleScratchpadPost))
+	mux.HandleFunc("POST /api/paste-stack/{id}", a.requireAuth(a.handlePasteUpload))
+	mux.HandleFunc("POST /api/screen/start", a.requireAuth(a.handleScreenStart))
+	mux.HandleFunc("POST /api/screen/frame/{id}", a.requireAuth(a.handleScreenFrame))
+	mux.HandleFunc("POST /api/screen/stop/{id}", a.requireAuth(a.handleScreenStop))
+	keyPair, err := tls.LoadX509KeyPair(a.certificates.Certificate, a.certificates.Key)
+	if err != nil {
+		return err
+	}
+	listener, err := net.Listen("tcp", a.cfg.ListenAddress)
+	if err != nil {
+		return err
+	}
+	defer listener.Close()
+	if stopViewer, err := a.startScreenListener(keyPair); err != nil {
+		log.Printf("Screen viewer unavailable: %s", err)
+	} else {
+		defer stopViewer()
+	}
+	server := &http.Server{
+		Addr: a.cfg.ListenAddress, Handler: securityHeaders(mux), ReadHeaderTimeout: 5e9,
+		TLSConfig: &tls.Config{Certificates: []tls.Certificate{keyPair}},
+	}
 	if ctx.Done() != nil {
 		go func() {
 			<-ctx.Done()
@@ -195,11 +242,41 @@ func (a *App) RunContext(ctx context.Context) error {
 			_ = server.Shutdown(shutdown)
 		}()
 	}
-	err := server.ListenAndServeTLS(a.certificates.Certificate, a.certificates.Key)
+	a.reportRestoredOffers()
+	a.reportScratchpad()
+	a.pasteSnapshot()
+	relayContext, stopRelay := context.WithCancel(ctx)
+	defer stopRelay()
+	go a.collectRelay(relayContext)
+	log.Printf("TUI_READY")
+	err = server.ServeTLS(listener, "", "")
 	if err == http.ErrServerClosed {
 		return nil
 	}
 	return err
+}
+
+func (a *App) collectRelay(ctx context.Context) {
+	inbox := a.cfg.InboxDirectory
+	if inbox == "" {
+		inbox = filepath.Join(a.cfg.DataDirectory, "inbox")
+	}
+	ticker := time.NewTicker(3 * time.Second)
+	defer ticker.Stop()
+	for {
+		relay.Collect(a.cfg.DataDirectory, inbox, func(name string) {
+			path := filepath.Join(inbox, "Relay", name)
+			if info, err := os.Stat(path); err == nil {
+				log.Printf("RECEIVED %q (%d bytes) saved to %q", name, info.Size(), path)
+				a.recordFrom(name, "saved-to-inbox", info.Size(), "File Relay")
+			}
+		})
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+		}
+	}
 }
 
 type pairRequest struct{ Code, DeviceID, Name, PublicKey string }
@@ -248,6 +325,12 @@ func (a *App) handleVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, map[string]string{"token": token})
+	if device, ok := a.pairing.Device(request.DeviceID); ok {
+		if join == pairing.JoinPending || join == pairing.JoinAllowed {
+			a.logDevicePicker()
+			log.Printf("TUI_PAIR_RESULT %s %x", join, device.Name)
+		}
+	}
 	if join == pairing.JoinPending {
 		log.Printf("JOIN REQUEST %s — sender approval needed", request.DeviceID)
 	} else if join == pairing.JoinAllowed {
@@ -257,8 +340,17 @@ func (a *App) handleVerify(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
-func (a *App) handleFiles(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, a.catalog.Public())
+func (a *App) handleFiles(w http.ResponseWriter, r *http.Request) {
+	public := a.catalog.Public()
+	peer := a.requestPeer(r)
+	a.publishMu.Lock()
+	for _, offer := range a.offers {
+		if offer.Peer == peer && offer.State == "accepted" {
+			public = append(public, offer.public().Files...)
+		}
+	}
+	a.publishMu.Unlock()
+	writeJSON(w, public)
 }
 func (a *App) handleDownload(w http.ResponseWriter, r *http.Request) {
 	ctx, done, ok := a.session.begin(r.Context())
@@ -268,12 +360,34 @@ func (a *App) handleDownload(w http.ResponseWriter, r *http.Request) {
 	}
 	defer done()
 	r = r.WithContext(ctx)
-	item, ok := a.catalog.Get(r.PathValue("id"))
+	peer := a.requestPeer(r)
+	item, ok := a.sharedItem(r.PathValue("id"), peer)
 	if !ok {
 		http.NotFound(w, r)
 		return
 	}
+	source, err := os.Open(item.Path)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	defer source.Close()
+	info, err := source.Stat()
+	if err != nil || !info.Mode().IsRegular() {
+		http.NotFound(w, r)
+		return
+	}
+	if !item.Modified.IsZero() && (info.Size() != item.Size || !item.Modified.Equal(info.ModTime())) {
+		log.Printf("TUI_OFFER file=%s peer=%x state=changed", item.ID, peer)
+		http.Error(w, "The original file changed. Ask the sender to offer it again.", http.StatusConflict)
+		return
+	}
+	w.Header().Set("ETag", fmt.Sprintf(`"%s-%x-%x"`, item.ID, info.Size(), info.ModTime().UnixNano()))
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", item.Name))
+	if r.Method == http.MethodHead {
+		http.ServeContent(w, r, item.Name, info.ModTime(), source)
+		return
+	}
 	log.Printf("SENDING %q to %s", item.Name, r.RemoteAddr)
 	a.setStatus("downloading")
 	writer := &transferWriter{ResponseWriter: w, started: time.Now(), last: time.Now(), total: item.Size}
@@ -282,10 +396,40 @@ func (a *App) handleDownload(w http.ResponseWriter, r *http.Request) {
 		lane = 1
 	}
 	writer.lane = lane
+	writer.telemetry = startTransferTelemetry(item.Name, "TX", -1, item.ID, peer)
 	log.Printf("STREAM START lane=%d file=%q range=%q", lane, item.Name, r.Header.Get("Range"))
-	http.ServeFile(writer, r, item.Path)
+	http.ServeContent(writer, r, item.Name, info.ModTime(), source)
 	writer.report()
+	state := "served"
+	if writer.status >= 400 || writer.writeError != nil {
+		state = "failed"
+	}
+	if writer.telemetry.total > 0 && writer.sent < writer.telemetry.total {
+		state = "interrupted"
+	}
+	if r.Context().Err() != nil {
+		state = "interrupted"
+	}
+	writer.telemetry.finish(state)
 	log.Printf("REQUEST FINISHED %q", item.Name)
+}
+
+func (a *App) sharedItem(id, peer string) (storedFile, bool) {
+	a.publishMu.Lock()
+	defer a.publishMu.Unlock()
+	if item, ok := a.catalog.Get(id); ok {
+		return storedFile{Item: item}, true
+	}
+	for _, offer := range a.offers {
+		if offer.Peer == peer && offer.State == "accepted" {
+			for _, file := range offer.Files {
+				if file.ID == id {
+					return file, true
+				}
+			}
+		}
+	}
+	return storedFile{}, false
 }
 
 type transferWriter struct {
@@ -293,9 +437,35 @@ type transferWriter struct {
 	started, last         time.Time
 	sent, previous, total int64
 	lane                  int
+	telemetry             *transferTelemetry
+	status                int
+	writeError            error
 }
 
-// Reuse larger copy buffers while preserving ServeFile's range handling.
+func (w *transferWriter) WriteHeader(status int) {
+	if w.status != 0 {
+		return
+	}
+	w.status = status
+	if w.telemetry != nil {
+		if total, err := strconv.ParseInt(w.Header().Get("Content-Length"), 10, 64); err == nil {
+			w.telemetry.total = total
+		}
+		switch status {
+		case http.StatusOK:
+			w.telemetry.offset = 0
+		case http.StatusPartialContent:
+			if before, _, found := strings.Cut(strings.TrimPrefix(w.Header().Get("Content-Range"), "bytes "), "-"); found {
+				if offset, err := strconv.ParseInt(before, 10, 64); err == nil {
+					w.telemetry.offset = offset
+				}
+			}
+		}
+	}
+	w.ResponseWriter.WriteHeader(status)
+}
+
+// Reuse larger copy buffers while preserving ServeContent's range handling.
 var transferBuffers = sync.Pool{New: func() any { b := make([]byte, 256*1024); return &b }}
 
 var throughput = struct {
@@ -312,8 +482,20 @@ func (w *transferWriter) ReadFrom(r io.Reader) (int64, error) {
 }
 
 func (w *transferWriter) Write(data []byte) (int, error) {
+	if w.status == 0 {
+		w.WriteHeader(http.StatusOK)
+	}
 	n, err := w.ResponseWriter.Write(data)
+	if err != nil {
+		w.writeError = err
+	}
 	w.sent += int64(n)
+	if w.telemetry != nil {
+		if total, err := strconv.ParseInt(w.Header().Get("Content-Length"), 10, 64); err == nil {
+			w.telemetry.total = total
+		}
+		w.telemetry.add(n)
+	}
 	throughput.Lock()
 	throughput.bytes += int64(n)
 	if elapsed := time.Since(throughput.last).Seconds(); elapsed >= 1 {

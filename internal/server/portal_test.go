@@ -50,3 +50,18 @@ func TestPortalShowsOnlySavedArrivalsToLocalComputer(t *testing.T) {
 		t.Fatalf("remote portal was not denied: %d %s", denied.Code, denied.Body.String())
 	}
 }
+
+func TestPortalCanBeDisabledWithoutBlockingDeviceRoutes(t *testing.T) {
+	app := &App{cfg: config.Config{PortalEnabled: false}}
+	portal := httptest.NewRecorder()
+	app.portalOnly(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) })(portal, httptest.NewRequest(http.MethodGet, "/portal.html", nil))
+	if portal.Code != http.StatusNotFound {
+		t.Fatalf("disabled portal returned %d", portal.Code)
+	}
+	app.cfg.PortalEnabled = true
+	portal = httptest.NewRecorder()
+	app.portalOnly(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) })(portal, httptest.NewRequest(http.MethodGet, "/portal.html", nil))
+	if portal.Code != http.StatusOK {
+		t.Fatalf("enabled portal returned %d", portal.Code)
+	}
+}

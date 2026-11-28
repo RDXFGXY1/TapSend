@@ -19,6 +19,8 @@ type Config struct {
 	StartDirectory  string
 	ShowHidden      bool
 	DirectJoinLimit int
+	UploadLimitGiB  int
+	PortalEnabled   bool
 	SharedFiles     []string
 }
 
@@ -29,6 +31,9 @@ type Settings struct {
 	StartDirectory  string `json:"start_directory,omitempty"`
 	ShowHidden      bool   `json:"show_hidden"`
 	DirectJoinLimit *int   `json:"direct_join_limit,omitempty"`
+	DataDirectory   string `json:"data_directory,omitempty"`
+	UploadLimitGiB  *int   `json:"upload_limit_gib,omitempty"`
+	PortalEnabled   *bool  `json:"portal_enabled,omitempty"`
 }
 
 func Default() Config {
@@ -44,6 +49,8 @@ func Default() Config {
 		DataDirectory:   data,
 		InboxDirectory:  filepath.Join(data, "inbox"),
 		DirectJoinLimit: 2,
+		UploadLimitGiB:  8,
+		PortalEnabled:   true,
 	}
 }
 
@@ -85,8 +92,17 @@ func Load() (Config, error) {
 	cfg.AdvertiseHost = settings.AdvertiseHost
 	cfg.StartDirectory = settings.StartDirectory
 	cfg.ShowHidden = settings.ShowHidden
+	if settings.DataDirectory != "" {
+		cfg.DataDirectory = settings.DataDirectory
+	}
 	if settings.DirectJoinLimit != nil {
 		cfg.DirectJoinLimit = *settings.DirectJoinLimit
+	}
+	if settings.UploadLimitGiB != nil {
+		cfg.UploadLimitGiB = *settings.UploadLimitGiB
+	}
+	if settings.PortalEnabled != nil {
+		cfg.PortalEnabled = *settings.PortalEnabled
 	}
 	if err := Validate(cfg); err != nil {
 		return cfg, err
@@ -120,6 +136,12 @@ func Validate(cfg Config) error {
 	if cfg.DirectJoinLimit < 1 || cfg.DirectJoinLimit > 8 {
 		return fmt.Errorf("direct join limit must be 1–8")
 	}
+	if cfg.DataDirectory == "" || !filepath.IsAbs(cfg.DataDirectory) {
+		return fmt.Errorf("data directory must be an absolute path")
+	}
+	if cfg.UploadLimitGiB < 1 || cfg.UploadLimitGiB > 64 {
+		return fmt.Errorf("upload limit must be 1–64 GiB")
+	}
 	return nil
 }
 
@@ -141,10 +163,12 @@ func Save(cfg Config) error {
 		return err
 	}
 	limit := cfg.DirectJoinLimit
+	uploadLimit, portalEnabled := cfg.UploadLimitGiB, cfg.PortalEnabled
 	data, err := json.MarshalIndent(Settings{
 		ListenAddress: cfg.ListenAddress, AdvertiseHost: cfg.AdvertiseHost,
 		InboxDirectory: cfg.InboxDirectory, StartDirectory: cfg.StartDirectory,
 		ShowHidden: cfg.ShowHidden, DirectJoinLimit: &limit,
+		DataDirectory: cfg.DataDirectory, UploadLimitGiB: &uploadLimit, PortalEnabled: &portalEnabled,
 	}, "", "  ")
 	if err != nil {
 		return err
@@ -166,4 +190,29 @@ func Save(cfg Config) error {
 		return err
 	}
 	return os.Rename(temporary.Name(), path)
+}
+
+// PrepareStorage checks both destinations before onboarding commits preferences.
+func PrepareStorage(cfg Config) error {
+	if err := Validate(cfg); err != nil {
+		return err
+	}
+	for _, dir := range []string{cfg.InboxDirectory, cfg.DataDirectory} {
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			return fmt.Errorf("cannot create folder %q: %w", dir, err)
+		}
+		file, err := os.CreateTemp(dir, ".tapsend-setup-*")
+		if err != nil {
+			return fmt.Errorf("folder %q is not writable: %w", dir, err)
+		}
+		err = file.Close()
+		removeErr := os.Remove(file.Name())
+		if err != nil {
+			return err
+		}
+		if removeErr != nil {
+			return removeErr
+		}
+	}
+	return nil
 }
