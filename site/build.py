@@ -9,6 +9,8 @@ from urllib.parse import quote, urlsplit
 
 from markdown_it import MarkdownIt
 
+from visuals import GUIDE_VISUALS, desktop_preview, screen_view
+
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
@@ -54,6 +56,8 @@ def read_guides():
     grouped = [slug for slugs in GROUPS.values() for slug in slugs]
     if files != guides.keys() or files != set(grouped) or len(grouped) != len(files):
         raise ValueError("Every Markdown guide must appear once in docs/README.md and the website navigation.")
+    if files != GUIDE_VISUALS.keys():
+        raise ValueError("Every guide needs a visual example in site/visuals.py.")
     return guides
 
 
@@ -209,14 +213,7 @@ def home(guides):
           <p class="download-note">Windows x64 · Linux x64 and ARM64</p>
           <a class="hero-link" href="releases.html">Portable downloads and install instructions →</a>
         </div>
-        <figure class="terminal-trace">
-          <div class="trace-title"><span class="trace-icon" aria-hidden="true">◈</span><figcaption>Example transfer</figcaption><span class="trace-index" aria-hidden="true">[ LAN ]</span></div>
-          <div class="trace-content">
-            <div class="devices"><div><span class="display-icon" aria-hidden="true"></span>Windows PC</div><span class="connection" aria-hidden="true"><b>⇄</b></span><div><span class="phone-icon" aria-hidden="true"></span>Android</div></div>
-            <div class="trace-file"><span>session-notes.txt</span><strong><span aria-hidden="true">✓</span> Saved</strong></div>
-          </div>
-          <div class="trace-footer"><kbd>V</kbd> Choose device <kbd>S</kbd> Send</div>
-        </figure>
+        {desktop_preview()}
       </section>
       {examples()}
       <section class="guide-overview" aria-labelledby="start-title">
@@ -228,13 +225,15 @@ def home(guides):
 
 
 def examples():
-    return """
+    return f"""
       <section class="examples" aria-labelledby="examples-title">
         <div class="section-heading"><h2 id="examples-title">See TapSend in action</h2></div>
         <div class="example-tabs" aria-label="Workflow examples">
           <a href="#example-send">Send files</a>
           <a href="#example-linux">Linux setup</a>
           <a href="#example-stack">Paste Stack</a>
+          <a href="#example-screen">Screen Share</a>
+          <a href="#example-folder">Folder drop</a>
         </div>
         <article class="example" id="example-send">
           <div class="example-copy">
@@ -285,6 +284,24 @@ def examples():
             <div class="example-prompt">Two items received</div>
           </div>
         </article>
+        <article class="example" id="example-screen">
+          <div class="example-copy">
+            <h3>View a phone screen on Windows</h3>
+            <p>Open the viewer and start Screen Share on Android. The phone chooses what to share. Freeze a frame to save an image or read text.</p>
+            <div class="example-keys"><span><kbd>L</kbd> Open viewer</span><span><kbd>Space</kbd> Freeze</span></div>
+            <a href="screen-share.html">Screen Share guide →</a>
+          </div>
+          {screen_view("live")}
+        </article>
+        <article class="example" id="example-folder">
+          <div class="example-copy">
+            <h3>Send straight into a folder</h3>
+            <p>Choose a paired phone and open the destination folder. The phone confirms where the file will go before sending.</p>
+            <div class="example-keys"><span><kbd>Shift</kbd> + <kbd>R</kbd> Set folder drop</span></div>
+            <a href="folder-drop.html">Folder drop guide →</a>
+          </div>
+          {GUIDE_VISUALS["folder-drop"]}
+        </article>
       </section>
     """
 
@@ -302,6 +319,7 @@ def article(guide, title, content, sections):
           <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>{group}</span></nav>
           <h1>{escape(title)}</h1>
           <p class="article-intro">{escape(guide.description)}</p>
+          {GUIDE_VISUALS[guide.slug]}
           <div class="prose">{content}</div>
           <div class="article-footer"><a href="{source_url(f'docs/{guide.slug}.md')}">View Markdown on GitHub</a></div>
         </article>

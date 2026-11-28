@@ -2,7 +2,7 @@
 
 The website renders the Markdown in [docs/](../docs/) to HTML. The guide pages and navigation work without JavaScript. Search and the compact navigation use a small local script. Artwork comes from HTML and CSS, and fonts come from the Android app's bundled JetBrains Mono files.
 
-The home page includes visual examples for targeted sends, Linux setup, and Paste Stack. It links directly to the Windows EXE and serves a copy of the Linux installer from `downloads/install.sh`. [Open the published website](https://rdxfgxy1.github.io/TapSend/)
+The home page has a desktop preview and examples for targeted sends, Linux setup, Paste Stack, Screen Share, and folder drops. Each guide has a matching visual defined in [visuals.py](visuals.py). The home page links directly to the Windows EXE and serves a copy of the Linux installer from `downloads/install.sh`. [Open the published website](https://rdxfgxy1.github.io/TapSend/)
 
 ## Preview locally
 
@@ -28,4 +28,4 @@ The workflow uploads only the generated website in `dist/tapsend-site/`. The pub
 
 ## Add a guide
 
-Add a Markdown file under `docs/`, link it from `docs/README.md`, and place its filename stem in the appropriate group in `site/build.py`. Use an H1 for the page title. The build creates the page, navigation, heading links, and search entry.
+Add a Markdown file under `docs/`, link it from `docs/README.md`, and place its filename stem in the appropriate group in `site/build.py`. Use an H1 for the page title and add a visual for the guide in `site/visuals.py`. The build creates the page, navigation, heading links, and search entry.
