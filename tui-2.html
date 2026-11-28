@@ -31,6 +31,12 @@
           <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Reference</span></nav>
           <h1>TapSend console TUI</h1>
           <p class="article-intro">Controls for the console app on Linux and Windows</p>
+          
+        <figure class="guide-visual visual-readout">
+          <figcaption>Console file browser controls</figcaption>
+          <dl><div><dt>↑ / ↓</dt><dd>Move the file cursor</dd></div><div><dt>Space / Enter</dt><dd>Mark a file / open a directory</dd></div><div><dt>S / ?</dt><dd>Start sharing / open help</dd></div></dl>
+        </figure>
+    
           <div class="prose"><p>This page describes the console interface on Linux and Windows. On Windows, run <code>tapsend-tui.exe</code> inside Windows Terminal or Command Prompt. Use the <a href="windows.html">Windows desktop guide</a> for the standalone <code>TapSend-Desktop.exe</code> window and its letter shortcuts.</p>
 <p>On Windows, <strong>C</strong> scans a QR displayed by a phone that is hosting a nearby share. Press <strong>Esc</strong> to cancel or <strong>R</strong> to refresh the file list after the scan. TapSend downloads a single shared file directly. For multiple files, press <strong>Y</strong> to download all, or press <strong>N</strong> and use arrows and <strong>Space</strong> to choose files, then press <strong>Enter</strong> to download. Keep the scanner files alongside the TapSend executables. The scanner requires the .NET 8 Runtime and Windows camera permission. For computer pairing, scan the computer's QR from Android.</p>
 <p>On Linux, build with

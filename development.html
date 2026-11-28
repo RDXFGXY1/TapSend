@@ -31,6 +31,12 @@
           <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Reference</span></nav>
           <h1>Development</h1>
           <p class="article-intro">Code layout, build commands, and checks</p>
+          
+        <figure class="guide-visual">
+          <figcaption>How the app builds</figcaption>
+          <ol class="visual-flow"><li><strong>Go</strong><span>Build the local transfer server and command-line tools</span></li><li><strong>Rust</strong><span>Build the terminal interface</span></li><li><strong>Gradle · optional</strong><span>Build the Android APK with the JDK and SDK</span></li></ol>
+        </figure>
+    
           <div class="prose"><h2 id="interactive-linux-installer">Interactive Linux installer</h2>
 <p>Download and run the installer on Linux.</p>
 <pre><code class="language-bash">curl -fsSLo install.sh https://raw.githubusercontent.com/RDXFGXY1/TapSend/tap-send/install.sh

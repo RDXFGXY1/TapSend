@@ -38,14 +38,21 @@
           <p class="download-note">Windows x64 · Linux x64 and ARM64</p>
           <a class="hero-link" href="releases.html">Portable downloads and install instructions →</a>
         </div>
-        <figure class="terminal-trace">
-          <div class="trace-title"><span class="trace-icon" aria-hidden="true">◈</span><figcaption>Example transfer</figcaption><span class="trace-index" aria-hidden="true">[ LAN ]</span></div>
-          <div class="trace-content">
-            <div class="devices"><div><span class="display-icon" aria-hidden="true"></span>Windows PC</div><span class="connection" aria-hidden="true"><b>⇄</b></span><div><span class="phone-icon" aria-hidden="true"></span>Android</div></div>
-            <div class="trace-file"><span>session-notes.txt</span><strong><span aria-hidden="true">✓</span> Saved</strong></div>
+        
+      <figure class="terminal-trace desktop-preview">
+        <div class="trace-title"><span class="trace-icon" aria-hidden="true">&gt;_</span><figcaption>TapSend desktop preview</figcaption><span class="trace-index">● LAN ready</span></div>
+        <div class="trace-content">
+          <div class="devices"><div><span class="display-icon" aria-hidden="true"></span>Windows PC</div><span class="connection" aria-hidden="true"><b>⇄</b></span><div><span class="phone-icon" aria-hidden="true"></span>Pixel 8</div></div>
+          <div class="preview-queue">
+            <div class="preview-queue-title"><strong>Transfer queue</strong><span>2 files</span></div>
+            <div><span>session-notes.txt</span><strong>✓ Saved</strong></div>
+            <div><span>field-footage.mp4</span><span>68% · Receiving</span></div>
+            <progress aria-label="Example transfer progress" max="100" value="68">68%</progress>
           </div>
-          <div class="trace-footer"><kbd>V</kbd> Choose device <kbd>S</kbd> Send</div>
-        </figure>
+        </div>
+        <div class="trace-footer"><kbd>V</kbd> Devices <kbd>S</kbd> Send <kbd>N</kbd> Help</div>
+      </figure>
+    
       </section>
       
       <section class="examples" aria-labelledby="examples-title">
@@ -54,6 +61,8 @@
           <a href="#example-send">Send files</a>
           <a href="#example-linux">Linux setup</a>
           <a href="#example-stack">Paste Stack</a>
+          <a href="#example-screen">Screen Share</a>
+          <a href="#example-folder">Folder drop</a>
         </div>
         <article class="example" id="example-send">
           <div class="example-copy">
@@ -103,6 +112,47 @@
             </ul>
             <div class="example-prompt">Two items received</div>
           </div>
+        </article>
+        <article class="example" id="example-screen">
+          <div class="example-copy">
+            <h3>View a phone screen on Windows</h3>
+            <p>Open the viewer and start Screen Share on Android. The phone chooses what to share. Freeze a frame to save an image or read text.</p>
+            <div class="example-keys"><span><kbd>L</kbd> Open viewer</span><span><kbd>Space</kbd> Freeze</span></div>
+            <a href="screen-share.html">Screen Share guide →</a>
+          </div>
+          
+        <figure class="guide-visual screen-visual screen-live">
+          <figcaption><span>Android screen on Windows</span><span class="visual-state">LIVE</span></figcaption>
+          <div class="viewer-stage">
+            <div class="viewer-phone">
+              <div class="viewer-phone-top">10:42 <span aria-hidden="true">▮▮▮</span></div>
+              <div class="viewer-phone-app">
+                <strong>Daily checklist</strong>
+                <div class="viewer-checks">
+                  <span>✓ Capture photos</span><span>✓ Pick files</span><span>□ Send to PC</span>
+                </div>
+                <span class="viewer-selection" aria-hidden="true"></span>
+                <span class="viewer-arrow" aria-hidden="true">↖</span>
+              </div>
+            </div>
+          </div>
+          <div class="visual-foot">Esc ends the viewer</div>
+        </figure>
+    
+        </article>
+        <article class="example" id="example-folder">
+          <div class="example-copy">
+            <h3>Send straight into a folder</h3>
+            <p>Choose a paired phone and open the destination folder. The phone confirms where the file will go before sending.</p>
+            <div class="example-keys"><span><kbd>Shift</kbd> + <kbd>R</kbd> Set folder drop</span></div>
+            <a href="folder-drop.html">Folder drop guide →</a>
+          </div>
+          
+        <figure class="guide-visual">
+          <figcaption>Send straight to a project folder</figcaption>
+          <ol class="visual-flow"><li><strong>Windows · Shift+R</strong><span>Set the open folder as the temporary destination</span></li><li><strong>Android · Send here</strong><span>Confirm the folder shown on the phone</span></li><li><strong>Saved</strong><span>Duplicate names are kept with a numbered suffix</span></li></ol>
+        </figure>
+    
         </article>
       </section>
     

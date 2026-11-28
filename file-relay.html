@@ -31,6 +31,12 @@
           <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Workflows</span></nav>
           <h1>File Relay</h1>
           <p class="article-intro">Deliver a file between Windows PCs using an always-on shared folder</p>
+          
+        <figure class="guide-visual">
+          <figcaption>A file’s route through File Relay</figcaption>
+          <ol class="visual-flow"><li><strong>Sending PC</strong><span>Queues the file using its relay pass</span></li><li><strong>Shared folder</strong><span>Holds encrypted contents while the receiver is away</span></li><li><strong>Destination PC</strong><span>Saves to its Relay inbox and confirms delivery</span></li></ol>
+        </figure>
+    
           <div class="prose"><p>File Relay delivers a file between two Windows computers when the destination is asleep or TapSend is closed there. A third computer needs to stay on and provide a shared folder both endpoints can write to. That folder holds encrypted file contents until the destination returns.</p>
 <h2 id="set-up-the-route">Set up the route</h2>
 <ol>

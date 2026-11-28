@@ -31,6 +31,12 @@
           <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Reference</span></nav>
           <h1>Release maintenance</h1>
           <p class="article-intro">Build, verify, sign, and publish packages</p>
+          
+        <figure class="guide-visual">
+          <figcaption>From build to published release</figcaption>
+          <ol class="visual-flow"><li><strong>Package</strong><span>Assemble the files for each platform</span></li><li><strong>Verify</strong><span>Test the packages and generate checksums</span></li><li><strong>Publish</strong><span>Upload the verified downloads under the intended tag</span></li></ol>
+        </figure>
+    
           <div class="prose"><p>Use <a href="releases.html">Releases and downloads</a> for the published release history and workspace builds.</p>
 <h2 id="prepare-a-version">Prepare a version</h2>
 <p>Update Android's <code>versionCode</code> and <code>versionName</code>, the Rust package version, the Go CLI version, the Windows installer version, archive names, and release notes together. Run the checks in <a href="development.html">Development</a>.</p>
