@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 from dataclasses import dataclass
+from hashlib import sha256
 from html import escape
 from pathlib import Path
 from urllib.parse import quote, urlsplit
@@ -18,6 +19,7 @@ SITE = ROOT / "site"
 OUTPUT = ROOT / "dist" / "tapsend-site"
 REPO = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'RDXFGXY1/TapSend')}"
 SOURCE_BRANCH = os.environ.get("GITHUB_REF_NAME", "tap-send")
+STYLE_REVISION = sha256((SITE / "assets/site.css").read_bytes()).hexdigest()[:12]
 WINDOWS_SETUP = f"{REPO}/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64-setup.exe"
 INDEX_ROW = re.compile(r"^\| \[([^\]]+)\]\(([\w-]+)\.md\) \| (.+?) \|$", re.MULTILINE)
 LOCAL_ASSET = re.compile(r"\[([^\]]+)\]\(\.\./dist/[^)]+\)")
@@ -151,7 +153,7 @@ def layout(title, description, current, content, guides):
   <meta name="description" content="{escape(description)}">
   <title>{escape(page_title)}</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/site.css?v={STYLE_REVISION}">
   <script defer src="assets/search-index.js"></script>
   <script defer src="assets/site.js"></script>
 </head>
