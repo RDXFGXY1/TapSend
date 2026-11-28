@@ -1,22 +1,39 @@
 # [BETA] TapSend
 
-TapSend shares files and messages across devices on the same local network. Run the terminal app on a Linux or Windows computer to share selected files with a phone through a browser or the Android app. The Android app can also share files directly with another phone, without a computer or cloud service.
+TapSend moves files, screenshots, and messages between devices on your local network. Windows has a keyboard-driven desktop app with a terminal-style interface and its own window. Linux has a console app. Phones can connect through the Android app or a browser.
 
-Start with the [documentation index](docs/README.md) for installation, current Windows and Android workflows, individual feature guides, and troubleshooting. See [Releases and downloads](docs/releases.md) for public packages and workspace builds.
+## Download TapSend
 
-See the [documentation website guide](site/README.md) to preview the terminal-style site or publish it on GitHub Pages.
+| Platform | Download |
+| --- | --- |
+| Windows x64 | [v1.0.2 setup EXE](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64-setup.exe) · [Portable ZIP](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64.zip) |
+| Android 13+ and Linux x86-64 | [Earlier public packages](https://github.com/RDXFGXY1/TapSend/releases/tag/v1.0.0) · [Build the current source](docs/development.md) |
 
-> TapSend is in development. Try it with non-critical files before relying on it for important transfers.
+Open the setup EXE by itself. It downloads and verifies the ZIP over the internet, then installs to the folder you choose. The default is `C:\TapSend`. For portable use, extract the full ZIP and run `TapSend-Desktop.exe`.
 
-## Features
+[Read the v1.0.2 release notes](https://github.com/RDXFGXY1/TapSend/releases/tag/v1.0.2) · [Browse the documentation](docs/README.md)
 
-- Browse and select files in a Rust terminal interface, then share them through a Go HTTPS server.
-- Use `tabsend send` to offer a file to one paired phone by device name or ID.
-- Pair phones with a QR code or manual code, and reconnect previously paired devices.
-- Download files, upload to the computer's inbox, and exchange messages from the browser or Android app.
-- Share files directly between phones on the same Wi-Fi network or hotspot. Recipients can use a browser or the Android app.
-- Approve additional recipients, limit a share to one device, pause computer downloads, or revoke a paired device.
-- Open **Portal Mode** on the computer for a live pairing QR and animated file arrivals; flick selected files upward from the Android app or phone browser.
+## Quick start on Windows
+
+1. Open TapSend. After first-run setup, the server starts automatically. Connect the computer and phone to the same Wi-Fi network or hotspot.
+2. Press **P** for the pairing QR or pass. On a compatible Android build, open **Tools → Connect a PC**. For browser transfers, open the pairing link on the phone.
+3. To send to a phone, press **V**, select the recipient with **Enter**, and press **F** to browse files. Mark files with **Space** and press **S**. Press **T** to see transfer progress and save confirmation.
+4. To receive, send from the phone and open **R** on the desktop to see the inbox. Press **N** anytime for shortcut help.
+
+See [Windows desktop](docs/windows.md), [Pairing](docs/pairing.md), and [Troubleshooting](docs/troubleshooting.md).
+
+## What TapSend can do
+
+- Search files with **Shift+S**, send to one paired phone, and keep offers queued across desktop restarts.
+- Receive in the Windows tray, get arrival notifications, and queue files from Explorer’s **Send to** menu.
+- Pair by QR or pass. Rename or forget paired phones from the desktop.
+- Resume supported computer-to-phone downloads after reopening the browser or Android app.
+- Send Android screenshots and text to **Paste Stack**, then open **Shift+V** on Windows to copy or save them. Android can queue items while the PC is offline.
+- View a consenting phone’s screen, grab a frame or extract text, and draw temporary annotations with permission.
+- Use Scratchpad, a temporary folder drop, **Hold This for Me**, or a shared folder as a relay between PCs.
+- Exchange messages and use **Portal Mode** for local file arrivals. Compatible Android builds can also share directly between phones.
+
+See the [feature and compatibility list](docs/features.md) for which clients support each workflow.
 
 ## Requirements
 
@@ -73,8 +90,6 @@ The same values are available through `tabsend settings`, `tabsend settings defa
 ### Linux installation and portable archive
 
 Run `make install-linux` to install the binaries in `~/.local/bin` and create a **TapSend** launcher in your desktop application menu. If that folder is on your `PATH`, you can then type `tabsend` or `tapsend` from any terminal. Install the Rust `x86_64-unknown-linux-musl` target, then run `make portable-linux` to create a static `.tar.gz` archive under `dist/`; extract it and run `bin/tabsend` without installing.
-
-The Windows release includes `TapSend-v1.0.1-windows-x64.zip`; extract it and run the included commands together. The v1.0.1 installer is pending the GitHub Actions release build. Pairing and transfers still need a hands-on check on Windows and Android devices.
 
 In the terminal, focus a file and press `s` to share it. Use Space to select multiple files first. Scan the displayed QR code with the Android app, or open the pairing link in a phone browser. You can also enter the displayed address, code, and security key manually in the app. Press `r` to issue a fresh pairing code.
 

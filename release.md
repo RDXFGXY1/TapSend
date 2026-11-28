@@ -1,49 +1,34 @@
-# TapSend v1.0.1
+# TapSend v1.0.2 for Windows
 
-TapSend moves files and short messages between devices on the same local network. It has a terminal app for Linux and Windows, an Android app, and a phone browser interface. Transfers go directly between your devices; no TapSend account or cloud storage is needed.
+TapSend now opens in its own terminal-style Windows window and starts the local transfer server automatically after first-run setup.
 
-## Fixed in v1.0.1
+## Download and install
 
-- A new computer IP address no longer leaves the pairing QR pointing at an address missing from the server certificate. Starting a share renews the server certificate for the current private IPv4 addresses.
-- New installations retain the local CA signing key, so later IP changes keep the same CA trusted by phone browsers.
-- Automatic pairing addresses now skip public and link-local IPv4 adapters that the Android app cannot use for local pairing.
+- [Windows x64 setup EXE](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64-setup.exe) — Run it by itself with an internet connection. Setup downloads and verifies the package, then installs it in the folder you choose. The default is `C:\TapSend`.
+- [Windows x64 portable ZIP](https://github.com/RDXFGXY1/TapSend/releases/download/v1.0.2/TapSend-v1.0.2-windows-x64.zip) — Extract the full archive and open `TapSend-Desktop.exe`.
 
-After upgrading, restart the computer share and scan a fresh QR. If the server certificate changes, Android phones need to pair again. If this is the first IP change on an installation from v1.0.0, TapSend must also create a new local CA; phone browsers need to trust its new CA certificate. Windows Firewall must allow inbound connections on the current network profile.
+The terminal-style installer offers English and Arabic, an inbox and private storage location, a per-file upload limit, and optional desktop and command-line shortcuts. It can keep an existing profile. Windows can also notify you when a newer compatible release is available on GitHub.
 
-## What you can do
+## What's new
 
-- Browse files in the desktop terminal interface and share selected files with a phone.
-- Send a file to one previously paired phone with `tabsend send`, or receive phone uploads with `tabsend receive`.
-- Pair by QR code, link, or manual code. Paired devices can reconnect without scanning every time.
-- Upload to the computer inbox, download shared files, and exchange messages from Android or a phone browser.
-- Share files directly between two Android phones on the same Wi-Fi network or hotspot; recipients can also use a browser.
-- Limit recipients, approve additional phones, pause desktop downloads, and revoke paired devices.
-- Open **Portal Mode** on the computer, flick selected files upward on the phone, and watch each arrival animate after it is saved to the inbox.
+- **Desktop shortcuts and file search.** Use **D** for Dashboard, **V** for Devices, **N** for shortcut help, and **Shift+S** to search the current folder.
+- **Send queue and Send Later.** Select a paired phone with **V**, mark files, and press **S**. The phone can accept or decline. The queue tracks transfer progress and phone-confirmed saves. Pending offers survive a desktop restart while the source files stay available.
+- **Pairing and device management.** Pair with a QR or a copyable pairing pass. Rename or forget saved phones, or clear the full list. The Windows camera scanner also has a terminal-style preview for scanning a nearby share QR.
+- **Windows integration.** Keep receiving from the tray, get arrival notifications, or queue files from File Explorer’s **Send to → TapSend Desktop**.
+- **Paste Stack and screen sharing.** Open Android screenshots and text from **Shift+V** on Windows. Android can queue items while the PC is offline. Screen Share adds **Freeze & Grab** and **Live Red Pen** for captures, OCR, and temporary annotations.
+- **More transfer tools.** Scratchpad keeps short notes and links handy. **Throw to This Folder** sends files into a specific temporary destination, **Hold This for Me** keeps an item handy, and **File Relay** uses a shared folder to hold deliveries between PCs.
 
-## Downloads
+## Fixes and improvements
 
-| Device | File | What is inside |
-| --- | --- | --- |
-| Windows x64 | `TapSend-v1.0.1-windows-x64.zip` | Updated desktop commands and server, with the unchanged v1.0.0 terminal executable |
+- Buffered desktop drawing reduces flicker and blank frames during redraws.
+- **V** opens the picker and advances the highlight when pressed again. Arrow keys move the highlight and **Enter** selects the phone.
+- Pairing help now suggests checking the local network and Windows Firewall, or refreshing the QR after the computer’s IP changes.
+- Eligible phone browser downloads can reuse saved chunks after a page reload when the browser retains the site's data and the file is unchanged.
+- Android and Windows folder drops preserve files when names collide. Android reports the new numbered filename; transfer status distinguishes a confirmed save from a browser download whose save cannot be confirmed.
+- Screen Share improves capture and playback pacing. Performance depends on the phone and network.
 
-Download `SHA256SUMS.txt` alongside the package to verify its SHA-256 checksum.
+## Compatibility
 
-The v1.0.0 [Linux and Android downloads](https://github.com/RDXFGXY1/TapSend/releases/tag/v1.0.0) remain available. GitHub Actions did not start the v1.0.1 platform jobs because the account is locked due to a billing issue, so this release currently has a Windows ZIP only. The Windows installer, Linux archive, and Android APK will be added after those jobs can run.
+The downloadable binaries in this release are for **Windows x64**. Features such as targeted save confirmation, Android Share to TapSend, Paste Stack, and Screen Share need a compatible Android build. Android and Linux users can [build the current source](https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/development.md) or use the [earlier public packages](https://github.com/RDXFGXY1/TapSend/releases/tag/v1.0.0) for the features available in those builds.
 
-## Get started
-
-1. Install or extract the desktop package. Keep the desktop executables together if you use a portable archive.
-2. Run `tapsend` to browse and share files, or run `tabsend receive` to accept files from a phone without selecting a computer file.
-3. Pair your phone using the QR, link, or manual details shown by the computer. The computer and phone must be on the same reachable local network; allow inbound port `8443` on the computer.
-4. To try Portal Mode, open `https://localhost:8443/portal.html` on the computer while TapSend is running. Choose **Portal files** on the phone and flick the file tile upward. Use your configured listen port if it differs from `8443`.
-
-## Security and compatibility notes
-
-- Computer sharing uses HTTPS and a local TapSend certificate authority. The Android app checks the certificate fingerprint from pairing. A phone browser may warn until you install and trust the TapSend CA certificate from the computer.
-- Nearby phone-to-phone sharing uses local HTTP so browser recipients can join without certificate setup. Its traffic is unencrypted; use a network you trust.
-- Portal arrival details and pairing QR are available only to a browser running on the computer.
-- The Android release APK uses a release signing key. An older debug APK has a different signature and must be uninstalled before installing this release.
-- The app supports Linux x86_64, Windows x64, and Android 13 or newer in this release. There is no macOS or iOS app in this package.
-- The Windows ZIP was assembled from locally cross compiled v1.0.1 Go binaries and the unchanged v1.0.0 terminal executable. Confirm pairing and transfers on physical Windows and Android devices before relying on this fix.
-
-For controls, settings, and source build instructions, see [README.md](README.md).
+[Windows guide](https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/windows.md) · [Pairing help](https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/pairing.md) · [Documentation](https://github.com/RDXFGXY1/TapSend/tree/tap-send/docs) · [Full changes since v1.0.1](https://github.com/RDXFGXY1/TapSend/compare/v1.0.1...v1.0.2)
