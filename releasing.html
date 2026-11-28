@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Build, verify, sign, and publish packages">
+  <title>Release maintenance · TapSend Docs</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/search-index.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <div class="top-actions">
+        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
+        <a class="top-release" href="releases.html">Releases</a>
+      </div>
+    </div>
+  </header>
+  <div class="shell">
+    <nav id="guide-navigation" class="guide-nav" aria-label="Documentation"><div class="nav-group"><h2>Get started</h2><ul><li><a href="quick-start.html"><span>Quick start</span></a></li><li><a href="features.html"><span>Features</span></a></li><li><a href="windows.html"><span>Windows desktop</span></a></li><li><a href="android.html"><span>Android</span></a></li><li><a href="browser.html"><span>Phone browser</span></a></li><li><a href="pairing.html"><span>Pairing and devices</span></a></li></ul></div><div class="nav-group"><h2>Workflows</h2><ul><li><a href="transfers.html"><span>Sending and receiving files</span></a></li><li><a href="download-recovery.html"><span>Download recovery</span></a></li><li><a href="messages.html"><span>Messages and Scratchpad</span></a></li><li><a href="paste-stack.html"><span>Paste Stack</span></a></li><li><a href="screen-share.html"><span>Screen Share</span></a></li><li><a href="freeze-and-grab.html"><span>Freeze &amp; Grab</span></a></li><li><a href="live-red-pen.html"><span>Live Red Pen</span></a></li><li><a href="folder-drop.html"><span>Throw to This Folder</span></a></li><li><a href="hold-this-for-me.html"><span>Hold This for Me</span></a></li><li><a href="file-relay.html"><span>File Relay</span></a></li></ul></div><div class="nav-group"><h2>Reference</h2><ul><li><a href="releases.html"><span>Releases and downloads</span></a></li><li><a href="troubleshooting.html"><span>Troubleshooting</span></a></li><li><a href="privacy-and-storage.html"><span>Privacy and storage</span></a></li><li><a href="cli-and-settings.html"><span>CLI and settings</span></a></li><li><a href="tui-2.html"><span>Terminal TUI reference</span></a></li><li><a href="development.html"><span>Development</span></a></li><li><a href="releasing.html" aria-current="page"><span>Release maintenance</span></a></li></ul></div></nav>
+    <main id="main" tabindex="-1">
+      <div class="article-layout">
+        <article class="article">
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Reference</span></nav>
+          <h1>Release maintenance</h1>
+          <p class="article-intro">Build, verify, sign, and publish packages</p>
+          <div class="prose"><p>Use <a href="releases.html">Releases and downloads</a> for the published release history and workspace builds.</p>
+<h2 id="prepare-a-version">Prepare a version</h2>
+<p>Update Android's <code>versionCode</code> and <code>versionName</code>, the Rust package version, the Go CLI version, the Windows installer version, archive names, and release notes together. Run the checks in <a href="development.html">Development</a>.</p>
+<h2 id="build-the-packages">Build the packages</h2>
+<ul>
+<li>
+<p><strong>Linux.</strong> Run <code>make portable-linux</code> after installing the <code>x86_64-unknown-linux-musl</code> Rust target. Check that the archive includes the CLI, terminal app, server, and installer script.</p>
+</li>
+<li>
+<p><strong>Windows.</strong> Run the <a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/.github/workflows/windows-package.yml">Windows package workflow</a> with the version you plan to tag. It packages the Go, Rust, and .NET files and pins the ZIP's checksum inside the installer. For a local build, follow <a href="development.html">Development</a> to stage the Windows files, then run <code>pwsh -File packaging/build-windows-installer.ps1 -ReleaseVersion 1.0.2</code>. Upload the matching ZIP, installer, and checksum file to the same GitHub release tag, with their generated filenames intact.</p>
+</li>
+<li>
+<p><strong>Android.</strong> Assemble the release APK using the existing signing key and check it with <code>apksigner verify --verbose</code>. Keep the keystore and passwords private and backed up. Updates to an installed release need the same key.</p>
+</li>
+</ul>
+<p>Windows update notifications look for a stable public release tagged <code>vMAJOR.MINOR.PATCH</code> that has both the installer and matching ZIP. The packaging workflow stamps the GitHub repository and version into the Windows CLI used by the desktop updater. For a different version in a local build, set both values on the Go CLI using <code>-ldflags &quot;-X main.releaseVersion=VERSION -X main.releaseRepository=OWNER/REPO&quot;</code> before packaging. Add your own <code>packaging/tapsend.ico</code> to use it in the setup EXE, installed shortcuts, desktop window, and notification area.</p>
+<h2 id="verify-and-publish">Verify and publish</h2>
+<p>Install or extract the packages on their target devices. Verify startup, pairing, sends in both directions, save confirmations, and any features listed in the release notes. On Windows, open the actual packaged EXE and verify that Screen Share loads with its companion files.</p>
+<p>Generate <code>SHA256SUMS.txt</code> for the final assets. Publish the verified packages and checksums with the intended tag. List which platforms are available and identify which workflows the packages contain.</p>
+</div>
+          <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/releasing.md">View Markdown on GitHub</a></div>
+        </article>
+        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#prepare-a-version">Prepare a version</a></li><li class="h2"><a href="#build-the-packages">Build the packages</a></li><li class="h2"><a href="#verify-and-publish">Verify and publish</a></li></ul></nav></aside>
+      </div>
+    </main>
+  </div>
+  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <dialog class="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
+    <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
+    <div class="search-scroll">
+      <p class="search-status" role="status"></p>
+      <ol class="search-results"></ol>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> Browse</span><span><kbd>Enter</kbd> Open</span></div>
+  </dialog>
+</body>
+</html>

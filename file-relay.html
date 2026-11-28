@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Deliver a file between Windows PCs using an always-on shared folder">
+  <title>File Relay · TapSend Docs</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/search-index.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <div class="top-actions">
+        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
+        <a class="top-release" href="releases.html">Releases</a>
+      </div>
+    </div>
+  </header>
+  <div class="shell">
+    <nav id="guide-navigation" class="guide-nav" aria-label="Documentation"><div class="nav-group"><h2>Get started</h2><ul><li><a href="quick-start.html"><span>Quick start</span></a></li><li><a href="features.html"><span>Features</span></a></li><li><a href="windows.html"><span>Windows desktop</span></a></li><li><a href="android.html"><span>Android</span></a></li><li><a href="browser.html"><span>Phone browser</span></a></li><li><a href="pairing.html"><span>Pairing and devices</span></a></li></ul></div><div class="nav-group"><h2>Workflows</h2><ul><li><a href="transfers.html"><span>Sending and receiving files</span></a></li><li><a href="download-recovery.html"><span>Download recovery</span></a></li><li><a href="messages.html"><span>Messages and Scratchpad</span></a></li><li><a href="paste-stack.html"><span>Paste Stack</span></a></li><li><a href="screen-share.html"><span>Screen Share</span></a></li><li><a href="freeze-and-grab.html"><span>Freeze &amp; Grab</span></a></li><li><a href="live-red-pen.html"><span>Live Red Pen</span></a></li><li><a href="folder-drop.html"><span>Throw to This Folder</span></a></li><li><a href="hold-this-for-me.html"><span>Hold This for Me</span></a></li><li><a href="file-relay.html" aria-current="page"><span>File Relay</span></a></li></ul></div><div class="nav-group"><h2>Reference</h2><ul><li><a href="releases.html"><span>Releases and downloads</span></a></li><li><a href="troubleshooting.html"><span>Troubleshooting</span></a></li><li><a href="privacy-and-storage.html"><span>Privacy and storage</span></a></li><li><a href="cli-and-settings.html"><span>CLI and settings</span></a></li><li><a href="tui-2.html"><span>Terminal TUI reference</span></a></li><li><a href="development.html"><span>Development</span></a></li><li><a href="releasing.html"><span>Release maintenance</span></a></li></ul></div></nav>
+    <main id="main" tabindex="-1">
+      <div class="article-layout">
+        <article class="article">
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Workflows</span></nav>
+          <h1>File Relay</h1>
+          <p class="article-intro">Deliver a file between Windows PCs using an always-on shared folder</p>
+          <div class="prose"><p>File Relay delivers a file between two Windows computers when the destination is asleep or TapSend is closed there. A third computer needs to stay on and provide a shared folder both endpoints can write to. That folder holds encrypted file contents until the destination returns.</p>
+<h2 id="set-up-the-route">Set up the route</h2>
+<ol>
+<li>Confirm the sending PC and destination PC can open the same writable network share in File Explorer, for example <code>\\relay-pc\share</code>.</li>
+<li>On the <strong>destination PC</strong>, open TapSend. Press <strong>:</strong> and run <code>relay create \\relay-pc\share</code> with the real share path. TapSend copies a relay pass to the clipboard.</li>
+<li>Move the pass privately to the <strong>sending PC</strong>. Copy it there and press <strong>Shift+J</strong> in TapSend.</li>
+</ol>
+<p>The pass gives access to the encrypted lane. Share it only with the sending endpoint you trust.</p>
+<h2 id="send-and-confirm-a-file">Send and confirm a file</h2>
+<ol>
+<li>On the sending PC, press <strong>F</strong> and focus a file. Press <strong>:</strong> and run <code>relay send</code>.</li>
+<li>Run <code>relay status</code> to see the latest delivery. <strong>Holding</strong> means the file is staged on the relay for the destination.</li>
+<li>Start TapSend on the destination PC. It collects the file into the <strong>Relay</strong> folder inside its configured inbox. The sender's status changes to <strong>SAVED</strong> once the destination confirms.</li>
+</ol>
+<p>Keep the shared folder available until the destination collects the file. File Relay currently uses Windows endpoints and a network share. For delivery from Windows to an offline paired Android phone, use <a href="transfers.html#send-later">Send Later</a>.</p>
+</div>
+          <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/file-relay.md">View Markdown on GitHub</a></div>
+        </article>
+        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#set-up-the-route">Set up the route</a></li><li class="h2"><a href="#send-and-confirm-a-file">Send and confirm a file</a></li></ul></nav></aside>
+      </div>
+    </main>
+  </div>
+  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <dialog class="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
+    <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
+    <div class="search-scroll">
+      <p class="search-status" role="status"></p>
+      <ol class="search-results"></ol>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> Browse</span><span><kbd>Enter</kbd> Open</span></div>
+  </dialog>
+</body>
+</html>

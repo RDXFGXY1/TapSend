@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Keyboard shortcuts, tray mode, Explorer integration, and camera scanning">
+  <title>Windows desktop · TapSend Docs</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/search-index.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <div class="top-actions">
+        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
+        <a class="top-release" href="releases.html">Releases</a>
+      </div>
+    </div>
+  </header>
+  <div class="shell">
+    <nav id="guide-navigation" class="guide-nav" aria-label="Documentation"><div class="nav-group"><h2>Get started</h2><ul><li><a href="quick-start.html"><span>Quick start</span></a></li><li><a href="features.html"><span>Features</span></a></li><li><a href="windows.html" aria-current="page"><span>Windows desktop</span></a></li><li><a href="android.html"><span>Android</span></a></li><li><a href="browser.html"><span>Phone browser</span></a></li><li><a href="pairing.html"><span>Pairing and devices</span></a></li></ul></div><div class="nav-group"><h2>Workflows</h2><ul><li><a href="transfers.html"><span>Sending and receiving files</span></a></li><li><a href="download-recovery.html"><span>Download recovery</span></a></li><li><a href="messages.html"><span>Messages and Scratchpad</span></a></li><li><a href="paste-stack.html"><span>Paste Stack</span></a></li><li><a href="screen-share.html"><span>Screen Share</span></a></li><li><a href="freeze-and-grab.html"><span>Freeze &amp; Grab</span></a></li><li><a href="live-red-pen.html"><span>Live Red Pen</span></a></li><li><a href="folder-drop.html"><span>Throw to This Folder</span></a></li><li><a href="hold-this-for-me.html"><span>Hold This for Me</span></a></li><li><a href="file-relay.html"><span>File Relay</span></a></li></ul></div><div class="nav-group"><h2>Reference</h2><ul><li><a href="releases.html"><span>Releases and downloads</span></a></li><li><a href="troubleshooting.html"><span>Troubleshooting</span></a></li><li><a href="privacy-and-storage.html"><span>Privacy and storage</span></a></li><li><a href="cli-and-settings.html"><span>CLI and settings</span></a></li><li><a href="tui-2.html"><span>Terminal TUI reference</span></a></li><li><a href="development.html"><span>Development</span></a></li><li><a href="releasing.html"><span>Release maintenance</span></a></li></ul></div></nav>
+    <main id="main" tabindex="-1">
+      <div class="article-layout">
+        <article class="article">
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Get started</span></nav>
+          <h1>Windows desktop</h1>
+          <p class="article-intro">Keyboard shortcuts, tray mode, Explorer integration, and camera scanning</p>
+          <div class="prose"><h2 id="install-and-choose-preferences">Install and choose preferences</h2>
+<p>Run the Windows installer and choose where to install the program. The default is <code>C:\TapSend</code>. Choose a computer inbox, a private data folder, and a per-file upload limit from 1 to 64 GiB. The default limit is 8 GiB. If TapSend finds a saved profile, it offers to keep it. The inbox receives phone uploads, and private storage holds pairing and transfer state.</p>
+<p>The installer has English and Arabic options. The destination screen shows whether the program folder already exists. You can keep your current storage and pairing settings and choose whether to add a desktop shortcut or command-line access.</p>
+<p>Run the setup EXE by itself with an internet connection. When you click <strong>Install</strong>, setup downloads its matching package from GitHub Releases, verifies its checksum, and extracts the files into the program folder you selected. The desktop shortcut, command-line PATH entry, and opening the app after install are optional.</p>
+<p>If you extract the portable ZIP instead, keep its files together and open <code>TapSend-Desktop.exe</code>. On a fresh profile, use the arrows and <strong>Enter</strong> to edit the First-Run Setup fields and press <strong>S</strong> when ready. TapSend starts its server once preferences are saved. After setup, it starts the server when you open the app. <code>tapsend-tui.exe</code> opens the <a href="tui-2.html">console version</a> and uses its own controls.</p>
+<h2 id="keyboard-shortcuts">Keyboard shortcuts</h2>
+<div class="table-scroll" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>N</strong> or <strong>?</strong></td>
+<td>Open shortcut help</td>
+</tr>
+<tr>
+<td><strong>D</strong>, <strong>F</strong>, <strong>R</strong>, <strong>T</strong>, <strong>M</strong></td>
+<td>Dashboard, Files, Receive, Transfers, and Messages</td>
+</tr>
+<tr>
+<td><strong>V</strong></td>
+<td>Choose a phone. In the picker, use arrows or press <strong>V</strong> again to move, then <strong>Enter</strong> to select.</td>
+</tr>
+<tr>
+<td><strong>P</strong>, <strong>U</strong>, <strong>Y</strong></td>
+<td>Open pairing, refresh its QR/pass, or copy the pass from the pairing view</td>
+</tr>
+<tr>
+<td><strong>Space</strong>, <strong>S</strong></td>
+<td>Mark a file in Files, then send the marked files</td>
+</tr>
+<tr>
+<td><strong>Shift+S</strong></td>
+<td>Search by filename in the current folder. Mark results with <strong>Enter</strong>.</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Scan a QR displayed by a phone that is hosting a nearby file share</td>
+</tr>
+<tr>
+<td><strong>L</strong></td>
+<td>Open or close <a href="screen-share.html">Screen Share</a></td>
+</tr>
+<tr>
+<td><strong>K</strong>, <strong>Shift+V</strong></td>
+<td>Open Scratchpad or Paste Stack</td>
+</tr>
+<tr>
+<td><strong>Shift+R</strong>, <strong>Shift+H</strong></td>
+<td>Set a temporary folder drop or hold a focused file</td>
+</tr>
+<tr>
+<td><strong>Shift+J</strong>, <strong>:</strong></td>
+<td>Pair File Relay from the clipboard or open the command input</td>
+</tr>
+<tr>
+<td><strong>G</strong>, <strong>W</strong></td>
+<td>Open TapSend settings or Windows options</td>
+</tr>
+<tr>
+<td><strong>I</strong></td>
+<td>Open GitHub release updates</td>
+</tr>
+<tr>
+<td><strong>Q</strong></td>
+<td>Quit TapSend</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="check-for-updates">Check for updates</h2>
+<p>TapSend checks your repository's public GitHub releases when it starts after setup and every six hours while it is running. A newer stable Windows release with both the installer and ZIP shows <strong>[I] UPDATE</strong> in the title bar. When tray notifications are enabled, TapSend also shows a Windows notification. In the update panel, press <strong>Enter</strong> to open the official release and start the update with its installer when you are ready. Press <strong>R</strong> to check again.</p>
+<h2 id="receive-in-the-background">Receive in the background</h2>
+<ol>
+<li>Press <strong>W</strong> and enable <strong>Receive in background and show notifications</strong>.</li>
+<li>Close the desktop window. TapSend stays in the notification area and can continue receiving.</li>
+<li>Click the TapSend tray icon to reopen its window. To stop the server, right-click the icon and choose <strong>Quit TapSend</strong>.</li>
+</ol>
+<h2 id="send-from-file-explorer">Send from File Explorer</h2>
+<ol>
+<li>Press <strong>W</strong> and enable <strong>File Explorer Send to shortcut</strong>.</li>
+<li>In Explorer, select the files and right-click. On Windows 11, choose <strong>Show more options</strong> if needed.</li>
+<li>Choose <strong>Send to → TapSend Desktop</strong>. Review the files and select a recipient before sending.</li>
+</ol>
+<h2 id="scan-a-phones-share-qr">Scan a phone's share QR</h2>
+<p>Start a nearby file share on the phone. Press <strong>C</strong> on Windows and point the camera at the phone's displayed QR. The scanner uses the terminal-style preview and closes after it recognizes the link. Use <strong>Esc</strong> to cancel. Windows camera permission, the .NET 8 Runtime, and the scanner files included in the bundle are required.</p>
+<p>If the phone shares one file, TapSend downloads it to the computer inbox. For multiple files, press <strong>Y</strong> to download all, or press <strong>N</strong> to choose which ones to save. If the phone still needs to approve your computer, approve it there and press <strong>R</strong> to refresh.</p>
+<p>To pair an Android phone with the computer, use the opposite direction. Press <strong>P</strong> on Windows and scan that QR with the phone.</p>
+</div>
+          <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/windows.md">View Markdown on GitHub</a></div>
+        </article>
+        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#install-and-choose-preferences">Install and choose preferences</a></li><li class="h2"><a href="#keyboard-shortcuts">Keyboard shortcuts</a></li><li class="h2"><a href="#check-for-updates">Check for updates</a></li><li class="h2"><a href="#receive-in-the-background">Receive in the background</a></li><li class="h2"><a href="#send-from-file-explorer">Send from File Explorer</a></li><li class="h2"><a href="#scan-a-phones-share-qr">Scan a phone&#x27;s share QR</a></li></ul></nav></aside>
+      </div>
+    </main>
+  </div>
+  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <dialog class="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
+    <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
+    <div class="search-scroll">
+      <p class="search-status" role="status"></p>
+      <ol class="search-results"></ol>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> Browse</span><span><kbd>Enter</kbd> Open</span></div>
+  </dialog>
+</body>
+</html>

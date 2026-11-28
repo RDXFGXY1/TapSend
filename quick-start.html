@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Install, pair, and send your first file">
+  <title>Quick start · TapSend Docs</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/search-index.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <div class="top-actions">
+        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
+        <a class="top-release" href="releases.html">Releases</a>
+      </div>
+    </div>
+  </header>
+  <div class="shell">
+    <nav id="guide-navigation" class="guide-nav" aria-label="Documentation"><div class="nav-group"><h2>Get started</h2><ul><li><a href="quick-start.html" aria-current="page"><span>Quick start</span></a></li><li><a href="features.html"><span>Features</span></a></li><li><a href="windows.html"><span>Windows desktop</span></a></li><li><a href="android.html"><span>Android</span></a></li><li><a href="browser.html"><span>Phone browser</span></a></li><li><a href="pairing.html"><span>Pairing and devices</span></a></li></ul></div><div class="nav-group"><h2>Workflows</h2><ul><li><a href="transfers.html"><span>Sending and receiving files</span></a></li><li><a href="download-recovery.html"><span>Download recovery</span></a></li><li><a href="messages.html"><span>Messages and Scratchpad</span></a></li><li><a href="paste-stack.html"><span>Paste Stack</span></a></li><li><a href="screen-share.html"><span>Screen Share</span></a></li><li><a href="freeze-and-grab.html"><span>Freeze &amp; Grab</span></a></li><li><a href="live-red-pen.html"><span>Live Red Pen</span></a></li><li><a href="folder-drop.html"><span>Throw to This Folder</span></a></li><li><a href="hold-this-for-me.html"><span>Hold This for Me</span></a></li><li><a href="file-relay.html"><span>File Relay</span></a></li></ul></div><div class="nav-group"><h2>Reference</h2><ul><li><a href="releases.html"><span>Releases and downloads</span></a></li><li><a href="troubleshooting.html"><span>Troubleshooting</span></a></li><li><a href="privacy-and-storage.html"><span>Privacy and storage</span></a></li><li><a href="cli-and-settings.html"><span>CLI and settings</span></a></li><li><a href="tui-2.html"><span>Terminal TUI reference</span></a></li><li><a href="development.html"><span>Development</span></a></li><li><a href="releasing.html"><span>Release maintenance</span></a></li></ul></div></nav>
+    <main id="main" tabindex="-1">
+      <div class="article-layout">
+        <article class="article">
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Get started</span></nav>
+          <h1>Quick start</h1>
+          <p class="article-intro">Install, pair, and send your first file</p>
+          <div class="prose"><h2 id="install">Install</h2>
+<ul>
+<li><strong>Windows.</strong> Quit TapSend in the tray if it is already open. Run the installer to choose the program location, inbox, private storage, and upload limit. For portable use, extract the complete ZIP, open <code>TapSend-Desktop.exe</code>, and complete First-Run Setup if prompted.</li>
+<li><strong>Android.</strong> Install the matching APK on Android 13 or newer. Android can update an installed copy in place when the packages have matching signatures.</li>
+<li><strong>Linux.</strong> Extract the Linux archive and run <code>bin/tapsend</code> from a terminal. See the <a href="tui-2.html">terminal guide</a> for its controls.</li>
+<li><strong>Phone browser.</strong> Open the computer's pairing link. Follow <a href="browser.html">browser setup</a> if the browser warns about TapSend's local certificate.</li>
+</ul>
+<p>See <a href="releases.html">Releases and downloads</a> for the correct package.</p>
+<h2 id="pair-a-phone-with-windows">Pair a phone with Windows</h2>
+<ol>
+<li>Connect both devices to the same local network and open TapSend on Windows. The desktop app starts its server after first-run setup is complete.</li>
+<li>Press <strong>P</strong> on Windows to show the pairing QR.</li>
+<li>On Android, open <strong>Tools → Connect a PC</strong>, optionally set a device name, and choose <strong>Scan QR</strong>.</li>
+<li>If the phone asks for approval, press <strong>V</strong> on Windows, highlight its request, and press <strong>A</strong>.</li>
+</ol>
+<p>For camera-free setup, copy the pairing pass with <strong>Y</strong> on the Windows pairing screen. See <a href="pairing.html">Pairing and devices</a>.</p>
+<h2 id="send-your-first-file">Send your first file</h2>
+<p><strong>Windows to Android</strong></p>
+<ol>
+<li>Press <strong>V</strong>, highlight your phone, and press <strong>Enter</strong>.</li>
+<li>Press <strong>F</strong>, open the file's folder, and mark the file with <strong>Space</strong>. Press <strong>S</strong> to send the offer.</li>
+<li>Open TapSend on Android and accept the offer. Watch the desktop queue for the save confirmation.</li>
+</ol>
+<p><strong>Android to Windows</strong></p>
+<ol>
+<li>In TapSend on Android, select <strong>Computer → Send files</strong>, then pick the files and send the queue. You can also choose <strong>TapSend</strong> from Android's Share menu.</li>
+<li>When the phone reports <strong>Saved on computer</strong>, find the file in your computer inbox. Press <strong>R</strong> on Windows for the Receive view or check <strong>G → Computer inbox</strong> for its location.</li>
+</ol>
+<p>Press <strong>N</strong> on Windows for shortcut help. See <a href="transfers.html">Sending and receiving files</a> for more transfer options.</p>
+</div>
+          <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/quick-start.md">View Markdown on GitHub</a></div>
+        </article>
+        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#install">Install</a></li><li class="h2"><a href="#pair-a-phone-with-windows">Pair a phone with Windows</a></li><li class="h2"><a href="#send-your-first-file">Send your first file</a></li></ul></nav></aside>
+      </div>
+    </main>
+  </div>
+  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <dialog class="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
+    <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
+    <div class="search-scroll">
+      <p class="search-status" role="status"></p>
+      <ol class="search-results"></ol>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> Browse</span><span><kbd>Enter</kbd> Open</span></div>
+  </dialog>
+</body>
+</html>

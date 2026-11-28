@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Local data, pairing protection, and where files go">
+  <title>Privacy and storage · TapSend Docs</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/search-index.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <div class="top-actions">
+        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
+        <a class="top-release" href="releases.html">Releases</a>
+      </div>
+    </div>
+  </header>
+  <div class="shell">
+    <nav id="guide-navigation" class="guide-nav" aria-label="Documentation"><div class="nav-group"><h2>Get started</h2><ul><li><a href="quick-start.html"><span>Quick start</span></a></li><li><a href="features.html"><span>Features</span></a></li><li><a href="windows.html"><span>Windows desktop</span></a></li><li><a href="android.html"><span>Android</span></a></li><li><a href="browser.html"><span>Phone browser</span></a></li><li><a href="pairing.html"><span>Pairing and devices</span></a></li></ul></div><div class="nav-group"><h2>Workflows</h2><ul><li><a href="transfers.html"><span>Sending and receiving files</span></a></li><li><a href="download-recovery.html"><span>Download recovery</span></a></li><li><a href="messages.html"><span>Messages and Scratchpad</span></a></li><li><a href="paste-stack.html"><span>Paste Stack</span></a></li><li><a href="screen-share.html"><span>Screen Share</span></a></li><li><a href="freeze-and-grab.html"><span>Freeze &amp; Grab</span></a></li><li><a href="live-red-pen.html"><span>Live Red Pen</span></a></li><li><a href="folder-drop.html"><span>Throw to This Folder</span></a></li><li><a href="hold-this-for-me.html"><span>Hold This for Me</span></a></li><li><a href="file-relay.html"><span>File Relay</span></a></li></ul></div><div class="nav-group"><h2>Reference</h2><ul><li><a href="releases.html"><span>Releases and downloads</span></a></li><li><a href="troubleshooting.html"><span>Troubleshooting</span></a></li><li><a href="privacy-and-storage.html" aria-current="page"><span>Privacy and storage</span></a></li><li><a href="cli-and-settings.html"><span>CLI and settings</span></a></li><li><a href="tui-2.html"><span>Terminal TUI reference</span></a></li><li><a href="development.html"><span>Development</span></a></li><li><a href="releasing.html"><span>Release maintenance</span></a></li></ul></div></nav>
+    <main id="main" tabindex="-1">
+      <div class="article-layout">
+        <article class="article">
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Reference</span></nav>
+          <h1>Privacy and storage</h1>
+          <p class="article-intro">Local data, pairing protection, and where files go</p>
+          <div class="prose"><h2 id="connections">Connections</h2>
+<ul>
+<li><strong>Computer ↔ Android or phone browser.</strong> TapSend runs a local HTTPS server. Android checks the certificate fingerprint from pairing. A browser may require trust in the computer's local TapSend CA. Pairing links and passes are credentials. Share them privately and refresh them when needed.</li>
+<li><strong>Nearby phone sharing.</strong> The share uses local HTTP. Use a trusted Wi-Fi network or hotspot and stop the share after use.</li>
+<li><strong>Screen Share.</strong> Android prompts for capture and the chosen Windows viewer receives the frames. A regular session streams without automatic recording. A grab is stored on the PC only when you ask to save an image or recognized text. Live Red Pen also requires a separate Android opt-in.</li>
+<li><strong>File Relay.</strong> The relay folder carries encrypted contents. The destination confirms the save with an authenticated receipt. Keep the relay pass private because it contains the route and the key needed to read that route's transfers.</li>
+</ul>
+<h2 id="where-information-is-stored">Where information is stored</h2>
+<div class="table-scroll" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Location</th>
+<th>What's there</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows <code>%APPDATA%\TapSend\data\</code> by default</td>
+<td>Computer certificate and private keys, paired devices, transfer records, outgoing offers, Scratchpad, and Paste Stack</td>
+</tr>
+<tr>
+<td>Linux <code>~/.local/share/tapsend/</code> by default</td>
+<td>Computer data for the terminal app and server</td>
+</tr>
+<tr>
+<td>Computer inbox</td>
+<td>Normal Android and browser uploads. Check <strong>Settings → Computer inbox</strong> for the actual path. File Relay saves under its <code>Relay</code> subfolder.</td>
+</tr>
+<tr>
+<td>Android <code>Downloads/TapSend</code></td>
+<td>Finished downloads saved by the Android app</td>
+</tr>
+<tr>
+<td>Android app-private storage</td>
+<td>Pairing data, partial downloads, and pending Paste Stack deliveries</td>
+</tr>
+<tr>
+<td>Phone browser site storage</td>
+<td>Browser pairing and eligible partial download chunks</td>
+</tr>
+</tbody>
+</table></div>
+<p>For browser setup, move <code>tapsend-ca.crt</code> from your own computer to your phone. Keep <code>server.key</code> and the CA signing key private. If you change the private data directory or replace the certificate identity, use <a href="pairing.html">Pairing and devices</a> to reconnect.</p>
+</div>
+          <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/privacy-and-storage.md">View Markdown on GitHub</a></div>
+        </article>
+        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#connections">Connections</a></li><li class="h2"><a href="#where-information-is-stored">Where information is stored</a></li></ul></nav></aside>
+      </div>
+    </main>
+  </div>
+  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <dialog class="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
+    <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
+    <div class="search-scroll">
+      <p class="search-status" role="status"></p>
+      <ol class="search-results"></ol>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> Browse</span><span><kbd>Enter</kbd> Open</span></div>
+  </dialog>
+</body>
+</html>

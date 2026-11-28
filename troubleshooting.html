@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Connection, install, save, and playback problems">
+  <title>Troubleshooting · TapSend Docs</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/search-index.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <div class="top-actions">
+        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
+        <a class="top-release" href="releases.html">Releases</a>
+      </div>
+    </div>
+  </header>
+  <div class="shell">
+    <nav id="guide-navigation" class="guide-nav" aria-label="Documentation"><div class="nav-group"><h2>Get started</h2><ul><li><a href="quick-start.html"><span>Quick start</span></a></li><li><a href="features.html"><span>Features</span></a></li><li><a href="windows.html"><span>Windows desktop</span></a></li><li><a href="android.html"><span>Android</span></a></li><li><a href="browser.html"><span>Phone browser</span></a></li><li><a href="pairing.html"><span>Pairing and devices</span></a></li></ul></div><div class="nav-group"><h2>Workflows</h2><ul><li><a href="transfers.html"><span>Sending and receiving files</span></a></li><li><a href="download-recovery.html"><span>Download recovery</span></a></li><li><a href="messages.html"><span>Messages and Scratchpad</span></a></li><li><a href="paste-stack.html"><span>Paste Stack</span></a></li><li><a href="screen-share.html"><span>Screen Share</span></a></li><li><a href="freeze-and-grab.html"><span>Freeze &amp; Grab</span></a></li><li><a href="live-red-pen.html"><span>Live Red Pen</span></a></li><li><a href="folder-drop.html"><span>Throw to This Folder</span></a></li><li><a href="hold-this-for-me.html"><span>Hold This for Me</span></a></li><li><a href="file-relay.html"><span>File Relay</span></a></li></ul></div><div class="nav-group"><h2>Reference</h2><ul><li><a href="releases.html"><span>Releases and downloads</span></a></li><li><a href="troubleshooting.html" aria-current="page"><span>Troubleshooting</span></a></li><li><a href="privacy-and-storage.html"><span>Privacy and storage</span></a></li><li><a href="cli-and-settings.html"><span>CLI and settings</span></a></li><li><a href="tui-2.html"><span>Terminal TUI reference</span></a></li><li><a href="development.html"><span>Development</span></a></li><li><a href="releasing.html"><span>Release maintenance</span></a></li></ul></div></nav>
+    <main id="main" tabindex="-1">
+      <div class="article-layout">
+        <article class="article">
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Reference</span></nav>
+          <h1>Troubleshooting</h1>
+          <p class="article-intro">Connection, install, save, and playback problems</p>
+          <div class="prose"><h2 id="the-phone-cannot-pair-or-reconnect">The phone cannot pair or reconnect</h2>
+<ol>
+<li>Confirm TapSend is running and both devices are on a local network that allows them to reach each other. A guest Wi-Fi network can isolate devices.</li>
+<li>On Windows, check that the firewall allows TapSend on the active network profile and that the listen port, normally <code>8443</code>, is reachable.</li>
+<li>If the computer's IP changed, restart TapSend and display a fresh pairing QR with <strong>P</strong> and <strong>U</strong>. Scan it again. If the wrong network adapter appears in the pairing link, set <strong>Pairing host</strong> to the correct local address in Settings.</li>
+<li>If Android asks for approval, press <strong>V</strong> on Windows, highlight the request, and press <strong>A</strong>.</li>
+<li>If camera scanning is unavailable, copy the pairing pass from the Windows pairing screen with <strong>Y</strong>. On Android, <strong>Connect a PC → Why won’t it connect?</strong> shows checks for the current connection.</li>
+</ol>
+<h2 id="the-app-still-looks-like-the-older-build">The app still looks like the older build</h2>
+<p>On Windows, quit the old instance from the notification area. Extract the new ZIP together and open the new folder's <code>TapSend-Desktop.exe</code>. If launching through Explorer, check the <strong>Send to</strong> shortcut too. On Android, check which APK you installed. See <a href="releases.html">Releases and downloads</a> if Android rejects an update.</p>
+<h2 id="a-transfer-seems-stuck-or-the-file-is-missing">A transfer seems stuck or the file is missing</h2>
+<ul>
+<li><strong>Waiting for phone.</strong> Open TapSend on the selected phone and respond to the offer. Keep the computer reachable and the original file in place.</li>
+<li><strong>Browser save unconfirmed.</strong> Check the browser's downloads. The browser controls the final save when it takes over.</li>
+<li><strong>Saved under a different name.</strong> Android and Windows folder drops keep the existing file and report the numbered copy. Check <code>Downloads/TapSend</code> on Android or the inbox or drop folder shown for a Windows upload.</li>
+<li><strong>Interrupted download.</strong> Open the same file from the same connection and retry. See <a href="download-recovery.html">Download recovery</a> for storage and revision requirements.</li>
+<li><strong>Folder drop expired.</strong> Set the folder again with <strong>Shift+R</strong> and confirm the refreshed destination on Android.</li>
+</ul>
+<h2 id="screen-share-is-missing-blank-or-slow">Screen Share is missing, blank, or slow</h2>
+<ul>
+<li>Use the current builds on both devices. Click <strong>Screen Share</strong> or press <strong>L</strong> on Windows, choose the intended phone, then begin capture from <strong>Tools</strong> on Android.</li>
+<li>If the viewer does not open, make sure the full Windows ZIP was extracted and the .NET 8 Runtime is present.</li>
+<li>If the viewer opens but waits, confirm the Android capture prompt. Start a new session if Android has revoked that permission. Some protected apps can appear blank.</li>
+<li>If motion stutters, check local Wi-Fi quality and close competing large transfers. Frame rate varies with the devices and network.</li>
+<li>If arrows never appear, choose <strong>Share screen with Live Red Pen</strong> on Android, grant <strong>Display over other apps</strong>, and start the share again.</li>
+</ul>
+<h2 id="file-relay-still-says-holding">File Relay still says Holding</h2>
+<p>Verify both computers can write to the same network share and that the relay computer is awake. Start TapSend on the destination and check the <strong>Relay</strong> folder inside its inbox. Run <code>relay status</code> on the sender again. A missing or invalid confirmation needs investigation before the sender can treat the transfer as saved.</p>
+</div>
+          <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/troubleshooting.md">View Markdown on GitHub</a></div>
+        </article>
+        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#the-phone-cannot-pair-or-reconnect">The phone cannot pair or reconnect</a></li><li class="h2"><a href="#the-app-still-looks-like-the-older-build">The app still looks like the older build</a></li><li class="h2"><a href="#a-transfer-seems-stuck-or-the-file-is-missing">A transfer seems stuck or the file is missing</a></li><li class="h2"><a href="#screen-share-is-missing-blank-or-slow">Screen Share is missing, blank, or slow</a></li><li class="h2"><a href="#file-relay-still-says-holding">File Relay still says Holding</a></li></ul></nav></aside>
+      </div>
+    </main>
+  </div>
+  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <dialog class="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
+    <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
+    <div class="search-scroll">
+      <p class="search-status" role="status"></p>
+      <ol class="search-results"></ol>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> Browse</span><span><kbd>Enter</kbd> Open</span></div>
+  </dialog>
+</body>
+</html>

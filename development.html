@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Code layout, build commands, and checks">
+  <title>Development · TapSend Docs</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/search-index.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <div class="top-actions">
+        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
+        <a class="top-release" href="releases.html">Releases</a>
+      </div>
+    </div>
+  </header>
+  <div class="shell">
+    <nav id="guide-navigation" class="guide-nav" aria-label="Documentation"><div class="nav-group"><h2>Get started</h2><ul><li><a href="quick-start.html"><span>Quick start</span></a></li><li><a href="features.html"><span>Features</span></a></li><li><a href="windows.html"><span>Windows desktop</span></a></li><li><a href="android.html"><span>Android</span></a></li><li><a href="browser.html"><span>Phone browser</span></a></li><li><a href="pairing.html"><span>Pairing and devices</span></a></li></ul></div><div class="nav-group"><h2>Workflows</h2><ul><li><a href="transfers.html"><span>Sending and receiving files</span></a></li><li><a href="download-recovery.html"><span>Download recovery</span></a></li><li><a href="messages.html"><span>Messages and Scratchpad</span></a></li><li><a href="paste-stack.html"><span>Paste Stack</span></a></li><li><a href="screen-share.html"><span>Screen Share</span></a></li><li><a href="freeze-and-grab.html"><span>Freeze &amp; Grab</span></a></li><li><a href="live-red-pen.html"><span>Live Red Pen</span></a></li><li><a href="folder-drop.html"><span>Throw to This Folder</span></a></li><li><a href="hold-this-for-me.html"><span>Hold This for Me</span></a></li><li><a href="file-relay.html"><span>File Relay</span></a></li></ul></div><div class="nav-group"><h2>Reference</h2><ul><li><a href="releases.html"><span>Releases and downloads</span></a></li><li><a href="troubleshooting.html"><span>Troubleshooting</span></a></li><li><a href="privacy-and-storage.html"><span>Privacy and storage</span></a></li><li><a href="cli-and-settings.html"><span>CLI and settings</span></a></li><li><a href="tui-2.html"><span>Terminal TUI reference</span></a></li><li><a href="development.html" aria-current="page"><span>Development</span></a></li><li><a href="releasing.html"><span>Release maintenance</span></a></li></ul></div></nav>
+    <main id="main" tabindex="-1">
+      <div class="article-layout">
+        <article class="article">
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Reference</span></nav>
+          <h1>Development</h1>
+          <p class="article-intro">Code layout, build commands, and checks</p>
+          <div class="prose"><h2 id="source-layout">Source layout</h2>
+<div class="table-scroll" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/RDXFGXY1/TapSend/tree/tap-send/tui">tui/</a></td>
+<td>Rust terminal UI, Windows desktop host, file picker, and desktop controls</td>
+</tr>
+<tr>
+<td><a href="https://github.com/RDXFGXY1/TapSend/tree/tap-send/cmd/tapsend">cmd/tapsend/</a></td>
+<td>Go command-line launcher and commands</td>
+</tr>
+<tr>
+<td><a href="https://github.com/RDXFGXY1/TapSend/tree/tap-send/cmd/tapsend-server">cmd/tapsend-server/</a></td>
+<td>Local server entry point</td>
+</tr>
+<tr>
+<td><a href="https://github.com/RDXFGXY1/TapSend/tree/tap-send/internal/server">internal/server/</a></td>
+<td>HTTPS transfers, pairing routes, desktop control, Paste Stack, and Screen Share</td>
+</tr>
+<tr>
+<td><a href="https://github.com/RDXFGXY1/TapSend/tree/tap-send/internal/server/web">internal/server/web/</a></td>
+<td>Phone browser and Portal Mode</td>
+</tr>
+<tr>
+<td><a href="https://github.com/RDXFGXY1/TapSend/tree/tap-send/internal/relay">internal/relay/</a></td>
+<td>Encrypted File Relay queue and save confirmations</td>
+</tr>
+<tr>
+<td><a href="https://github.com/RDXFGXY1/TapSend/tree/tap-send/android">android/</a></td>
+<td>Android sharing, pairing, recovery, capture, and annotations</td>
+</tr>
+<tr>
+<td><a href="https://github.com/RDXFGXY1/TapSend/tree/tap-send/camera-scanner">camera-scanner/</a></td>
+<td>Windows QR scanner and live screen viewer</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="build">Build</h2>
+<p>Requirements for this checkout include Go 1.24 or newer, Rust with edition 2024 support, and platform build tools. The Windows scanner and screen viewer use the .NET 8 SDK to build and the .NET 8 Runtime to run. Android uses Java 17, SDK Platform 35, and Android Build Tools 35.0.0.</p>
+<p>On Linux, run <code>make build</code> and launch <code>./bin/tapsend</code>. Run <code>make portable-linux</code> after installing the <code>x86_64-unknown-linux-musl</code> Rust target to create the portable archive.</p>
+<p>On Windows, run these commands from the repository root.</p>
+<pre><code class="language-powershell">New-Item -ItemType Directory -Force dist/windows | Out-Null
+go build -o dist/windows/tapsend.exe ./cmd/tapsend
+go build -o dist/windows/tapsend-server.exe ./cmd/tapsend-server
+cargo build --release --manifest-path tui/Cargo.toml
+dotnet publish camera-scanner/TapSend.CameraScanner.csproj -c Release -r win-x64 --self-contained false -o dist/windows/camera
+</code></pre>
+<p>Copy <code>tui/target/release/tapsend-desktop.exe</code> into <code>dist/windows</code> as <code>TapSend-Desktop.exe</code>. Copy the Rust <code>tapsend.exe</code> into the same folder as <code>tapsend-tui.exe</code>. Put the published camera helper files directly alongside the desktop EXE and preserve their runtime folder structure.</p>
+<p>For Android, open <code>android/</code> in Android Studio and build the <code>app</code> module, or run <code>./gradlew :app:assembleDebug</code> from that directory on a shell that can run the checked-in wrapper. The APK is under <code>android/app/build/outputs/apk/debug/</code>.</p>
+<h2 id="verify-changes">Verify changes</h2>
+<pre><code class="language-text">go test ./...
+cargo test --manifest-path tui/Cargo.toml
+node --check internal/server/web/app.js
+node --check internal/server/web/portal.js
+</code></pre>
+<p>Smoke-test the relevant workflow using the packaged binaries. An emulator can test Android UI and capture. Check Wi-Fi behavior, camera permissions, save handling, and installation on the devices you plan to support before publishing.</p>
+<p>See <a href="releasing.html">Release maintenance</a> for packaging and signing.</p>
+</div>
+          <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/development.md">View Markdown on GitHub</a></div>
+        </article>
+        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#source-layout">Source layout</a></li><li class="h2"><a href="#build">Build</a></li><li class="h2"><a href="#verify-changes">Verify changes</a></li></ul></nav></aside>
+      </div>
+    </main>
+  </div>
+  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <dialog class="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
+    <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
+    <div class="search-scroll">
+      <p class="search-status" role="status"></p>
+      <ol class="search-results"></ol>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> Browse</span><span><kbd>Enter</kbd> Open</span></div>
+  </dialog>
+</body>
+</html>

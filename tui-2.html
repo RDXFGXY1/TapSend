@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Controls for the console app on Linux and Windows">
+  <title>TapSend console TUI · TapSend Docs</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/search-index.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <div class="top-actions">
+        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
+        <a class="top-release" href="releases.html">Releases</a>
+      </div>
+    </div>
+  </header>
+  <div class="shell">
+    <nav id="guide-navigation" class="guide-nav" aria-label="Documentation"><div class="nav-group"><h2>Get started</h2><ul><li><a href="quick-start.html"><span>Quick start</span></a></li><li><a href="features.html"><span>Features</span></a></li><li><a href="windows.html"><span>Windows desktop</span></a></li><li><a href="android.html"><span>Android</span></a></li><li><a href="browser.html"><span>Phone browser</span></a></li><li><a href="pairing.html"><span>Pairing and devices</span></a></li></ul></div><div class="nav-group"><h2>Workflows</h2><ul><li><a href="transfers.html"><span>Sending and receiving files</span></a></li><li><a href="download-recovery.html"><span>Download recovery</span></a></li><li><a href="messages.html"><span>Messages and Scratchpad</span></a></li><li><a href="paste-stack.html"><span>Paste Stack</span></a></li><li><a href="screen-share.html"><span>Screen Share</span></a></li><li><a href="freeze-and-grab.html"><span>Freeze &amp; Grab</span></a></li><li><a href="live-red-pen.html"><span>Live Red Pen</span></a></li><li><a href="folder-drop.html"><span>Throw to This Folder</span></a></li><li><a href="hold-this-for-me.html"><span>Hold This for Me</span></a></li><li><a href="file-relay.html"><span>File Relay</span></a></li></ul></div><div class="nav-group"><h2>Reference</h2><ul><li><a href="releases.html"><span>Releases and downloads</span></a></li><li><a href="troubleshooting.html"><span>Troubleshooting</span></a></li><li><a href="privacy-and-storage.html"><span>Privacy and storage</span></a></li><li><a href="cli-and-settings.html"><span>CLI and settings</span></a></li><li><a href="tui-2.html" aria-current="page"><span>Terminal TUI reference</span></a></li><li><a href="development.html"><span>Development</span></a></li><li><a href="releasing.html"><span>Release maintenance</span></a></li></ul></div></nav>
+    <main id="main" tabindex="-1">
+      <div class="article-layout">
+        <article class="article">
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Reference</span></nav>
+          <h1>TapSend console TUI</h1>
+          <p class="article-intro">Controls for the console app on Linux and Windows</p>
+          <div class="prose"><p>This page describes the console interface on Linux and Windows. On Windows, run <code>tapsend-tui.exe</code> inside Windows Terminal or Command Prompt. Use the <a href="windows.html">Windows desktop guide</a> for the standalone <code>TapSend-Desktop.exe</code> window and its letter shortcuts.</p>
+<p>On Windows, <strong>C</strong> scans a QR displayed by a phone that is hosting a nearby share. Press <strong>Esc</strong> to cancel or <strong>R</strong> to refresh the file list after the scan. TapSend downloads a single shared file directly. For multiple files, press <strong>Y</strong> to download all, or press <strong>N</strong> and use arrows and <strong>Space</strong> to choose files, then press <strong>Enter</strong> to download. Keep the scanner files alongside the TapSend executables. The scanner requires the .NET 8 Runtime and Windows camera permission. For computer pairing, scan the computer's QR from Android.</p>
+<p>On Linux, build with
+<code>cargo build --release --manifest-path tui/Cargo.toml</code> and
+<code>go build -o tui/target/release/tapsend-server ./cmd/tapsend-server</code> and
+<code>go build -o tui/target/release/tapsend ./cmd/tapsend</code>, then run
+<code>./tui/target/release/tapsend</code> in an interactive terminal.</p>
+<p>The terminal interface targets Linux terminals and Windows 10/11 VT-capable consoles.
+Windows Terminal is recommended. No Nerd Font or GUI dependency is required.
+Use at least 48 columns by 12 rows; the persistent sidebar appears at 100 columns.
+The reference dashboard appears at 130 columns by 34 rows; 160 by 45 or larger is recommended. It includes Unicode icons, solid borders, five metric panels, transfer rows, a vertical network graph, device/file panels and connection logs.</p>
+<div class="table-scroll" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1–5 / Tab</td>
+<td>Dashboard, Files, Devices, Transfers, Messages</td>
+</tr>
+<tr>
+<td>F / D</td>
+<td>Files / devices; D also requests a device refresh</td>
+</tr>
+<tr>
+<td>Up/Down, J/K</td>
+<td>Browse files</td>
+</tr>
+<tr>
+<td>Up/Down on Dashboard</td>
+<td>Select a transfer in the queue</td>
+</tr>
+<tr>
+<td>Space on Dashboard</td>
+<td>Open the selected completed received file (RX) with the OS default app</td>
+</tr>
+<tr>
+<td>Enter / Backspace</td>
+<td>Open folder / parent folder</td>
+</tr>
+<tr>
+<td>Space</td>
+<td>Mark a file</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Start receiving; on Files, start sharing selected/focused files</td>
+</tr>
+<tr>
+<td>A</td>
+<td>Add selected/focused files from Files while sharing</td>
+</tr>
+<tr>
+<td>P</td>
+<td>Cycle pairing QR, manual details, and current page</td>
+</tr>
+<tr>
+<td>C (Windows)</td>
+<td>Scan a phone-share QR with the laptop camera</td>
+</tr>
+<tr>
+<td>R</td>
+<td>New pairing code</td>
+</tr>
+<tr>
+<td>T</td>
+<td>Stop/resume downloads (not resumable per-file pause)</td>
+</tr>
+<tr>
+<td>M</td>
+<td>Compose a message</td>
+</tr>
+<tr>
+<td>G / ? / ;</td>
+<td>Settings / help / command palette</td>
+</tr>
+<tr>
+<td>Q / Ctrl+C</td>
+<td>Exit and restore terminal settings</td>
+</tr>
+</tbody>
+</table></div>
+<p>Settings controls the inbox, private data folder, starting folder, hidden files,
+listen address, pairing host, direct join limit, upload size limit, and local
+Portal Mode. Press G, use arrows and Enter to edit, and press S to save. Changing
+the private data folder starts a new device identity after restarting the share.
+Connection and upload settings apply to new shares, not an active session.</p>
+<p>Transfer statistics come from the server. TX means computer to phone; RX means
+phone to computer. Progress and ETA describe individual HTTP requests, including
+parallel ranges, rather than claiming a whole file is complete. <code>served</code> means
+the HTTP response finished; <code>saved</code> means an incoming file reached the inbox.
+Unknown lengths display no percentage or ETA. Network history uses the recent
+bounded log window, auto-scales, and shows last-reported rates. RTT is the latest
+phone report; absent measurements remain unavailable. Saved devices are not
+automatically labelled online.</p>
+<p>Windows builds and terminal navigation were checked locally. Linux and Windows
+CI checks are defined in <code>.github/workflows/tui-check.yml</code>; they run after these
+changes are pushed. Linux runtime and separate Windows 10/11 device tests are
+still required; CI runners do not replace those checks.</p>
+</div>
+          <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/tui-2.md">View Markdown on GitHub</a></div>
+        </article>
+        
+      </div>
+    </main>
+  </div>
+  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <dialog class="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
+    <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
+    <div class="search-scroll">
+      <p class="search-status" role="status"></p>
+      <ol class="search-results"></ol>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> Browse</span><span><kbd>Enter</kbd> Open</span></div>
+  </dialog>
+</body>
+</html>

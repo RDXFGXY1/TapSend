@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Commands and persistent settings">
+  <title>CLI and settings · TapSend Docs</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/search-index.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <div class="top-actions">
+        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
+        <a class="top-release" href="releases.html">Releases</a>
+      </div>
+    </div>
+  </header>
+  <div class="shell">
+    <nav id="guide-navigation" class="guide-nav" aria-label="Documentation"><div class="nav-group"><h2>Get started</h2><ul><li><a href="quick-start.html"><span>Quick start</span></a></li><li><a href="features.html"><span>Features</span></a></li><li><a href="windows.html"><span>Windows desktop</span></a></li><li><a href="android.html"><span>Android</span></a></li><li><a href="browser.html"><span>Phone browser</span></a></li><li><a href="pairing.html"><span>Pairing and devices</span></a></li></ul></div><div class="nav-group"><h2>Workflows</h2><ul><li><a href="transfers.html"><span>Sending and receiving files</span></a></li><li><a href="download-recovery.html"><span>Download recovery</span></a></li><li><a href="messages.html"><span>Messages and Scratchpad</span></a></li><li><a href="paste-stack.html"><span>Paste Stack</span></a></li><li><a href="screen-share.html"><span>Screen Share</span></a></li><li><a href="freeze-and-grab.html"><span>Freeze &amp; Grab</span></a></li><li><a href="live-red-pen.html"><span>Live Red Pen</span></a></li><li><a href="folder-drop.html"><span>Throw to This Folder</span></a></li><li><a href="hold-this-for-me.html"><span>Hold This for Me</span></a></li><li><a href="file-relay.html"><span>File Relay</span></a></li></ul></div><div class="nav-group"><h2>Reference</h2><ul><li><a href="releases.html"><span>Releases and downloads</span></a></li><li><a href="troubleshooting.html"><span>Troubleshooting</span></a></li><li><a href="privacy-and-storage.html"><span>Privacy and storage</span></a></li><li><a href="cli-and-settings.html" aria-current="page"><span>CLI and settings</span></a></li><li><a href="tui-2.html"><span>Terminal TUI reference</span></a></li><li><a href="development.html"><span>Development</span></a></li><li><a href="releasing.html"><span>Release maintenance</span></a></li></ul></div></nav>
+    <main id="main" tabindex="-1">
+      <div class="article-layout">
+        <article class="article">
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Reference</span></nav>
+          <h1>CLI and settings</h1>
+          <p class="article-intro">Commands and persistent settings</p>
+          <div class="prose"><p>This document describes the command-line interface and persistent settings. For Windows desktop shortcuts, see <a href="windows.html">Windows desktop</a>.</p>
+<h2 id="commands">Commands</h2>
+<pre><code class="language-text">tabsend                                      Open the terminal interface
+tabsend devices                              List paired devices and their IDs
+tabsend send --device &quot;My Phone&quot; --path photo.jpg
+tabsend send -d &quot;My Phone&quot; -p photo.jpg
+tabsend send -p photo.jpg -d &quot;My Phone&quot;      Named options can appear in either order
+tabsend send &quot;My Phone&quot; photo.jpg            Positional shorthand
+tabsend send                                 Choose a device and file interactively
+tabsend receive                              Start phone uploads with no PC file selected
+tabsend status                               Show the active transfer and its result
+</code></pre>
+<p><code>--device</code> (<code>-d</code>) accepts a saved device name or ID. Quote names containing spaces. If a name is ambiguous, use the ID shown by <code>tabsend devices</code>.</p>
+<p><code>--path</code> (<code>-p</code>) accepts a local file path. Repeat it for several files. You can mix named options with one positional value, as in <code>tabsend send -d &quot;My Phone&quot; photo.jpg</code>. With two positional values, use <code>DEVICE PATH</code> order. Quote paths containing spaces. Use <code>--</code> before a positional path beginning with <code>-</code>.</p>
+<p>When a value is missing in an interactive terminal, TapSend prompts for it. In scripts, provide the recipient and file paths explicitly. Run <code>tabsend send --help</code> for examples.</p>
+<h2 id="send-flow">Send flow</h2>
+<ol>
+<li>Resolve the device name to a unique paired device ID and validate each path before opening a share.</li>
+<li>Start a share restricted to that device. A previously paired Android app reconnects without a new QR code.</li>
+<li>Review the offer on the phone and accept or decline it.</li>
+<li>Use <code>tabsend status</code> to check progress. TapSend reports a confirmed save when the phone finishes writing the file.</li>
+<li>Keep the sender command running until completion or cancellation. The standalone Windows app has a separate persistent <a href="transfers.html#send-later">Send Later</a> queue.</li>
+</ol>
+<h2 id="terminal-settings">Terminal settings</h2>
+<p>Press <strong>G</strong> for Settings. Use arrows or Tab to move, Enter to edit or toggle, <strong>D</strong> to load defaults, <strong>S</strong> to save, and <strong>Esc</strong> to close. Press Esc again to discard unsaved changes. The CLI equivalents are <code>tabsend settings</code>, <code>tabsend settings set</code>, <code>tabsend settings defaults</code>, and <code>tabsend settings reset</code>.</p>
+<div class="table-scroll" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Setting</th>
+<th>Default and behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transfers</td>
+<td>Computer inbox folder</td>
+<td>Current TapSend data directory's <code>inbox/</code>; controls files uploaded <strong>to the computer</strong></td>
+</tr>
+<tr>
+<td>Browser</td>
+<td>Starting folder</td>
+<td>Current directory by default; must be an absolute path when set</td>
+</tr>
+<tr>
+<td>Browser</td>
+<td>Show hidden files</td>
+<td>Off by default; applies when the TUI opens and immediately after saving</td>
+</tr>
+<tr>
+<td>Connection</td>
+<td>Listen address</td>
+<td><code>:8443</code> by default; binds the server to an address and port</td>
+</tr>
+<tr>
+<td>Connection</td>
+<td>Pairing host</td>
+<td>Automatic by default; overrides the host/IP in pairing links and QR codes, without changing the bind address</td>
+</tr>
+<tr>
+<td>Devices</td>
+<td>Direct joins</td>
+<td><code>2</code> by default; number of paired phones that can join before sender approval, from 1 to 8</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>Private data folder</td>
+<td>Platform-specific TapSend data directory. See <a href="privacy-and-storage.html">Privacy and storage</a>.</td>
+</tr>
+<tr>
+<td>Transfers</td>
+<td>Upload limit</td>
+<td>8 GiB by default on the server. The setting accepts 1–64 GiB. Client limits can also apply.</td>
+</tr>
+<tr>
+<td>Connection</td>
+<td>Portal Mode</td>
+<td>Enabled by default. Change it with <code>--portal-enabled=false</code> or through Settings.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Connection and direct join changes take effect when a new share starts. The pairing host must be reachable from the phone and covered by the existing server certificate; TapSend reports a mismatch when a share starts. The starting folder and hidden-file preference apply to the terminal interface; the Android download folder remains controlled by the Android app.</p>
+<p>Android downloads go to <code>Downloads/TapSend</code>. The computer inbox setting applies to uploads received by the computer.</p>
+<h2 id="file-relay-commands">File Relay commands</h2>
+<p>The CLI exposes <code>relay create SHARED_FOLDER</code>, <code>relay connect</code> (reads the pass from standard input), <code>relay send FILE</code>, and <code>relay status</code>. See the <a href="file-relay.html">File Relay guide</a> for the Windows walkthrough.</p>
+</div>
+          <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/cli-and-settings.md">View Markdown on GitHub</a></div>
+        </article>
+        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#commands">Commands</a></li><li class="h2"><a href="#send-flow">Send flow</a></li><li class="h2"><a href="#terminal-settings">Terminal settings</a></li><li class="h2"><a href="#file-relay-commands">File Relay commands</a></li></ul></nav></aside>
+      </div>
+    </main>
+  </div>
+  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <dialog class="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
+    <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
+    <div class="search-scroll">
+      <p class="search-status" role="status"></p>
+      <ol class="search-results"></ol>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> Browse</span><span><kbd>Enter</kbd> Open</span></div>
+  </dialog>
+</body>
+</html>

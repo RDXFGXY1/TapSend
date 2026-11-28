@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="The send queue, Send Later, incoming files, duplicate names, and transfer states">
+  <title>Sending and receiving files · TapSend Docs</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/search-index.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="TapSend documentation home"><span class="brand-icon" aria-hidden="true">&gt;_</span><strong>TapSend</strong><span class="brand-section">/ DOCS</span></a>
+      <div class="top-actions">
+        <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
+        <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
+        <a class="top-release" href="releases.html">Releases</a>
+      </div>
+    </div>
+  </header>
+  <div class="shell">
+    <nav id="guide-navigation" class="guide-nav" aria-label="Documentation"><div class="nav-group"><h2>Get started</h2><ul><li><a href="quick-start.html"><span>Quick start</span></a></li><li><a href="features.html"><span>Features</span></a></li><li><a href="windows.html"><span>Windows desktop</span></a></li><li><a href="android.html"><span>Android</span></a></li><li><a href="browser.html"><span>Phone browser</span></a></li><li><a href="pairing.html"><span>Pairing and devices</span></a></li></ul></div><div class="nav-group"><h2>Workflows</h2><ul><li><a href="transfers.html" aria-current="page"><span>Sending and receiving files</span></a></li><li><a href="download-recovery.html"><span>Download recovery</span></a></li><li><a href="messages.html"><span>Messages and Scratchpad</span></a></li><li><a href="paste-stack.html"><span>Paste Stack</span></a></li><li><a href="screen-share.html"><span>Screen Share</span></a></li><li><a href="freeze-and-grab.html"><span>Freeze &amp; Grab</span></a></li><li><a href="live-red-pen.html"><span>Live Red Pen</span></a></li><li><a href="folder-drop.html"><span>Throw to This Folder</span></a></li><li><a href="hold-this-for-me.html"><span>Hold This for Me</span></a></li><li><a href="file-relay.html"><span>File Relay</span></a></li></ul></div><div class="nav-group"><h2>Reference</h2><ul><li><a href="releases.html"><span>Releases and downloads</span></a></li><li><a href="troubleshooting.html"><span>Troubleshooting</span></a></li><li><a href="privacy-and-storage.html"><span>Privacy and storage</span></a></li><li><a href="cli-and-settings.html"><span>CLI and settings</span></a></li><li><a href="tui-2.html"><span>Terminal TUI reference</span></a></li><li><a href="development.html"><span>Development</span></a></li><li><a href="releasing.html"><span>Release maintenance</span></a></li></ul></div></nav>
+    <main id="main" tabindex="-1">
+      <div class="article-layout">
+        <article class="article">
+          <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Workflows</span></nav>
+          <h1>Sending and receiving files</h1>
+          <p class="article-intro">The send queue, Send Later, incoming files, duplicate names, and transfer states</p>
+          <div class="prose"><h2 id="send-to-a-specific-phone">Send to a specific phone</h2>
+<ol>
+<li>Press <strong>V</strong> on Windows and select a paired phone with <strong>Enter</strong>.</li>
+<li>Press <strong>F</strong> and browse to the files. Use <strong>Space</strong> to mark each file. To search the current folder, press <strong>Shift+S</strong>, type part of a filename, mark matches with <strong>Enter</strong>, and close search with <strong>Esc</strong>.</li>
+<li>Press <strong>S</strong> to send the marked files. The target can accept or decline the offer.</li>
+<li>Check the queue in Files or open the <strong>Transfers</strong> view with <strong>T</strong>.</li>
+</ol>
+<div class="table-scroll" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>State</th>
+<th>What happened</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Waiting for phone</strong></td>
+<td>The offer is queued for the paired phone. It can respond when it opens TapSend again.</td>
+</tr>
+<tr>
+<td><strong>Accepted / downloading</strong></td>
+<td>The recipient accepted the offer. TapSend reports progress as data transfers.</td>
+</tr>
+<tr>
+<td><strong>Saved</strong></td>
+<td>TapSend received confirmation that the destination saved the file.</td>
+</tr>
+<tr>
+<td><strong>Browser save unconfirmed</strong></td>
+<td>The download reached the browser, which took over saving the file. Check the browser's downloads.</td>
+</tr>
+<tr>
+<td><strong>Declined / failed</strong></td>
+<td>The recipient declined, the file changed or became unavailable, or the transfer hit an error. Check the row for details.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="send-later">Send Later</h2>
+<p>Use the same <strong>V → F → Space → S</strong> flow while the phone is offline. Desktop offers survive a restart. Keep the source files in place and unchanged until the phone confirms the save. The PC must be reachable again for the phone to accept and download. For PC-to-PC delivery while the destination is offline, see <a href="file-relay.html">File Relay</a>.</p>
+<h2 id="receive-from-android">Receive from Android</h2>
+<p>Open TapSend on Windows and leave it running. On the phone choose <strong>Computer → Send files</strong>, or share files to TapSend from another app. TapSend normally saves uploads in the computer inbox configured under <strong>G</strong>. <strong>R</strong> opens the Receive view. With a <a href="folder-drop.html">folder drop</a>, the Android confirmation shows the chosen destination before sending.</p>
+<p>Android downloads are saved under <code>Downloads/TapSend</code>. When a name is taken, TapSend keeps the existing file and reports the numbered name it saved. A folder drop on Windows also preserves the existing file. The normal Windows inbox uses a unique incoming filename.</p>
+<p>For browser-based uploads and the Portal Mode arrival display, see <a href="browser.html">Phone browser</a>.</p>
+</div>
+          <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/transfers.md">View Markdown on GitHub</a></div>
+        </article>
+        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#send-to-a-specific-phone">Send to a specific phone</a></li><li class="h2"><a href="#send-later">Send Later</a></li><li class="h2"><a href="#receive-from-android">Receive from Android</a></li></ul></nav></aside>
+      </div>
+    </main>
+  </div>
+  <footer class="footer"><div><a href="index.html">TapSend Docs</a><a href="https://github.com/RDXFGXY1/TapSend">Source on GitHub</a></div></footer>
+  <dialog class="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-header"><h2 id="search-title">Search documentation</h2><button type="submit" aria-label="Close search">Esc</button></form>
+    <label class="search-field"><span class="search-icon" aria-hidden="true"></span><span class="sr-only">Search terms</span><input type="search" placeholder="Find a guide or command…" autocomplete="off"></label>
+    <div class="search-scroll">
+      <p class="search-status" role="status"></p>
+      <ol class="search-results"></ol>
+    </div>
+    <div class="search-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> Browse</span><span><kbd>Enter</kbd> Open</span></div>
+  </dialog>
+</body>
+</html>
