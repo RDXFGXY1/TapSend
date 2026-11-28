@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 
 	"tapsend/internal/config"
 	"tapsend/internal/qr"
@@ -35,14 +38,33 @@ func main() {
 		return
 	}
 	var files fileList
+	defaults := config.Default()
+	listen := flag.String("listen", "", "HTTPS listen address (default "+defaults.ListenAddress+")")
+	data := flag.String("data-dir", "", "private TapSend data directory")
+	apk := flag.String("share-apk", "", "temporarily serve one Android APK and print its download QR")
+	apkHost := flag.String("apk-host", "", "private IPv4 address to use for the APK share")
+	flag.Var(&files, "file", "file to share (repeatable)")
+	flag.Parse()
+	if *apk != "" {
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+		if err := server.ShareAPK(ctx, *apk, *apkHost, os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
-	flag.StringVar(&cfg.ListenAddress, "listen", cfg.ListenAddress, "HTTPS listen address")
-	flag.StringVar(&cfg.DataDirectory, "data-dir", cfg.DataDirectory, "private TapSend data directory")
-	flag.Var(&files, "file", "file to share (repeatable)")
-	flag.Parse()
+	flag.Visit(func(f *flag.Flag) {
+		switch f.Name {
+		case "listen":
+			cfg.ListenAddress = *listen
+		case "data-dir":
+			cfg.DataDirectory = *data
+		}
+	})
 	cfg.SharedFiles = files
 
 	app, err := server.New(cfg)

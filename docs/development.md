@@ -1,5 +1,22 @@
 # Development
 
+## Interactive Linux installer
+
+Download and run the installer on Linux.
+
+```bash
+curl -fsSLo install.sh https://raw.githubusercontent.com/RDXFGXY1/TapSend/tap-send/install.sh
+bash install.sh
+```
+
+Run `bash install.sh --check` for a dependency table. The installer checks Go 1.24+, Rust and Cargo 1.88+, a compiler, and the other command-line tools. It asks before installing dependencies or building TapSend. System packages can be installed through APT, DNF, or Pacman. The Go and Rust toolchains can be installed for your user.
+
+If you choose to build the Android app on x86-64 Linux, the installer checks the JDK, Android SDK platform 35, and build tools 35.0.0. It asks before downloading missing components and lets you review the Android SDK licenses. It uses the repository's Gradle wrapper and saves the debug APK under `${XDG_DATA_HOME:-$HOME/.local/share}/tapsend/builds/`.
+
+After a successful APK build, TapSend starts a temporary download and prints a QR. Connect the phone and PC to the same network, scan the QR with the phone camera, and open the downloaded APK. The browser may ask you to trust the local HTTPS connection. You can also use the printed URL. Press **Ctrl+C** on the PC when you finish. If the PC picks the wrong network adapter, rerun setup with `TAPSEND_APK_HOST` set to the PC's local IPv4 address.
+
+Android 13 or later is required. The APK is debug-signed. Android updates an existing installation only if the signing key matches.
+
 ## Source layout
 
 | Path | Responsibility |
@@ -15,7 +32,7 @@
 
 ## Build
 
-Requirements for this checkout include Go 1.24 or newer, Rust with edition 2024 support, and platform build tools. The Windows scanner and screen viewer use the .NET 8 SDK to build and the .NET 8 Runtime to run. Android uses Java 17, SDK Platform 35, and Android Build Tools 35.0.0.
+Requirements for this checkout include Go 1.24 or newer, Rust 1.88 or newer, and platform build tools. The Windows scanner and screen viewer use the .NET 8 SDK to build and the .NET 8 Runtime to run. Android uses Java 17, SDK Platform 35, and Android Build Tools 35.0.0.
 
 On Linux, run `make build` and launch `./bin/tapsend`. Run `make portable-linux` after installing the `x86_64-unknown-linux-musl` Rust target to create the portable archive.
 
