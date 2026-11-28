@@ -19,7 +19,7 @@
       <div class="top-actions">
         <button class="menu-button" type="button" aria-controls="guide-navigation" aria-expanded="false">Guides</button>
         <button class="search-button" type="button" aria-label="Search docs" aria-haspopup="dialog"><span class="search-icon" aria-hidden="true"></span><span>Search docs</span><kbd>/</kbd></button>
-        <a class="top-release" href="releases.html">Releases</a>
+        <a class="top-release" href="releases.html">Downloads</a>
       </div>
     </div>
   </header>
@@ -31,7 +31,16 @@
           <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Docs</a> <span aria-hidden="true">/</span> <span>Reference</span></nav>
           <h1>Development</h1>
           <p class="article-intro">Code layout, build commands, and checks</p>
-          <div class="prose"><h2 id="source-layout">Source layout</h2>
+          <div class="prose"><h2 id="interactive-linux-installer">Interactive Linux installer</h2>
+<p>Download and run the installer on Linux.</p>
+<pre><code class="language-bash">curl -fsSLo install.sh https://raw.githubusercontent.com/RDXFGXY1/TapSend/tap-send/install.sh
+bash install.sh
+</code></pre>
+<p>Run <code>bash install.sh --check</code> for a dependency table. The installer checks Go 1.24+, Rust and Cargo 1.88+, a compiler, and the other command-line tools. It asks before installing dependencies or building TapSend. System packages can be installed through APT, DNF, or Pacman. The Go and Rust toolchains can be installed for your user.</p>
+<p>If you choose to build the Android app on x86-64 Linux, the installer checks the JDK, Android SDK platform 35, and build tools 35.0.0. It asks before downloading missing components and lets you review the Android SDK licenses. It uses the repository's Gradle wrapper and saves the debug APK under <code>${XDG_DATA_HOME:-$HOME/.local/share}/tapsend/builds/</code>.</p>
+<p>After a successful APK build, TapSend starts a temporary download and prints a QR. Connect the phone and PC to the same network, scan the QR with the phone camera, and open the downloaded APK. The browser may ask you to trust the local HTTPS connection. You can also use the printed URL. Press <strong>Ctrl+C</strong> on the PC when you finish. If the PC picks the wrong network adapter, rerun setup with <code>TAPSEND_APK_HOST</code> set to the PC's local IPv4 address.</p>
+<p>Android 13 or later is required. The APK is debug-signed. Android updates an existing installation only if the signing key matches.</p>
+<h2 id="source-layout">Source layout</h2>
 <div class="table-scroll" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -75,7 +84,7 @@
 </tbody>
 </table></div>
 <h2 id="build">Build</h2>
-<p>Requirements for this checkout include Go 1.24 or newer, Rust with edition 2024 support, and platform build tools. The Windows scanner and screen viewer use the .NET 8 SDK to build and the .NET 8 Runtime to run. Android uses Java 17, SDK Platform 35, and Android Build Tools 35.0.0.</p>
+<p>Requirements for this checkout include Go 1.24 or newer, Rust 1.88 or newer, and platform build tools. The Windows scanner and screen viewer use the .NET 8 SDK to build and the .NET 8 Runtime to run. Android uses Java 17, SDK Platform 35, and Android Build Tools 35.0.0.</p>
 <p>On Linux, run <code>make build</code> and launch <code>./bin/tapsend</code>. Run <code>make portable-linux</code> after installing the <code>x86_64-unknown-linux-musl</code> Rust target to create the portable archive.</p>
 <p>On Windows, run these commands from the repository root.</p>
 <pre><code class="language-powershell">New-Item -ItemType Directory -Force dist/windows | Out-Null
@@ -97,7 +106,7 @@ node --check internal/server/web/portal.js
 </div>
           <div class="article-footer"><a href="https://github.com/RDXFGXY1/TapSend/blob/tap-send/docs/development.md">View Markdown on GitHub</a></div>
         </article>
-        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#source-layout">Source layout</a></li><li class="h2"><a href="#build">Build</a></li><li class="h2"><a href="#verify-changes">Verify changes</a></li></ul></nav></aside>
+        <aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><ul><li class="h2"><a href="#interactive-linux-installer">Interactive Linux installer</a></li><li class="h2"><a href="#source-layout">Source layout</a></li><li class="h2"><a href="#build">Build</a></li><li class="h2"><a href="#verify-changes">Verify changes</a></li></ul></nav></aside>
       </div>
     </main>
   </div>

@@ -2,6 +2,50 @@
 
 document.documentElement.classList.add("has-js");
 
+const exampleTabs = document.querySelector(".example-tabs");
+if (exampleTabs) {
+  const tabs = Array.from(exampleTabs.querySelectorAll("a"));
+  const panels = tabs.map((tab) => document.getElementById(tab.hash.slice(1)));
+  exampleTabs.setAttribute("role", "tablist");
+
+  function selectExample(index) {
+    tabs.forEach((tab, i) => {
+      const selected = i === index;
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      panels[i].hidden = !selected;
+    });
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.id = `workflow-tab-${i}`;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-controls", panels[i].id);
+    panels[i].setAttribute("role", "tabpanel");
+    panels[i].setAttribute("aria-labelledby", tab.id);
+    panels[i].tabIndex = 0;
+    tab.addEventListener("click", (event) => {
+      event.preventDefault();
+      selectExample(i);
+    });
+    tab.addEventListener("keydown", (event) => {
+      let next;
+      switch (event.key) {
+        case "ArrowRight": next = (i + 1) % tabs.length; break;
+        case "ArrowLeft": next = (i + tabs.length - 1) % tabs.length; break;
+        case "Home": next = 0; break;
+        case "End": next = tabs.length - 1; break;
+        case " ": next = i; break;
+        default: return;
+      }
+      event.preventDefault();
+      selectExample(next);
+      tabs[next].focus();
+    });
+  });
+  selectExample(Math.max(tabs.findIndex((tab) => tab.hash === location.hash), 0));
+}
+
 const menuButton = document.querySelector(".menu-button");
 const navigation = document.querySelector(".guide-nav");
 menuButton.addEventListener("click", () => {
